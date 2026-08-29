@@ -562,7 +562,7 @@ reads `.env.local`). Idempotent: looks up by email/join code and updates rather 
 7. **Smoke test against the live URL** (all must pass before the submission is written):
    - `/` renders the landing; both CTAs navigate.
    - `/login?demo=vinuy` → credentials prefilled → Log in → lands on `/roadmap` showing **$260 / week**, Peru **26%**, **12 paydays**.
-   - `/achievable` shows three verdicts with **$481** and **$474** per week.
+   - `/achievable` shows Peru and the $25k car **On track** and the house **Adjusted** with an engine-derived "needs $…/wk" figure (computed from the house's waterfall start month, so higher than the from-day-one $474 — ~$799/wk for the seeded persona).
    - `/progress` → **Yes** → `/progress` again shows streak **7**.
    - `/progress/adapt` → rent +$40 → before/after shows engine **$220**; Accept → roadmap dates move.
    - `judge@…` login → lands on `/discover` → submit numbers + one goal → `/achievable` in under 3 s (AI not awaited).
@@ -604,7 +604,7 @@ Order is the dependency order. Tasks 7–10 can be split across sessions without
 | 0:10 | "See Vinuy's journey" → Log in | "He told us where he is and where he wants to go. One number came out." | Roadmap · **$260 / week** |
 | 0:20 | Scroll the roadmap | "Peru is on track for January. The car needed a trade-off — February 2029, no loan. The house is adjusted, honestly." | Peru **26%** · **12 paydays** · tags |
 | 0:35 | Drag what-if to $350 | "Every date moves live. This is arithmetic, not a model guessing." | "Peru in December, the car in June 2028" |
-| 0:45 | `/achievable` | "This is the moment competitors skip: what $260 can actually reach." | **$481** vs $260 · **$474** · 2037 |
+| 0:45 | `/achievable` | "This is the moment competitors skip: what $260 can actually reach. The car already took its trade-off. The house: honest — at this engine the deposit needs about $800 a week from 2029, so the first place is ~$450k and the levers are income and time." | Peru **On track** · Car **On track $25,000** · Home **Adjusted**, needs $~799/wk |
 | 0:55 | `/progress` → **Yes** | "One question per payday. Partly counts." | Streak **7** |
 | 1:05 | `/progress/adapt` → rent +$40 → Accept | "Life changes; the roadmap redraws. Nothing saved moves — only the dates." | Engine **$220** · Peru Feb |
 | 1:15 | Log out → `admin@…` → `/admin` | "The employer sees this — seats and headcount. Never a goal, never a number. That's enforced in the database, not the UI." | Counts only |
