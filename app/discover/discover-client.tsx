@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type FormEvent, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import { capacityMonthlyCents } from "@/lib/engine/rates";
 import { CYCLE_WORD, KIND_LABEL, formatMoney, formatMoneyCompact, perCycleFromMonthlyCents } from "@/lib/format";
@@ -158,18 +158,80 @@ export function DiscoverClient({
 
   const [freedomText] = useState(initialProfile?.freedomText ?? "");
   const [freedomDraft, setFreedomDraft] = useState("");
+  type ChatMsg = { role: "zenda" | "me"; text: string };
+  const [chat, setChat] = useState<ChatMsg[]>(() => {
+    const start: ChatMsg[] = [{ role: "zenda", text: "Where do you want to go in three years?" }];
+    if (initialProfile?.freedomText) {
+      start.push({ role: "me", text: initialProfile.freedomText });
+      start.push({ role: "zenda", text: reflectionMessage ?? "Got it. Your goals are below — tap one to change the amount or the date, or tell me more." });
+    }
+    return start;
+  });
+  const [draft, setDraft] = useState("");
+  const [chatBusy, setChatBusy] = useState(false);
+  const chatFreedomText = chat.filter((m) => m.role === "me").map((m) => m.text).join(" ");
 
+  async function sendChat(e?: FormEvent) {
+    e?.preventDefault();
+    const text = draft.trim();
+    if (!text || chatBusy) return;
+    const next: ChatMsg[] = [...chat, { role: "me", text }];
+    setChat(next);
+    setDraft("");
+    setChatBusy(true);
+    try {
+      const res = await fetch("/api/discover/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: next.map((m) => ({ role: m.role, text: m.text })) }),
+      });
+      const data = await res.json().catch(() => null);
+      const reply: string = data?.reply ?? "Got it. Tap a goal below to set the amount and the date.";
+      setChat((c) => [...c, { role: "zenda", text: reply }]);
+      if (Array.isArray(data?.goals)) {
+        setSelected((prev) => {
+          const n = { ...prev };
+          for (const g of data.goals as Array<{ kind: string; title?: string; target_cents?: number; target_date?: string }>) {
+            if (!(CHIP_ORDER as readonly string[]).includes(g.kind)) continue;
+            const k = g.kind as ChipKind;
+            const def = KIND_DEFAULTS[k];
+            const cur = prev[k];
+            n[k] = {
+              id: cur?.id,
+              title: g.title || cur?.title || def.title,
+              targetCents: g.target_cents || cur?.targetCents || def.targetCents,
+              targetDate: g.target_date || cur?.targetDate || firstOfMonthPlus(todayIso, def.months),
+            };
+          }
+          return n;
+        });
+      }
+    } catch {
+      setChat((c) => [...c, { role: "zenda", text: "Couldn't reach Zenda. Try again." }]);
+    } finally {
+      setChatBusy(false);
+    }
+  }
+
+  function editMessage(index: number) {
+    const m = chat[index];
+    if (!m || m.role !== "me") return;
+    setDraft(m.text);
+    setChat(chat.slice(0, index));
+  }
+
+  const hasNumbers = !!initialProfile && initialProfile.takeHomeCents > 0;
   const [payCycle, setPayCycle] = useState<PayCycle>(initialProfile?.payCycle ?? "weekly");
-  const [incomeDollars, setIncomeDollars] = useState(initialProfile ? String(initialProfile.takeHomeCents / 100) : "");
-  const [rentDollars, setRentDollars] = useState(initialProfile ? String(initialProfile.essentialsCents / 100) : "");
-  const [foodDollars, setFoodDollars] = useState("");
-  const [petrolDollars, setPetrolDollars] = useState("");
-  const [funDollars, setFunDollars] = useState(initialProfile ? String(initialProfile.lifestyleCents / 100) : "");
-  const [bufferDollars, setBufferDollars] = useState(initialProfile ? String(initialProfile.bufferCents / 100) : "");
-  const [savingsDollars, setSavingsDollars] = useState(initialProfile ? String(initialProfile.savingsCents / 100) : "");
-  const [debtDollars, setDebtDollars] = useState(initialProfile ? String(initialProfile.debtCents / 100) : "");
+  const [incomeDollars, setIncomeDollars] = useState(hasNumbers ? String(initialProfile!.takeHomeCents / 100) : "1100");
+  const [rentDollars, setRentDollars] = useState(hasNumbers ? String(initialProfile!.essentialsCents / 100) : "400");
+  const [foodDollars, setFoodDollars] = useState(hasNumbers ? "" : "120");
+  const [petrolDollars, setPetrolDollars] = useState(hasNumbers ? "" : "70");
+  const [funDollars, setFunDollars] = useState(hasNumbers ? String(initialProfile!.lifestyleCents / 100) : "250");
+  const [bufferDollars, setBufferDollars] = useState(hasNumbers ? String(initialProfile!.bufferCents / 100) : "100");
+  const [savingsDollars, setSavingsDollars] = useState(hasNumbers ? String(initialProfile!.savingsCents / 100) : "0");
+  const [debtDollars, setDebtDollars] = useState(hasNumbers ? String(initialProfile!.debtCents / 100) : "0");
   const [debtRatePercent, setDebtRatePercent] = useState(
-    initialProfile ? String(initialProfile.debtRateBps / 100) : "",
+    hasNumbers ? String(initialProfile!.debtRateBps / 100) : "0",
   );
 
   const [submitError, setSubmitError] = useState<SubmitError | null>(null);
@@ -190,18 +252,7 @@ export function DiscoverClient({
     return perCycleFromMonthlyCents(monthly, payCycle);
   }, [payCycle, incomeDollars, rentDollars, foodDollars, petrolDollars, funDollars, bufferDollars]);
 
-  const bubble3Text = useMemo(() => {
-    if (reflectionMessage) return reflectionMessage;
-    if (selectedKinds.length === 0) return "Tell us where you're going. Then the numbers.";
-    const labels = selectedKinds.map((k) => KIND_LABEL[k]);
-    const joined =
-      labels.length === 1
-        ? labels[0]
-        : labels.length === 2
-          ? `${labels[0]} and ${labels[1]}`
-          : `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
-    return `${joined}. Got it. Now the numbers — quick, no judgement.`;
-  }, [reflectionMessage, selectedKinds]);
+  void reflectionMessage;
 
   function handleChipClick(kind: ChipKind) {
     const current = selected[kind];
@@ -247,7 +298,7 @@ export function DiscoverClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          freedom_text: (freedomText || freedomDraft) || undefined,
+          freedom_text: (chatFreedomText || freedomText || freedomDraft) || undefined,
           pay_cycle: payCycle,
           take_home_cents: toCents(incomeDollars),
           essentials_cents: toCents(rentDollars) + toCents(foodDollars) + toCents(petrolDollars),
@@ -328,46 +379,42 @@ export function DiscoverClient({
         </div>
       </div>
 
-      {/* where you want to go */}
+      {/* where you want to go — a real conversation */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "12px 20px 0 20px" }}>
-        <div style={{ maxWidth: 290, padding: "11px 15px", background: "#F2F2F7", borderRadius: "20px 20px 20px 6px", fontSize: 16, lineHeight: 1.38, color: "#000000" }}>
-          Where do you want to go in three years?
-        </div>
-        {freedomText ? (
-          <div style={{ alignSelf: "flex-end", maxWidth: 300, padding: "11px 15px", background: "#5856D6", color: "#FFFFFF", borderRadius: "20px 20px 6px 20px", fontSize: 16, lineHeight: 1.38 }}>
-            {freedomText}
-          </div>
-        ) : (
-          <textarea
-            value={freedomDraft}
-            onChange={(e) => setFreedomDraft(e.target.value)}
-            placeholder="Tell us in your words…"
-            maxLength={600}
-            rows={3}
-            style={{
-              alignSelf: "flex-end",
-              maxWidth: 300,
-              width: "100%",
-              padding: "11px 15px",
-              background: "#5856D6",
-              color: "#FFFFFF",
-              borderRadius: "20px 20px 6px 20px",
-              fontSize: 16,
-              lineHeight: 1.38,
-              border: "none",
-              outline: "none",
-              resize: "none",
-              font: "inherit",
-            }}
-          />
+        {chat.map((m, i) =>
+          m.role === "zenda" ? (
+            <div key={i} style={{ maxWidth: 290, padding: "11px 15px", background: "#F2F2F7", borderRadius: "20px 20px 20px 6px", fontSize: 16, lineHeight: 1.38, color: "#000000" }}>
+              {m.text}
+            </div>
+          ) : (
+            <div key={i} style={{ alignSelf: "flex-end", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, maxWidth: 300 }}>
+              <div style={{ padding: "11px 15px", background: "#5856D6", color: "#FFFFFF", borderRadius: "20px 20px 6px 20px", fontSize: 16, lineHeight: 1.38 }}>{m.text}</div>
+              <button type="button" onClick={() => editMessage(i)} style={{ background: "none", border: 0, padding: "4px 6px", font: "inherit", fontSize: 12, fontWeight: 600, color: "#5856D6", cursor: "pointer" }}>
+                Edit
+              </button>
+            </div>
+          ),
         )}
-      </div>
-
-      {/* bubble 3 */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "10px 20px 0 20px" }}>
-        <div style={{ maxWidth: 290, padding: "11px 15px", background: "#F2F2F7", borderRadius: "20px 20px 20px 6px", fontSize: 16, lineHeight: 1.38, color: "#000000" }}>
-          {bubble3Text}
-        </div>
+        {chatBusy && (
+          <div style={{ maxWidth: 290, padding: "11px 15px", background: "#F2F2F7", borderRadius: "20px 20px 20px 6px", fontSize: 16, color: "rgba(60,60,67,0.6)" }}>…</div>
+        )}
+        <form onSubmit={sendChat} style={{ display: "flex", gap: 8, marginTop: 4 }}>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={chat.length > 1 ? "Add or change anything…" : "Tell us in your words…"}
+            maxLength={600}
+            aria-label="Your message"
+            style={{ flex: 1, minWidth: 0, height: 44, padding: "0 14px", borderRadius: 999, border: "1px solid rgba(60,60,67,0.25)", font: "inherit", fontSize: 16 }}
+          />
+          <button
+            type="submit"
+            disabled={chatBusy || !draft.trim()}
+            style={{ height: 44, padding: "0 18px", borderRadius: 999, border: 0, background: "#5856D6", color: "#FFFFFF", font: "inherit", fontWeight: 600, cursor: "pointer", opacity: chatBusy || !draft.trim() ? 0.5 : 1 }}
+          >
+            Send
+          </button>
+        </form>
       </div>
 
       {/* goal chips */}
