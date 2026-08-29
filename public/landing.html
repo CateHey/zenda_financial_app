@@ -109,6 +109,20 @@
   .shot b{font-size:14px;font-weight:600}
   .screens .cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
   #ctaStart2{background:var(--accent);color:#fff;font-family:var(--font);font-size:17px;font-weight:600;border:0;border-radius:999px;padding:16px 34px;text-decoration:none;display:inline-block}
+
+  .rows{display:flex;flex-direction:column;gap:64px;width:100%;max-width:1040px;margin:16px 0 40px}
+  .row{display:grid;grid-template-columns:300px 1fr;gap:48px;align-items:center}
+  .row.alt{grid-template-columns:1fr 300px}
+  .row.alt .frame{order:2}
+  .row .frame{display:block;width:300px;height:650px;overflow:hidden;border-radius:26px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05),0 16px 40px rgba(0,0,0,.14);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+  .row .frame:hover{transform:translateY(-4px)}
+  .row iframe{width:390px;height:844px;border:0;transform:scale(.769);transform-origin:top left;pointer-events:none;display:block}
+  .row .txt{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.8);backdrop-filter:blur(8px);border-radius:16px;padding:22px 24px}
+  .row .n{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5856D6}
+  .row h3{margin:0;font-size:clamp(22px,2.6vw,30px);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+  .row p{margin:0;font-size:17px;line-height:1.5;color:rgba(44,44,50,.9)}
+  @media (max-width:760px){ .row,.row.alt{grid-template-columns:1fr} .row.alt .frame{order:0} .row .frame{margin:0 auto} }
+  #hud,#hint{display:none !important}
 </style>
 </head>
 <body>
@@ -159,80 +173,45 @@
   <section class="screens" id="screens">
     <h2>This is the product. Every screen, honest numbers.</h2>
     <p class="lead">Vinuy, 23, earns $1,100 a week and wants a house, a car and Peru. Here is what Zenda shows him — click any screen to open it.</p>
-    <div class="shots">
-      <a class="shot" href="/screens/discover.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/discover.html" loading="lazy" title="1 · Discover" tabindex="-1"></iframe></div>
-        <span class="n">1 · Discover</span><b>Where you are, where you want to go</b>
-      </a>
-      <a class="shot" href="/screens/achievable.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/achievable.html" loading="lazy" title="2 · What's achievable" tabindex="-1"></iframe></div>
-        <span class="n">2 · What's achievable</span><b>Honest distances, real levers</b>
-      </a>
-      <a class="shot" href="/screens/prioritise.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/prioritise.html" loading="lazy" title="3 · Prioritise" tabindex="-1"></iframe></div>
-        <span class="n">3 · Prioritise</span><b>When goals compete</b>
-      </a>
-      <a class="shot" href="/screens/roadmap.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/roadmap.html" loading="lazy" title="4 · Roadmap" tabindex="-1"></iframe></div>
-        <span class="n">4 · Roadmap</span><b>Today at one end, the goal at the other</b>
-      </a>
-      <a class="shot" href="/screens/tradeoff.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/tradeoff.html" loading="lazy" title="5 · Trade-off" tabindex="-1"></iframe></div>
-        <span class="n">5 · Trade-off</span><b>Real options, real dates</b>
-      </a>
-      <a class="shot" href="/screens/progress.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/progress.html" loading="lazy" title="6 · Progress" tabindex="-1"></iframe></div>
-        <span class="n">6 · Progress</span><b>One question per payday</b>
-      </a>
-      <a class="shot" href="/screens/adapt.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/adapt.html" loading="lazy" title="7 · Life changed" tabindex="-1"></iframe></div>
-        <span class="n">7 · Life changed</span><b>The roadmap redraws</b>
-      </a>
-      <a class="shot" href="/screens/celebration.html" target="_blank" rel="noopener">
-        <div class="frame"><iframe src="/screens/celebration.html" loading="lazy" title="8 · Goal reached" tabindex="-1"></iframe></div>
-        <span class="n">8 · Goal reached</span><b>The one loud moment</b>
-      </a>
+    <div class="rows">
+      <div class="row">
+        <a class="frame" href="/screens/discover.html" target="_blank" rel="noopener" aria-label="Open the 1 · Discover screen"><iframe src="/screens/discover.html" loading="lazy" title="1 · Discover" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">1 · Discover</span><h3>Where you are, where you want to go</h3><p>Tell us where you are — income, rent, food, fun, debt — and where you want to go: a trip, a car, a home. Two minutes, no bank login. It ends on one number: your engine, what's left every week to move your goals.</p></div>
+      </div>
+      <div class="row alt">
+        <a class="frame" href="/screens/achievable.html" target="_blank" rel="noopener" aria-label="Open the 2 · What's achievable screen"><iframe src="/screens/achievable.html" loading="lazy" title="2 · What's achievable" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">2 · What's achievable</span><h3>Honest distances, real levers</h3><p>Every goal gets an honest verdict — on track, needs a trade-off, or adjusted — with the exact number that would change it. The word "impossible" never appears.</p></div>
+      </div>
+      <div class="row">
+        <a class="frame" href="/screens/prioritise.html" target="_blank" rel="noopener" aria-label="Open the 3 · Prioritise screen"><iframe src="/screens/prioritise.html" loading="lazy" title="3 · Prioritise" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">3 · Prioritise</span><h3>When goals compete</h3><p>When goals fight for the same money, you decide which wins. The engine follows your order and the dates follow the engine — you can see exactly where each dollar goes, and when.</p></div>
+      </div>
+      <div class="row alt">
+        <a class="frame" href="/screens/roadmap.html" target="_blank" rel="noopener" aria-label="Open the 4 · Roadmap screen"><iframe src="/screens/roadmap.html" loading="lazy" title="4 · Roadmap" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">4 · Roadmap</span><h3>Today at one end, the goal at the other</h3><p>Your path from today to the goal, milestone by milestone, with dates. Drag the what-if slider and watch every date move live — that's arithmetic, not a model guessing.</p></div>
+      </div>
+      <div class="row">
+        <a class="frame" href="/screens/tradeoff.html" target="_blank" rel="noopener" aria-label="Open the 5 · Trade-off screen"><iframe src="/screens/tradeoff.html" loading="lazy" title="5 · Trade-off" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">5 · Trade-off</span><h3>Real options, real dates</h3><p>When something is out of reach, Zenda shows real options — a smaller number now, the full one later — and what each choice does to your other goals.</p></div>
+      </div>
+      <div class="row alt">
+        <a class="frame" href="/screens/progress.html" target="_blank" rel="noopener" aria-label="Open the 6 · Progress screen"><iframe src="/screens/progress.html" loading="lazy" title="6 · Progress" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">6 · Progress</span><h3>One question per payday</h3><p>Did you put the money aside? Yes, partly, or not this time. Partly counts. Your streak and your percentage, and nothing else to manage.</p></div>
+      </div>
+      <div class="row">
+        <a class="frame" href="/screens/adapt.html" target="_blank" rel="noopener" aria-label="Open the 7 · Life changed screen"><iframe src="/screens/adapt.html" loading="lazy" title="7 · Life changed" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">7 · Life changed</span><h3>The roadmap redraws</h3><p>Rent went up? Bonus landed? Update anything and the whole roadmap redraws — before and after, side by side, with a choice about what to protect.</p></div>
+      </div>
+      <div class="row alt">
+        <a class="frame" href="/screens/celebration.html" target="_blank" rel="noopener" aria-label="Open the 8 · Goal reached screen"><iframe src="/screens/celebration.html" loading="lazy" title="8 · Goal reached" tabindex="-1"></iframe></a>
+        <div class="txt"><span class="n">8 · Goal reached</span><h3>The one loud moment</h3><p>Peru, funded. The celebration is the only loud screen in Zenda — and your weekly amount automatically flows to the next goal.</p></div>
+      </div>
     </div>
     <div class="cta"><a id="ctaStart2" href="/signup">Start your journey 🚀</a><a href="/login?demo=vinuy" class="ghost">See Vinuy's journey</a></div>
   </section>
+  <div class="spacer" style="height:12vh"></div>
 
-  <section class="beat r"><div class="card">
-    <p class="eyebrow">02 · The problem</p>
-    <h2>Money leaks.</h2>
-    <p>The path ahead greys out; particles fall away from the stream. The quietest beat on the page.</p>
-  </div></section>
 
-  <section class="beat"><div class="card">
-    <p class="eyebrow">03 · How it works</p>
-    <h2>Milestones ignite.</h2>
-    <p>Conversation → roadmap → check-in. Three nodes light in sequence as you pass them.</p>
-  </div></section>
-
-  <section class="beat r"><div class="card">
-    <p class="eyebrow">04 · The employee view</p>
-    <h2>The ¾ swing.</h2>
-    <p>Camera moves beside the path. On the real page, the product UI docks into this half of the screen.</p>
-  </div></section>
-
-  <section class="beat"><div class="card">
-    <p class="eyebrow">05 · The HR view</p>
-    <h2>You see the current, never the swimmer.</h2>
-    <p>The organisation appears as anonymous parallel paths — readable only as a flow. The privacy promise, drawn.</p>
-  </div></section>
-
-  <section class="beat r"><div class="card">
-    <p class="eyebrow">06 · Proof</p>
-    <h2>Convergence.</h2>
-    <p>Every path bends toward the same horizon.</p>
-  </div></section>
-
-  <section class="beat"><div class="card">
-    <p class="eyebrow">07 · Freedom</p>
-    <h2>Arrival.</h2>
-    <p>The goal — the one loud moment of the page. The call to action lives here.</p>
-  </div></section>
-
-  <div class="spacer"></div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
