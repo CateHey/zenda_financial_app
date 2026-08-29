@@ -283,6 +283,9 @@ async function main() {
   const vinuyId = await ensureUser("vinuy@demo.zenda.app");
   const judgeId = await ensureUser("judge@demo.zenda.app");
   const adminId = await ensureUser("admin@demo.zenda.app");
+  // T1 (ZENDA_TEST_SPEC.md "Test data"): a fourth account, a Vinuy clone used only by mutating
+  // tests — vinuy@ itself must stay pristine. Reset to this same state by scripts/reset-e2e.ts.
+  const e2eId = await ensureUser("e2e@demo.zenda.app");
 
   console.log("seed: profiles…");
   await upsertProfile(vinuyId, orgId, {
@@ -301,6 +304,20 @@ async function main() {
   });
   await upsertProfile(judgeId, orgId, { display_name: "Judge" });
   await upsertProfile(adminId, orgId, { role: "admin", display_name: "Admin" });
+  await upsertProfile(e2eId, orgId, {
+    display_name: "E2E",
+    pay_cycle: "weekly",
+    take_home_cents: 110_000,
+    essentials_cents: 59_000,
+    lifestyle_cents: 25_000,
+    buffer_cents: 10_000,
+    savings_cents: 0,
+    debt_cents: 3_000_000,
+    debt_rate_bps: 280,
+    risk_comfort: "high",
+    freedom_text: "A house — a real one, around a million. A car I don't have to worry about. And Peru in January.",
+    started_on: STARTED_ON,
+  });
 
   console.log("seed: Vinuy's goals…");
   const homeId = await ensureGoal(vinuyId, {
@@ -388,6 +405,92 @@ async function main() {
   );
   void emergencyId;
 
+  // ---------- T1: e2e@demo.zenda.app — a Vinuy clone (ZENDA_TEST_SPEC.md "Test data") ----------
+  // Same shape as Vinuy's block above; scripts/reset-e2e.ts restores exactly this state between
+  // mutating test runs so vinuy@ itself never has to be touched.
+  console.log("seed: e2e's goals (Vinuy clone)…");
+  const e2eHomeId = await ensureGoal(e2eId, {
+    kind: "home",
+    title: "A first home",
+    target_cents: 24_000_000,
+    target_date: "2033-09-01",
+    priority: 1,
+    goal_type: "growth_required",
+  });
+  const e2eCarId = await ensureGoal(e2eId, {
+    kind: "car",
+    title: "The car, no loan",
+    target_cents: 2_500_000,
+    target_date: "2029-01-14",
+    priority: 2,
+    goal_type: "savings_achievable",
+  });
+  const e2ePeruId = await ensureGoal(e2eId, {
+    kind: "travel",
+    title: "Peru",
+    target_cents: 400_000,
+    target_date: "2027-01-10",
+    priority: 3,
+    goal_type: "savings_achievable",
+  });
+  const e2eEmergencyId = await ensureGoal(e2eId, {
+    kind: "emergency",
+    title: "Emergency fund",
+    target_cents: 236_000,
+    target_date: "2027-03-07",
+    priority: 4,
+    goal_type: "savings_achievable",
+  });
+  const e2eBufferId = await ensureGoal(e2eId, {
+    kind: "buffer",
+    title: "Breathing room",
+    target_cents: 50_000,
+    target_date: "2026-10-01",
+    priority: 5,
+    goal_type: "savings_achievable",
+  });
+  void e2eHomeId;
+
+  console.log("seed: e2e's contributions…");
+  await ensureContribution(e2eId, e2eBufferId, 26_000, "2026-09-07", "seed");
+  await ensureContribution(e2eId, e2eBufferId, 26_000, "2026-09-14", "seed");
+  await ensureContribution(e2eId, e2ePeruId, 26_000, "2026-09-21", "seed");
+  await ensureContribution(e2eId, e2ePeruId, 26_000, "2026-09-28", "seed");
+  await ensureContribution(e2eId, e2ePeruId, 26_000, "2026-10-05", "seed");
+  await ensureContribution(e2eId, e2ePeruId, 26_000, "2026-10-12", "seed");
+
+  console.log("seed: running the engine for e2e…");
+  const e2eProjections = await recompute(admin, e2eId);
+  if (e2eProjections.length !== 5) {
+    console.warn(`seed: expected 5 projections for e2e, recompute() wrote ${e2eProjections.length}`);
+  }
+
+  console.log("seed: marking e2e's buffer goal reached…");
+  await markGoalReached(e2eBufferId, "2026-09-14T00:00:00.000Z");
+
+  console.log("seed: e2e's events…");
+  await ensureEvent(
+    e2eId,
+    "milestone_reached",
+    e2eBufferId,
+    "$500 of breathing room — done. Peru just moved closer.",
+    {},
+    "2026-09-14T00:00:00.000Z",
+  );
+  await ensureEvent(e2eId, "streak", null, "Six paydays in a row.", {}, null);
+  await ensureEvent(
+    e2eId,
+    "trade_off",
+    e2eCarId,
+    "Chose $25,000 for the car, landing January 2029 instead of $50,000 in September 2028.",
+    {
+      before: { target_cents: 5_000_000, target_date: "2028-09-01" },
+      after: { target_cents: 2_500_000, target_date: "2029-01-14" },
+    },
+    null,
+  );
+  void e2eEmergencyId;
+
   console.log("seed: lessons…");
   for (const lesson of LESSONS) await ensureLesson(lesson);
 
@@ -395,6 +498,7 @@ async function main() {
   console.log("  vinuy@demo.zenda.app / Zenda-demo-2026!  (populated persona)");
   console.log("  judge@demo.zenda.app / Zenda-demo-2026!  (fresh account)");
   console.log("  admin@demo.zenda.app / Zenda-demo-2026!  (org admin)");
+  console.log("  e2e@demo.zenda.app / Zenda-demo-2026!    (test account — mutated by tests, reset via npm run reset:e2e)");
 }
 
 main().catch((error) => {

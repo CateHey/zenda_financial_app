@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run",
+    "test": "vitest run --project unit",
+    "test:db": "vitest run --project db",
+    "test:e2e": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:all": "npm run test && npm run test:db && npm run test:e2e",
+    "reset:e2e": "tsx scripts/reset-e2e.ts",
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
@@ -24,6 +29,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.0",
     "vitest": "^3",
-    "tsx": "^4"
+    "tsx": "^4",
+    "@playwright/test": "^1.50"
   }
 }
