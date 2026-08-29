@@ -63,17 +63,17 @@ export const POST = withHandler(async (request: Request) => {
 
   const { data: existingContribRows, error: existingContribError } = await supabase
     .from("contributions")
-    .select("amount_cents, occurred_on")
+    .select("amount_cents, occurred_on, kind")
     .eq("goal_id", goal.id);
   if (existingContribError) throw existingContribError;
-  const existingContribs = (existingContribRows ?? []) as { amount_cents: number; occurred_on: string }[];
+  const existingContribs = (existingContribRows ?? []) as { amount_cents: number; occurred_on: string; kind: string }[];
 
   // A3: "already checked in this cycle" — a contribution already exists within the cycle window.
   // Server-side guard behind the Progress screen's own "Done for this payday" state, so a replay
   // or a second tab can't insert (and double-count) a second contribution for the same cycle.
   if (
     checkedInThisCycle(
-      existingContribs.map((c) => ({ goalId: goal.id, amountCents: c.amount_cents, occurredOn: c.occurred_on })),
+      existingContribs.filter((c) => c.kind !== "manual").map((c) => ({ goalId: goal.id, amountCents: c.amount_cents, occurredOn: c.occurred_on })),
       cycleLength,
       today,
     )
@@ -178,10 +178,10 @@ export const POST = withHandler(async (request: Request) => {
   const streakGoalIds = ((streakGoalRows ?? []) as { id: string }[]).map((g) => g.id);
   const { data: streakContribRows, error: streakContribError } = await supabase
     .from("contributions")
-    .select("goal_id, amount_cents, occurred_on")
+    .select("goal_id, amount_cents, occurred_on, kind")
     .in("goal_id", streakGoalIds.length > 0 ? streakGoalIds : [currentForStreak.id]);
   if (streakContribError) throw streakContribError;
-  const streakContribs = (streakContribRows ?? []).map((c) => ({
+  const streakContribs = (streakContribRows ?? []).filter((c) => c.kind !== "manual").map((c) => ({
     goalId: c.goal_id as string,
     amountCents: c.amount_cents as number,
     occurredOn: c.occurred_on as string,

@@ -146,3 +146,16 @@ $1M is the price, not the target. The target is the **deposit**, and the wall is
   edge case; it is the main case. It needs to be the best-written sentence in the app.
 - "Buffer" meant two different things to the person and to the engine. Module 1 must ask.
 - The debt-vs-saver comparison was the single most useful `why` — and it is pure arithmetic.
+
+## Money moves (demo, after migration 0002)
+
+Two rows outside the payday rhythm, both on Peru, both `manual` with a note — they show the
+overview, the "recent moves" list and the take-out flow with real data:
+
+| Date | Move | Amount | Note |
+|---|---|---|---|
+| 2 Oct 2026 | Taken out | −$150 | Concert ticket |
+| 9 Oct 2026 | Extra in | +$200 | Tax refund |
+
+Peru therefore holds **$1,090** on 20 Oct 2026 (four paydays $1,040 − $150 + $200). Paydays and
+the streak ignore manual moves: still **six paydays in a row**.

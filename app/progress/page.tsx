@@ -24,7 +24,8 @@ import {
 } from "@/lib/format";
 import { templateNudge } from "@/lib/data/templates";
 import { CheckinSheet } from "./checkin-sheet";
-import { ExtraSheet } from "./extra-sheet";
+import { MoneySheet } from "./money-sheet";
+import { MoneyOverview } from "./money-overview";
 
 // S6 · Progress — design/screens/Tracking.dc.html ported 1:1, bound per ZENDA_SCREEN_BINDINGS.md.
 // Server Component: reads the current goal (soonest active), the combined contributions of that
@@ -114,16 +115,21 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
   const combinedIds = combined.map((g) => g.id);
   const kindByGoalId = new Map(combined.map((g) => [g.id, g.kind]));
 
-  const contributionRows = await getContributionsForGoals(supabase, combinedIds);
+  // Every move on every goal (for the overview and the money sheet); the streak/dots use the
+  // combined set, paydays only — extras in or out never make or break a streak.
+  const allMoves = await getContributionsForGoals(supabase, goals.map((g) => g.id));
+  const contributionRows = allMoves.filter((c) => combinedIds.includes(c.goal_id));
+  const paydayRows = contributionRows.filter((c) => c.kind !== "manual");
   const engineContribs: EngineContribution[] = contributionRows.map((c) => ({
     goalId: c.goal_id,
     amountCents: c.amount_cents,
     occurredOn: c.occurred_on,
   }));
 
-  const streakCount = streak(engineContribs, cycleLength);
-  const alreadyCheckedIn = checkedInThisCycle(engineContribs, cycleLength, today);
-  const latestContribution = contributionRows[0] ?? null; // already sorted occurred_on desc
+  const paydayContribs: EngineContribution[] = paydayRows.map((c) => ({ goalId: c.goal_id, amountCents: c.amount_cents, occurredOn: c.occurred_on }));
+  const streakCount = streak(paydayContribs, cycleLength);
+  const alreadyCheckedIn = checkedInThisCycle(paydayContribs, cycleLength, today);
+  const latestContribution = paydayRows[0] ?? null; // already sorted occurred_on desc
   const nextPaydayLabel = latestContribution ? dayMonthYearLabel(addDaysIso(latestContribution.occurred_on, cycleLength)) : "";
 
   let currentProgress: ReturnType<typeof progress> | null = null;
@@ -155,7 +161,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
 
   // Dots: filled per contribution (oldest-first, most recent 12 when more exist), then empty
   // dots up to paydaysRemaining, capped at 12 total; anything beyond -> "+N".
-  const oldestFirst = [...contributionRows].reverse();
+  const oldestFirst = [...paydayRows].reverse();
   const shownContribs = oldestFirst.length > 12 ? oldestFirst.slice(oldestFirst.length - 12) : oldestFirst;
   const filledShown = shownContribs.length;
   const emptyShown = Math.min(paydaysRemaining, 12 - filledShown);
@@ -253,7 +259,8 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
 
       {/* a few charts that mean something */}
       <ProgressCharts
-        contributions={contributionRows.map((c) => ({ occurredOn: c.occurred_on, amountCents: c.amount_cents }))}
+        contributions={paydayRows.map((c) => ({ occurredOn: c.occurred_on, amountCents: c.amount_cents }))}
+        today={today}
         perCycleCapacityCents={capacityPerCycle}
         curve={(currentGoal.projection?.curve ?? []).map((q) => ({ m: q.m, balanceCents: q.balance_cents }))}
         targetCents={currentGoal.target_cents}
@@ -264,6 +271,16 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
         essentialsCents={profile.essentials_cents}
         lifestyleCents={profile.lifestyle_cents}
         bufferCents={profile.buffer_cents}
+        currency={profile.currency}
+      />
+
+      <MoneyOverview
+        goals={viewable.map((g) => ({ id: g.id, title: g.title, kind: g.kind, status: g.status, targetCents: g.target_cents, savedCents: g.starting_balance_cents + allMoves.filter((c) => c.goal_id === g.id).reduce((acc, c) => acc + c.amount_cents, 0), targetDate: g.target_date }))}
+        moves={allMoves.map((c) => ({ id: c.id, goalId: c.goal_id, goalTitle: goals.find((g) => g.id === c.goal_id)?.title ?? "a goal", amountCents: c.amount_cents, occurredOn: c.occurred_on, kind: c.kind, note: c.note ?? null }))}
+        currentGoalId={currentGoal.id}
+        soonestGoalId={soonestGoal?.id ?? null}
+        capacityPerCycleCents={capacityPerCycle}
+        cycleWord={profile.pay_cycle === "fortnightly" ? "fortnight" : profile.pay_cycle === "monthly" ? "month" : "week"}
         currency={profile.currency}
       />
 
@@ -329,26 +346,29 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
           <Link href="/progress" style={{ fontSize: 14, fontWeight: 600, color: "#5856D6", textDecoration: "none" }}>Back to your current goal →</Link>
         </div>
       ) : (
+      <>
+      {soonestGoal && soonestGoal.id !== currentGoal.id && (
+        <span style={{ display: "block", padding: "12px 20px 0 20px", fontSize: 13, color: "rgba(60,60,67,0.78)" }}>
+          Each payday goes to {soonestGoal.title} first — that is what the check-in below records.
+        </span>
+      )}
       <CheckinSheet
-        goalId={currentGoal.id}
+        goalId={soonestGoal ? soonestGoal.id : currentGoal.id}
         capacityPerCycleCents={capacityPerCycle}
         currency={profile.currency}
         alreadyCheckedIn={alreadyCheckedIn}
         nextPaydayLabel={nextPaydayLabel}
       />
+      </>
       )}
-      <ExtraSheet
+      <MoneySheet
+        key={currentGoal.id}
         currency={profile.currency}
         defaultGoalId={currentGoal.id}
-        goals={activeGoals
-          .slice()
-          .sort((x, y) => (x.target_date < y.target_date ? -1 : 1))
-          .map((g) => ({
-            id: g.id,
-            title: g.title,
-            kind: g.kind,
-            remainingCents: Math.max(0, g.target_cents - g.starting_balance_cents - contributionRows.filter((c) => c.goal_id === g.id).reduce((acc, c) => acc + c.amount_cents, 0)),
-          }))}
+        goals={viewable.map((g) => {
+          const saved = g.starting_balance_cents + allMoves.filter((c) => c.goal_id === g.id).reduce((acc, c) => acc + c.amount_cents, 0);
+          return { id: g.id, title: g.title, kind: g.kind, status: g.status === "reached" ? ("reached" as const) : ("active" as const), savedCents: saved, remainingCents: Math.max(0, g.target_cents - saved) };
+        })}
       />
 </div>
     </main>

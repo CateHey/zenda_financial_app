@@ -166,6 +166,7 @@ async function ensureContribution(
   amountCents: number,
   occurredOn: string,
   kind: ContributionKind,
+  note: string | null = null,
 ): Promise<void> {
   const { data: existing, error: readError } = await admin
     .from("contributions")
@@ -175,13 +176,13 @@ async function ensureContribution(
     .maybeSingle();
   if (readError) throw readError;
   if (existing) {
-    const { error } = await admin.from("contributions").update({ amount_cents: amountCents, kind }).eq("id", existing.id);
+    const { error } = await admin.from("contributions").update({ amount_cents: amountCents, kind, ...(note ? { note } : {}) }).eq("id", existing.id);
     if (error) throw error;
     return;
   }
   const { error: insertError } = await admin
     .from("contributions")
-    .insert({ user_id: userId, goal_id: goalId, amount_cents: amountCents, occurred_on: occurredOn, kind });
+    .insert({ user_id: userId, goal_id: goalId, amount_cents: amountCents, occurred_on: occurredOn, kind, ...(note ? { note } : {}) });
   if (insertError) throw insertError;
 }
 
@@ -369,6 +370,15 @@ async function main() {
   await ensureContribution(vinayId, peruId, 26_000, "2026-09-28", "seed");
   await ensureContribution(vinayId, peruId, 26_000, "2026-10-05", "seed");
   await ensureContribution(vinayId, peruId, 26_000, "2026-10-12", "seed");
+  // Money moves outside paydays (need migration 0002_money_moves.sql): a concert ticket taken
+  // out, a tax refund put in. Skipped with a warning until the migration is applied.
+  for (const [cents, on, note] of [[-15_000, "2026-10-02", "Concert ticket"], [20_000, "2026-10-09", "Tax refund"]] as const) {
+    try {
+      await ensureContribution(vinayId, peruId, cents, on, "manual", note);
+    } catch (err) {
+      console.warn(`seed: skipped money move ${note} (run supabase/migrations/0002_money_moves.sql):`, (err as { message?: string }).message ?? err);
+    }
+  }
 
   console.log("seed: running the engine (lib/data/recompute — the only writer of goal_projections)…");
   // Computed once while the buffer goal is still `active`, so it gets a real projection row

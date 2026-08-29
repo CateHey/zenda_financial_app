@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+
 // Three small, honest charts for the Progress screen. Inline SVG, the journey palette, no library.
 // Every number comes from the engine or the person's own rows; the charts only draw them.
 
@@ -6,6 +10,7 @@ type CurvePoint = { m: number; balanceCents: number };
 
 type Props = {
   contributions: Contribution[];      // newest first is fine; we sort
+  today: string;                      // demo clock, for the period filter
   perCycleCapacityCents: number;      // what "a full payday" means
   curve: CurvePoint[];                // the current goal's projection curve, from its start month
   targetCents: number;
@@ -31,7 +36,10 @@ export function ProgressCharts(p: Props) {
   const NAVY = "#10265F", BLUE = "#007AFF", INDIGO = "#5856D6", VIOLET = "#8450DA", PURPLE = "#AF52DE", GREY = "#E5E5EA";
 
   // --- 1. paydays: the last 12 contributions as bars, full = capacity ---
-  const recent = [...p.contributions].sort((a, b) => a.occurredOn.localeCompare(b.occurredOn)).slice(-12);
+  const [period, setPeriod] = useState<"12" | "3m" | "all">("12");
+  const sorted = [...p.contributions].sort((a, b) => a.occurredOn.localeCompare(b.occurredOn));
+  const since = (days: number) => { const d = new Date(`${p.today}T00:00:00Z`); d.setUTCDate(d.getUTCDate() - days); return d.toISOString().slice(0, 10); };
+  const recent = period === "12" ? sorted.slice(-12) : period === "3m" ? sorted.filter((c) => c.occurredOn >= since(91)) : sorted;
   const barMax = Math.max(p.perCycleCapacityCents, ...recent.map((c) => c.amountCents), 1);
   const bw = 100 / Math.max(recent.length, 1);
 
@@ -71,7 +79,16 @@ export function ProgressCharts(p: Props) {
     <div className="charts" style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px 20px 0 20px" }}>
       {/* 1 · paydays */}
       <div style={card}>
-        <span style={k}>Your last {recent.length || 0} paydays</span>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+          <span style={k}>{period === "all" ? `All ${recent.length} paydays` : period === "3m" ? `Last 3 months · ${recent.length} paydays` : `Your last ${recent.length} paydays`}</span>
+          <div role="tablist" style={{ display: "flex", gap: 4 }}>
+            {(["12", "3m", "all"] as const).map((v) => (
+              <button key={v} type="button" onClick={() => setPeriod(v)} aria-pressed={period === v} style={{ height: 26, padding: "0 10px", borderRadius: 999, border: 0, background: period === v ? "#5856D6" : "#F2F2F7", color: period === v ? "#FFFFFF" : "rgba(60,60,67,0.8)", font: "inherit", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
+                {v === "12" ? "12 paydays" : v === "3m" ? "3 months" : "All"}
+              </button>
+            ))}
+          </div>
+        </div>
         <svg viewBox="0 0 100 44" width="100%" height="88" preserveAspectRatio="none" role="img" aria-label="Amount set aside per payday">
           <line x1="0" x2="100" y1={(44 - (p.perCycleCapacityCents / barMax) * 40).toFixed(1)} y2={(44 - (p.perCycleCapacityCents / barMax) * 40).toFixed(1)} stroke={GREY} strokeWidth="0.6" strokeDasharray="1.5 1.5" />
           {recent.map((c, i) => {

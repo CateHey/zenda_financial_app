@@ -67,6 +67,7 @@ export type ContributionRow = {
   amount_cents: number;
   occurred_on: string;
   kind: ContributionKind;
+  note?: string | null;
   created_at: string;
 };
 

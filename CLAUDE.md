@@ -70,7 +70,7 @@ lib/engine/               types, rates, solver, waterfall, progress + engine.tes
 lib/data/                 types.ts (row types), queries.ts (all reads), recompute.ts (only writer of projections)
 lib/supabase/             browser.ts, server.ts (user client only)
 lib/ai/                   client.ts, banned-terms.ts, prompts.ts, run.ts
-supabase/migrations/      0000_teardown.sql, 0001_zenda.sql (applied by the owner in the SQL editor)
+supabase/migrations/      0000_teardown.sql, 0001_zenda.sql, 0002_money_moves.sql (applied by the owner in the SQL editor)
 scripts/seed.ts           demo org, three accounts, Vinay's data, lessons
 public/landing.html       the landing page (from demo/zenda-path.html; CTAs are links)
 design/, demo/, *.md      design truth and specs — Fable-owned
