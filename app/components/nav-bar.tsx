@@ -27,7 +27,7 @@ export function NavBar({ isAuthed, isAdmin }: Props) {
   return (
     <>
       <nav className="znav-top" aria-label="Main">
-        <Link href="/menu" className="znav-brand">Zenda</Link>
+        <a href="/" className="znav-brand">Zenda</a>
         <div className="znav-links">
           {links.map((l) => (
             <Link key={l.href} href={l.href} className="znav-link" aria-current={current(l.href)}>
@@ -44,7 +44,7 @@ export function NavBar({ isAuthed, isAdmin }: Props) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
           Menu
         </Link>
-        <Link href="/menu" className="znav-brand">Zenda</Link>
+        <a href="/" className="znav-brand">Zenda</a>
       </div>
       <nav className="znav-bottom" aria-label="Main">
         {links.map((l) => (
