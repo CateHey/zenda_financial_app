@@ -11,7 +11,7 @@ function balanceAtMonth(curve: GoalProjection["curve"], m: number): number {
   return curve[curve.length - 1].balanceCents;
 }
 
-function daysBetween(laterIso: string, earlierIso: string): number {
+export function daysBetween(laterIso: string, earlierIso: string): number {
   const [ly, lm, ld] = laterIso.split("-").map(Number);
   const [ey, em, ed] = earlierIso.split("-").map(Number);
   const laterMs = Date.UTC(ly, lm - 1, ld);
@@ -35,6 +35,18 @@ export function streak(contributions: EngineContribution[], cycleDaysLength: num
     previous = c.occurredOn;
   }
   return count;
+}
+
+/**
+ * checkedInThisCycle(contributions, cycleDaysLength, todayIso) — A3: "a contribution exists with
+ * occurred_on >= today − (cycle − 1) days." Equivalent to (today − occurred_on) <= cycle − 1.
+ */
+export function checkedInThisCycle(
+  contributions: EngineContribution[],
+  cycleDaysLength: number,
+  todayIso: string,
+): boolean {
+  return contributions.some((c) => daysBetween(todayIso, c.occurredOn) <= cycleDaysLength - 1);
 }
 
 /**

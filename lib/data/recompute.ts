@@ -4,31 +4,14 @@
 // is still empty. This is the ONLY writer of goal_projections in the whole app.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { capacityMonthlyCents, monthDate, monthIndex, todayMonth } from "@/lib/engine/rates";
+import { capacityMonthlyCents, monthIndex, todayMonth } from "@/lib/engine/rates";
 import { todayIso } from "@/lib/engine/today";
 import { waterfall } from "@/lib/engine/waterfall";
 import type { EngineGoal, EngineProfile, GoalProjection } from "@/lib/engine/types";
-import { formatMoney, monthYearLabel, weeklyFromMonthlyCents } from "@/lib/format";
+import { weeklyFromMonthlyCents } from "@/lib/format";
 import { assumptionsToEngine } from "./queries";
+import { templateWhy } from "./templates";
 import type { AssumptionRow, ContributionRow, GoalRow, ProfileRow } from "./types";
-
-function templateWhy(
-  goal: GoalRow,
-  projection: GoalProjection,
-  startedOn: string,
-  weeklyCapacityCents: number,
-  currency: string,
-): string {
-  const target = formatMoney(goal.target_cents, currency);
-  const byMonth = monthYearLabel(goal.target_date);
-  const weekly = formatMoney(weeklyCapacityCents, currency);
-  const lands = projection.achievable
-    ? "on time"
-    : projection.completionMonth !== null
-      ? `in ${monthYearLabel(monthDate(startedOn, projection.completionMonth))}`
-      : "later than planned";
-  return `${target} by ${byMonth}. At ${weekly}/week that lands ${lands}.`;
-}
 
 /**
  * recompute(supabase, userId) — loads everything the waterfall needs, runs it, upserts one

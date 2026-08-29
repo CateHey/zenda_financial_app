@@ -20,6 +20,13 @@ export async function getProfile(supabase: SupabaseClient): Promise<ProfileRow |
   return data as ProfileRow | null;
 }
 
+/** One goal by id, scoped to the signed-in user by RLS (S5 trade-off, S8 celebrate). */
+export async function getGoalById(supabase: SupabaseClient, id: string): Promise<GoalRow | null> {
+  const { data, error } = await supabase.from("goals").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data as GoalRow | null;
+}
+
 /** Every non-paused goal for the signed-in user, joined with its projection (if any), by target_date asc. */
 export async function getGoalsWithProjections(supabase: SupabaseClient): Promise<GoalWithProjection[]> {
   const { data, error } = await supabase
@@ -53,6 +60,22 @@ export async function getContributions(supabase: SupabaseClient, goalId: string)
   return (data ?? []) as ContributionRow[];
 }
 
+/** Every contribution against any of the given goal ids, newest first (S6: streak/dots span the
+ * current goal and the goals before it in date order — this fetches all of them in one call). */
+export async function getContributionsForGoals(
+  supabase: SupabaseClient,
+  goalIds: string[],
+): Promise<ContributionRow[]> {
+  if (goalIds.length === 0) return [];
+  const { data, error } = await supabase
+    .from("contributions")
+    .select("*")
+    .in("goal_id", goalIds)
+    .order("occurred_on", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as ContributionRow[];
+}
+
 export async function getUnseenEvents(supabase: SupabaseClient): Promise<MotivationalEventRow[]> {
   const { data, error } = await supabase
     .from("motivational_events")
@@ -61,6 +84,13 @@ export async function getUnseenEvents(supabase: SupabaseClient): Promise<Motivat
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []) as MotivationalEventRow[];
+}
+
+/** One motivational_events row by id, scoped to the signed-in user by RLS (S8: /celebrate?event=). */
+export async function getEventById(supabase: SupabaseClient, id: string): Promise<MotivationalEventRow | null> {
+  const { data, error } = await supabase.from("motivational_events").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data as MotivationalEventRow | null;
 }
 
 /** The latest Discover reflection bubble (S1 bubble 3), if AI call 1 (task 11) has ever run. */
