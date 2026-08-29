@@ -47,9 +47,9 @@
         border:0;border-radius:999px;padding:16px 34px;cursor:pointer;text-decoration:none;display:inline-block}
   #ctaStart:hover{filter:brightness(1.08)}
   #ctaStart:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
-  .ghost{background:transparent;color:var(--accent);font-family:var(--font);font-size:17px;font-weight:600;
+  .ghost{background:rgba(255,255,255,.94);color:var(--accent);font-family:var(--font);font-size:17px;font-weight:600;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.08),inset 0 0 0 1.5px rgba(88,86,214,.35);text-decoration:none;display:inline-block;
         border:0;padding:16px 34px;cursor:pointer;text-decoration:none;display:inline-block}
-  .ghost:hover{text-decoration:underline}
+  .ghost:hover{filter:brightness(.98)}
   .ghost:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
   .spacer{height:55vh}
   /* ---- HUD ---- */
@@ -123,6 +123,17 @@
   .row p{margin:0;font-size:17px;line-height:1.5;color:rgba(44,44,50,.9)}
   @media (max-width:760px){ .row,.row.alt{grid-template-columns:1fr} .row.alt .frame{order:0} .row .frame{margin:0 auto} }
   #hud,#hint{display:none !important}
+
+  #hero{position:relative;overflow:hidden}
+  #hero > *:not(.hicon){position:relative;z-index:1}
+  .hicon{position:absolute;z-index:0;width:clamp(96px,14vw,190px);height:auto;opacity:.2;pointer-events:none;animation:floaty 7s ease-in-out infinite}
+  .hicon.h1{left:4vw;top:12vh}
+  .hicon.h2{right:6vw;top:14vh;animation-delay:-2s}
+  .hicon.h3{left:8vw;bottom:10vh;animation-delay:-4s}
+  .hicon.h4{right:5vw;bottom:12vh;animation-delay:-6s}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @media (prefers-reduced-motion:reduce){.hicon{animation:none}}
+  @media (max-width:640px){.hicon{width:72px;opacity:.16}}
 </style>
 </head>
 <body>
@@ -154,6 +165,10 @@
 
 <main>
   <section id="hero">
+    <svg class="hicon h1" viewBox="0 0 64 64" fill="none" stroke="#10265F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 30 L32 10 L56 30"/><path d="M14 26 V54 H50 V26"/><path d="M28 54 V38 H36 V54"/></svg>
+    <svg class="hicon h2" viewBox="0 0 64 64" fill="none" stroke="#5856D6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 30 L58 10 L40 56 L32 36 Z"/><path d="M32 36 L58 10"/></svg>
+    <svg class="hicon h3" viewBox="0 0 64 64" fill="none" stroke="#007AFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 40 L14 26 H50 L56 40 V50 H8 Z"/><path d="M8 40 H56"/><circle cx="20" cy="50" r="4"/><circle cx="44" cy="50" r="4"/></svg>
+    <svg class="hicon h4" viewBox="0 0 64 64" fill="none" stroke="#AF52DE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 26 L32 14 L56 26 L32 38 Z"/><path d="M18 31 V44 C18 50 46 50 46 44 V31"/><path d="M56 26 V40"/></svg>
     <p class="eyebrow">Financial wellbeing, built on your paycheck</p>
     <h1>Discover your path to financial freedom.</h1>
     <p class="sub">Zenda turns what's left after your bills into a dated plan for the things you actually want — a trip, a car, a deposit. No bank login, no confusing charts.</p>
@@ -701,7 +716,7 @@
   // scroll and re-form on scroll-up, and by uReveal so they fade in during the intro — same
   // mechanism as every other element in the scene.
   (function(){
-    var N = isSmall ? 11 : 22;
+    var N = 0; // goal rain retired: the hero carries four fixed goal icons instead
     var pos = new Float32Array(N*3); // dummy zero positions — real position from the vertex shader
     var aCell = new Float32Array(N), aSeed = new Float32Array(N*4), aSize = new Float32Array(N), aTint = new Float32Array(N);
     for (var i5=0;i5<N;i5++){
