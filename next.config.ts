@@ -7,7 +7,10 @@ const nextConfig: NextConfig = {
     DEMO_TODAY: process.env.DEMO_TODAY === undefined ? "2026-10-20" : process.env.DEMO_TODAY,
   },
   async rewrites() {
-    return [{ source: "/", destination: "/landing.html" }];
+    return [
+      { source: "/", destination: "/landing.html" },
+      { source: "/benchmark", destination: "/benchmark.html" },
+    ];
   },
 };
 
