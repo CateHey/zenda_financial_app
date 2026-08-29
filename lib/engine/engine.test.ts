@@ -3,7 +3,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { Assumptions, EngineContribution, EngineGoal, EngineProfile } from "./types";
-import { capacityMonthlyCents, glideRate, monthIndex, todayMonth } from "./rates";
+import { capacityMonthlyCents, glideRate, monthDate, monthIndex, todayMonth } from "./rates";
 import { monthsToReach, projectCurve, requiredMonthlyCents } from "./solver";
 import { waterfall } from "./waterfall";
 import { progress, streak } from "./progress";
@@ -203,6 +203,19 @@ describe("waterfall — Vinuy's full roadmap", () => {
       expect(result.paydaysRemaining).toBe(12);
       expect(result.streak).toBe(6);
     });
+  });
+});
+
+describe("monthDate — A2, the inverse of monthIndex on first-of-month dates", () => {
+  it("returns startedOn + m months, same day-of-month", () => {
+    expect(monthDate(STARTED_ON, 0)).toBe(STARTED_ON);
+    expect(monthDate(STARTED_ON, 1)).toBe("2026-10-01");
+    expect(monthDate(STARTED_ON, 84)).toBe("2033-09-01");
+    expect(monthIndex(STARTED_ON, monthDate(STARTED_ON, 84))).toBe(84);
+  });
+
+  it("clamps to month end (Jan 31 + 1 month -> Feb 28)", () => {
+    expect(monthDate("2027-01-31", 1)).toBe("2027-02-28");
   });
 });
 

@@ -46,7 +46,7 @@ export function glideRate(monthsToHorizon: number, a: Assumptions): number {
   return a.cashRateAnnual + (a.growthRateAnnual - a.cashRateAnnual) * frac;
 }
 
-function parseIsoDate(date: string): { y: number; m: number; d: number } {
+export function parseIsoDate(date: string): { y: number; m: number; d: number } {
   const [y, m, d] = date.split("-").map(Number);
   return { y, m, d };
 }
@@ -71,4 +71,21 @@ export function todayMonth(startedOn: string, today: string): number {
   const wholeMonths = (b.y - a.y) * 12 + (b.m - a.m);
   const fraction = (b.d - a.d) / 30;
   return Math.max(0, wholeMonths + fraction);
+}
+
+/**
+ * monthDate(startedOn, m) — A2, the inverse of monthIndex: the calendar date `startedOn + m
+ * months`, same day-of-month, clamped to month end (e.g. Jan 31 + 1 month -> Feb 28/29).
+ * Used to turn a curve/projection month index back into a displayable "Month YYYY" date.
+ */
+export function monthDate(startedOn: string, m: number): string {
+  const start = parseIsoDate(startedOn);
+  const totalMonths = (start.m - 1) + m;
+  const y = start.y + Math.floor(totalMonths / 12);
+  const zeroBasedMonth = ((totalMonths % 12) + 12) % 12;
+  const lastDayOfMonth = new Date(Date.UTC(y, zeroBasedMonth + 1, 0)).getUTCDate();
+  const d = Math.min(start.d, lastDayOfMonth);
+  const dd = new Date(Date.UTC(y, zeroBasedMonth, d));
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${dd.getUTCFullYear()}-${pad(dd.getUTCMonth() + 1)}-${pad(dd.getUTCDate())}`;
 }
