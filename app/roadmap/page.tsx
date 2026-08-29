@@ -98,7 +98,7 @@ export default async function RoadmapPage() {
     // yet — render a minimal, honest stand-in rather than bouncing to /discover (the user's
     // whole path IS still here, just fully reached).
     return (
-      <main style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", padding: "20px", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 16 }}>
+      <main className="screen" data-web="two-col" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", padding: "20px", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Your roadmap</span>
           <LogoutLink />
@@ -145,7 +145,7 @@ export default async function RoadmapPage() {
   }
 
   return (
-    <main style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+    <main className="screen" data-web="two-col" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       {/* header: prioritised goals + this week's allocation */}
       <div style={{ padding: "20px 20px 0 20px", display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -165,9 +165,9 @@ export default async function RoadmapPage() {
 
       {/* the path: farthest first, then today */}
       <div style={{ position: "relative", padding: "16px 20px 0 20px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
-        <div style={{ position: "absolute", left: 33, top: 24, bottom: 6, width: 3, borderRadius: 2, background: "linear-gradient(180deg, #AF52DE 0%, #8450DA 22%, #5856D6 48%, #007AFF 78%, #10265F 100%)" }} />
+        <div className="path-line" style={{ position: "absolute", left: 33, top: 24, bottom: 6, width: 3, borderRadius: 2, background: "linear-gradient(180deg, #AF52DE 0%, #8450DA 22%, #5856D6 48%, #007AFF 78%, #10265F 100%)" }} />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        <div className="path-nodes" style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           {pathNodes.map((goal) => {
             const isCurrent = goal.id === currentGoal.id;
             const projection = goal.projection;

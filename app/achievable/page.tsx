@@ -29,7 +29,7 @@ export default async function AchievablePage() {
   const ordered = [...chosen, ...foundations];
 
   return (
-    <main style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+    <main className="screen" data-web="grid" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>What&apos;s achievable</span>
@@ -51,7 +51,7 @@ export default async function AchievablePage() {
         <span style={{ fontSize: 15, lineHeight: 1.4, color: "rgba(60,60,67,0.78)" }}>Honest distances, not verdicts. Every one has a lever.</span>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "20px 20px 0 20px" }}>
+      <div className="cards" style={{ display: "flex", flexDirection: "column", gap: 12, padding: "20px 20px 0 20px" }}>
         {ordered.map((goal) => {
           const projection = goal.projection;
           const isGrowth = goal.goal_type === "growth_required";

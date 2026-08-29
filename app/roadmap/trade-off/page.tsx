@@ -93,7 +93,7 @@ export default async function TradeoffPage({
   }));
 
   return (
-    <main style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+    <main className="screen" data-web="grid" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       <div style={{ padding: "16px 20px 0 20px", display: "flex", justifyContent: "flex-end" }}>
         <LogoutLink />
       </div>
@@ -110,7 +110,7 @@ export default async function TradeoffPage({
         </span>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "20px 20px 0 20px" }}>
+      <div className="cards" style={{ display: "flex", flexDirection: "column", gap: 12, padding: "20px 20px 0 20px" }}>
         <div style={{ display: "flex", gap: 14, padding: "16px 18px", borderRadius: 14, background: "#FFFFFF", boxShadow: "0 0 0 2px #5856D6, 0 4px 16px rgba(0,0,0,0.06)" }}>
           <span style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 999, background: "#5856D6", flexShrink: 0, marginTop: 2 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5 9-10" /></svg>

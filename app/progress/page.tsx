@@ -167,7 +167,7 @@ export default async function ProgressPage() {
   const dimmedNodes = [nextGoal, currentGoal].filter((g): g is NonNullable<typeof g> => g !== null);
 
   return (
-    <main style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+    <main className="screen" data-web="two-col" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0 20px" }}>
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Progress</span>
         <LogoutLink />

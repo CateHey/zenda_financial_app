@@ -288,8 +288,18 @@ export function DiscoverClient({
     router.push(data.redirect ?? "/achievable");
   }
 
+  async function startOver() {
+    if (!window.confirm("Clear your goals and progress and start again? Your numbers stay.")) return;
+    const res = await fetch("/api/reset", { method: "POST" }).catch(() => null);
+    if (res && res.ok) { window.location.href = "/discover"; }
+  }
+  function useDemoNumbers() {
+    setIncomeDollars("1100"); setRentDollars("400"); setFoodDollars("120"); setPetrolDollars("70");
+    setFunDollars("250"); setBufferDollars("100"); setSavingsDollars("0"); setDebtDollars("30000"); setDebtRatePercent("2.8");
+  }
+
   return (
-    <main style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+    <main className="screen" data-web="two-col" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       {/* top bar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -534,6 +544,10 @@ export function DiscoverClient({
           </button>
         </div>
         {submitting && <span style={{ fontSize: 13, color: "var(--label-2)", textAlign: "right" }}>One moment…</span>}
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, marginTop: 10 }}>
+          <button type="button" onClick={useDemoNumbers} style={{ background: "none", border: 0, padding: "10px 0", font: "inherit", fontSize: 13, fontWeight: 600, color: "#5856D6", cursor: "pointer" }}>Use demo numbers</button>
+          <button type="button" onClick={startOver} style={{ background: "none", border: 0, padding: "10px 0", font: "inherit", fontSize: 13, fontWeight: 600, color: "rgba(60,60,67,0.7)", cursor: "pointer" }}>Start over</button>
+        </div>
       </div>
 
       {sheetKind && (

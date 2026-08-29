@@ -54,7 +54,7 @@ export default async function AdminPage() {
   const stats = ((statsResult.data ?? []) as SeatStatsRow[])[0] ?? null;
 
   return (
-    <main
+    <main className="screen" data-web="grid"
       style={{
         maxWidth: 390,
         margin: "0 auto",
@@ -86,7 +86,7 @@ export default async function AdminPage() {
         {orgName}
       </span>
 
-      <div style={{ display: "flex", gap: 12 }}>
+      <div className="cards" style={{ display: "flex", gap: 12 }}>
         <div style={TILE_STYLE}>
           <span style={TILE_LABEL_STYLE}>Seats</span>
           <span style={TILE_NUMBER_STYLE}>{stats ? stats.seats : "—"}</span>

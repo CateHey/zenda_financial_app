@@ -69,7 +69,7 @@ export default async function CelebratePage({
   const nextStepLabel = NEXT_STEP_LABEL[goal.kind] ?? "Take the next step";
 
   return (
-    <main
+    <main className="screen" data-web="center"
       style={{
         maxWidth: 390,
         margin: "0 auto",

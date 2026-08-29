@@ -65,7 +65,7 @@ export default async function PrioritisePage() {
     .filter((s): s is NonNullable<typeof s> => s !== null);
 
   return (
-    <main style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
+    <main className="screen" data-web="center" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       <div style={{ padding: "20px 20px 0 20px", display: "flex", flexDirection: "column", gap: 6 }}>
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Prioritise</span>
         <span style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.1 }}>When goals compete, which wins?</span>
