@@ -181,6 +181,19 @@
   .faq-list summary::after{content:"+";font-size:22px;color:#5856D6;font-weight:400}
   .faq-list details[open] summary::after{content:"–"}
   .faq-list p{margin:0 0 14px;font-size:15px;line-height:1.5;color:rgba(44,44,50,.88)}
+
+  html{scroll-behavior:smooth}
+  .lnav{position:sticky;top:0;z-index:20;height:60px;display:flex;align-items:center;gap:18px;padding:0 5vw;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(60,60,67,.14)}
+  .lnav-brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:#5856D6;font-weight:700;font-size:18px;letter-spacing:-.01em}
+  .lnav-brand img{border-radius:8px;display:block}
+  .lnav-links{display:flex;gap:4px;margin-left:8px}
+  .lnav-links a{display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:999px;font-size:14px;font-weight:600;color:rgba(60,60,67,.85);text-decoration:none}
+  .lnav-links a:hover{background:#F2F2F7}
+  .lnav-cta{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .lnav-demo{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:999px;font-size:14px;font-weight:600;color:#5856D6;text-decoration:none;box-shadow:inset 0 0 0 1.5px rgba(88,86,214,.35)}
+  .lnav-start{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:999px;font-size:14px;font-weight:600;color:#fff;background:#5856D6;text-decoration:none}
+  @media (max-width:760px){.lnav-links{display:none}.lnav-start{display:none}}
+  #hero{min-height:calc(100vh - 60px)}
 </style>
 </head>
 <body>
@@ -192,6 +205,20 @@
   <button id="introYes" type="button">Yes</button>
   <button id="introSkip" type="button">Just show me</button>
 </div>
+
+<header class="lnav">
+  <a href="/" class="lnav-brand"><img src="/icon-192.png" alt="" width="30" height="30"><span>Zenda</span></a>
+  <nav class="lnav-links" aria-label="Sections">
+    <a href="#screens">Screens</a>
+    <a href="#coach">Coach</a>
+    <a href="#compare">Why Zenda</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <div class="lnav-cta">
+    <a href="/login?demo=vinuy" class="lnav-demo">Live demo</a>
+    <a href="/signup" class="lnav-start">Start your journey</a>
+  </div>
+</header>
 
 <canvas id="scene"></canvas>
 
