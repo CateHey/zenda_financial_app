@@ -65,9 +65,13 @@ export async function recompute(supabase: SupabaseClient, userId: string): Promi
   >[];
 
   const today = todayIso();
+  // A4: "the sum of its contributions to date" — every recorded contribution counts. A
+  // contribution's occurred_on is never future-dated in real use (check-ins default to
+  // current_date); no runtime date filter here (lib/engine/progress.ts sums the same way,
+  // unconditionally — this mirrors it rather than silently dropping seeded/backfilled rows
+  // whose occurred_on merely predates the *engine's* started_on-relative "today").
   const contributedByGoal = new Map<string, number>();
   for (const c of contributions) {
-    if (c.occurred_on > today) continue; // A4: only contributions to date count.
     contributedByGoal.set(c.goal_id, (contributedByGoal.get(c.goal_id) ?? 0) + c.amount_cents);
   }
 
