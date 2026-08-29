@@ -1,0 +1,16 @@
+{
+  "name": "Zenda",
+  "short_name": "Zenda",
+  "start_url": "/roadmap",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#5856D6",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "purpose": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
