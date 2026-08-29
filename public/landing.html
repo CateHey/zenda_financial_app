@@ -209,7 +209,9 @@
   var started = false;
   var pendingStart = false;
   var intro = document.getElementById("intro");
-  function closeIntro(){ intro.classList.add("gone"); if (pendingStart) { pendingStart = false; startScene(); } }
+  function closeIntro(){ intro.classList.add("gone"); try { sessionStorage.setItem("zintro", "1"); } catch (e) {} if (pendingStart) { pendingStart = false; startScene(); } }
+  var introSeen = false; try { introSeen = !!sessionStorage.getItem("zintro"); } catch (e) {}
+  if (introSeen) intro.classList.add("gone");
   document.getElementById("introYes").addEventListener("click", closeIntro);
   document.getElementById("introSkip").addEventListener("click", closeIntro);
   function showPoster(reason, allowPlay){
@@ -239,7 +241,7 @@
   }
   if (matchMedia("(prefers-reduced-motion: reduce)").matches){
     // The production page stops here. The demo offers a manual start so the scene can be reviewed.
-    pendingStart = true;
+    if (introSeen) { startScene(); return; } pendingStart = true;
     return;
   }
   startScene();
