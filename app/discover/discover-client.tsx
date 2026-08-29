@@ -473,7 +473,7 @@ export function DiscoverClient({
       )}
 
       {/* where you are today */}
-      <div
+      <div data-col="side"
         style={{
           marginTop: "auto",
           background: "#FFFFFF",

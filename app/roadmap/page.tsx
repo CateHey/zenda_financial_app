@@ -292,6 +292,7 @@ export default async function RoadmapPage() {
       </div>
 
       {/* what if — docked */}
+      <div data-col="side">
       <WhatIf
         engineGoals={engineGoals}
         assumptions={a}
@@ -300,6 +301,7 @@ export default async function RoadmapPage() {
         startedOn={profile.started_on}
         currency={profile.currency}
       />
+      </div>
 
       <p style={{ fontSize: 12, color: "var(--label-3)", padding: "0 20px 20px 20px" }}>{DISCLAIMER}</p>
     </main>

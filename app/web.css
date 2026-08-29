@@ -68,12 +68,12 @@
     grid-auto-rows: max-content; align-items: start;
   }
   .screen[data-web="two-col"] > * { grid-column: 1; }
-  .screen[data-web="two-col"] > :last-child {
+  .screen[data-web="two-col"] > [data-col="side"] {
     grid-column: 2; grid-row: 1 / span 40; position: sticky; top: 88px;
     margin: 0 !important; border-radius: 20px !important; background: var(--surface, #fff) !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06) !important; padding: 24px !important;
   }
-  .screen[data-web="two-col"] > :last-child > .sheet-handle { display: none; }
+  .screen[data-web="two-col"] > [data-col="side"] > .sheet-handle { display: none; }
 
   /* grid: cards containers marked .cards become 2/3-column grids; other blocks span full width */
   .screen[data-web="grid"] .cards { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px !important; }
@@ -86,7 +86,7 @@
 }
 @media (min-width: 1000px) {
   /* the roadmap path as a horizontal timeline on wide screens */
-  .path-nodes { display: flex !important; flex-direction: row-reverse; gap: 12px !important; overflow-x: auto; padding: 24px 0 8px !important; }
+  .path-nodes { display: flex !important; flex-direction: row-reverse !important; gap: 12px !important; overflow-x: auto; padding: 24px 0 8px !important; }
   .path-nodes > * { flex: 1 1 0; min-width: 180px; flex-direction: column !important; gap: 10px !important; padding: 0 !important; }
   .path-line { top: 34px !important; bottom: auto !important; left: 0 !important; right: 0 !important; width: auto !important; height: 3px !important;
     background: linear-gradient(90deg, #10265F 0%, #007AFF 22%, #5856D6 52%, #8450DA 78%, #AF52DE 100%) !important; }

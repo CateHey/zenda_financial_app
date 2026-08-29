@@ -23,30 +23,30 @@ export const viewport: Viewport = {
 
 export const dynamic = "force-dynamic";
 
-// The shell: the persistent menu (web top bar / phone bottom bar) and Ask Zenda are rendered for
-// signed-in people on every app screen; the landing and auth pages hide them client-side.
+// The shell: the persistent menu (web top bar / phone bottom bar) and the Zenda Coach on every
+// app screen. App screens are already behind the auth proxy, so the menu shows on any path that
+// is not the landing or an auth page — it never depends on this layout resolving the session.
+// The session is only consulted, best-effort, to decide whether to show the Admin link.
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  let isAuthed = false;
   let isAdmin = false;
   try {
     const supabase = await supabaseServer();
     if (supabase) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        isAuthed = true;
         const { data } = await supabase.from("profiles").select("role").eq("user_id", user.id).maybeSingle();
         isAdmin = data?.role === "admin";
       }
     }
   } catch (err) {
-    console.error("layout auth check", err);
+    console.error("layout role check", err);
   }
   return (
     <html lang="en">
-      <body className={isAuthed ? "has-nav" : undefined}>
-        <NavBar isAuthed={isAuthed} isAdmin={isAdmin} />
+      <body className="has-nav">
+        <NavBar isAuthed={true} isAdmin={isAdmin} />
         {children}
-        <AskZenda enabled={isAuthed && aiEnabled()} />
+        <AskZenda enabled={aiEnabled()} />
       </body>
     </html>
   );

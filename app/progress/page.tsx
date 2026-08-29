@@ -292,6 +292,7 @@ export default async function ProgressPage() {
         </div>
       )}
 
+      <div data-col="side">
       <CheckinSheet
         goalId={currentGoal.id}
         capacityPerCycleCents={capacityPerCycle}
@@ -299,6 +300,8 @@ export default async function ProgressPage() {
         alreadyCheckedIn={alreadyCheckedIn}
         nextPaydayLabel={nextPaydayLabel}
       />
+
+      </div>
     </main>
   );
 }
