@@ -1,7 +1,8 @@
 // lib/data/recompute.ts — D5: "the single place projections are written; every handler calls
 // it." Loads profile + goals + assumptions with the user-scoped client, runs the D6 waterfall,
-// upserts goal_projections, and fills in a template `why` (D7 fallback) on any goal whose why
-// is still empty. This is the ONLY writer of goal_projections in the whole app.
+// upserts goal_projections, and refreshes the template `why` (D7 fallback) for every active goal
+// on every recompute — the template is the truth for the current projection. This is the ONLY
+// writer of goal_projections in the whole app.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { capacityMonthlyCents, monthIndex, todayMonth } from "@/lib/engine/rates";
@@ -15,8 +16,9 @@ import type { AssumptionRow, ContributionRow, GoalRow, ProfileRow } from "./type
 
 /**
  * recompute(supabase, userId) — loads everything the waterfall needs, runs it, upserts one
- * goal_projections row per (non-reached) goal, and writes a template `why` on any goal that
- * doesn't have one yet. Returns the projections it wrote (callers avoid a second read).
+ * goal_projections row per (non-reached) goal, and writes a fresh template `why` for each of
+ * those goals every time (D7 fallback + cache rule — see the comment above `whyUpdates` below).
+ * Returns the projections it wrote (callers avoid a second read).
  */
 export async function recompute(supabase: SupabaseClient, userId: string): Promise<GoalProjection[]> {
   const [profileResult, goalsResult, assumptionsResult, contributionsResult] = await Promise.all([
@@ -78,13 +80,59 @@ export async function recompute(supabase: SupabaseClient, userId: string): Promi
 
   const projections = waterfall(engineGoals, capacity, a, todayFraction);
 
+  const goalsById = new Map(goals.map((g) => [g.id, g]));
+  const weeklyCapacityCents = weeklyFromMonthlyCents(capacity);
+
+  // D7 fallback + cache rule (lib/ai/run.ts's needsRegeneration): the template `why` is the
+  // truth for the *current* projection, so it is rewritten for every active goal on every
+  // recompute — not only the first time a goal gets one — otherwise a changed projection
+  // (adapt/adjust/prioritise) leaves `why` quoting stale numbers until the AI upgrade happens to
+  // run again. `projections` only ever holds active goals (waterfall() freezes `reached` goals
+  // and never emits a row for them, D6 §8), so a reached goal's `why` is never touched here.
+  //
+  // Ordering matters: this update MUST land before the goal_projections upsert below. The
+  // `goals_touch` trigger bumps `goals.updated_at` to Postgres's own now() on any update to the
+  // row, and needsRegeneration only re-triggers the AI copy when the projection's `computed_at`
+  // is strictly newer than that. Writing `why` first (bumping `updated_at`) and reading back what
+  // Postgres actually stamped it with — rather than comparing against this process's own
+  // `new Date()` — matters: a client/server clock skew of even ~100ms (observed against the real
+  // dev Supabase project) can otherwise land computed_at *before* updated_at despite happening
+  // strictly after it, silently starving needsRegeneration of the newer projection it's waiting
+  // for. `computedAt` below is Postgres's own clock, read back and nudged 1s forward, so both
+  // sides of that comparison come from the same source of truth and an AI regeneration is
+  // triggered exactly when the projection actually changed, on every recompute.
+  const whyUpdates = projections
+    .map((p) => {
+      const goal = goalsById.get(p.goalId);
+      if (!goal) return null;
+      return { id: goal.id, why: templateWhy(goal, p, profile.started_on, weeklyCapacityCents, profile.currency) };
+    })
+    .filter((u): u is { id: string; why: string } => u !== null);
+
+  let computedAt = new Date().toISOString();
+  if (whyUpdates.length > 0) {
+    const whyResults = await Promise.all(
+      whyUpdates.map((u) => supabase.from("goals").update({ why: u.why }).eq("id", u.id).select("updated_at")),
+    );
+    const whyError = whyResults.find((r) => r.error)?.error;
+    if (whyError) throw whyError;
+
+    const updatedAtMsValues = whyResults
+      .flatMap((r) => r.data ?? [])
+      .map((row) => new Date((row as { updated_at: string }).updated_at).getTime())
+      .filter((ms) => Number.isFinite(ms));
+    if (updatedAtMsValues.length > 0) {
+      computedAt = new Date(Math.max(...updatedAtMsValues) + 1000).toISOString();
+    }
+  }
+
   const upsertResults = await Promise.all(
     projections.map((p) =>
       supabase.from("goal_projections").upsert(
         {
           goal_id: p.goalId,
           user_id: userId,
-          computed_at: new Date().toISOString(),
+          computed_at: computedAt,
           rate_annual: p.rateAnnual,
           capacity_monthly_cents: p.capacityMonthlyCents,
           start_month: p.startMonth,
@@ -102,25 +150,6 @@ export async function recompute(supabase: SupabaseClient, userId: string): Promi
   );
   const upsertError = upsertResults.find((r) => r.error)?.error;
   if (upsertError) throw upsertError;
-
-  const goalsById = new Map(goals.map((g) => [g.id, g]));
-  const weeklyCapacityCents = weeklyFromMonthlyCents(capacity);
-
-  const whyUpdates = projections
-    .map((p) => {
-      const goal = goalsById.get(p.goalId);
-      if (!goal || goal.why) return null; // D7: template stands only when `why` is empty.
-      return { id: goal.id, why: templateWhy(goal, p, profile.started_on, weeklyCapacityCents, profile.currency) };
-    })
-    .filter((u): u is { id: string; why: string } => u !== null);
-
-  if (whyUpdates.length > 0) {
-    const whyResults = await Promise.all(
-      whyUpdates.map((u) => supabase.from("goals").update({ why: u.why }).eq("id", u.id)),
-    );
-    const whyError = whyResults.find((r) => r.error)?.error;
-    if (whyError) throw whyError;
-  }
 
   return projections;
 }
