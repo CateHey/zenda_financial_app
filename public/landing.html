@@ -28,7 +28,9 @@
   #hero .sub{font-size:20px;line-height:1.5;color:rgba(20,20,26,.92);margin:16px 0 0;max-width:52ch}
   @media (max-width:640px){ #hero{padding:6vh 6vw} }
   .steps{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:18px;margin-top:34px}
-  .step{display:flex;flex-direction:column;align-items:center}
+  .step{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:inherit;cursor:pointer}
+  .step:hover .circle{transform:translateY(-3px);box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(88,86,214,.25)}
+  .circle{transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s}
   .circle{width:68px;height:68px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06);
         display:flex;align-items:center;justify-content:center}
   .circle svg{width:28px;height:28px}
@@ -305,11 +307,11 @@
     <h1>Discover your path to financial freedom.</h1>
     <p class="sub">Zenda turns what's left after your bills into a dated plan for the things you actually want — a trip, a car, a deposit. No bank login needed — and only charts that mean something.</p>
     <div class="steps" aria-label="How it works">
-      <div class="step"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><line x1="19" y1="19" x2="14.5" y2="14.5"/></svg></span><span class="lbl">Discover</span></div>
+      <a class="step" href="#s-discover"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><line x1="19" y1="19" x2="14.5" y2="14.5"/></svg></span><span class="lbl">Discover</span></a>
       <div class="connector"></div>
-      <div class="step"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/><path d="M6 11l3.5 2.5 3-3.5 4 1.5" stroke-dasharray="1 2.6"/><circle cx="16.5" cy="10.5" r="0.9" fill="#5856D6" stroke="none"/></svg></span><span class="lbl">Roadmap</span></div>
+      <a class="step" href="#s-roadmap"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/><path d="M6 11l3.5 2.5 3-3.5 4 1.5" stroke-dasharray="1 2.6"/><circle cx="16.5" cy="10.5" r="0.9" fill="#5856D6" stroke="none"/></svg></span><span class="lbl">Roadmap</span></a>
       <div class="connector"></div>
-      <div class="step"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7.5 15a4.5 4.5 0 0 1 9 0"/><line x1="12" y1="15" x2="14.2" y2="11.8"/><line x1="6" y1="19" x2="6" y2="17"/><line x1="18" y1="19" x2="18" y2="17"/></svg></span><span class="lbl">Progress</span></div>
+      <a class="step" href="#s-progress"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7.5 15a4.5 4.5 0 0 1 9 0"/><line x1="12" y1="15" x2="14.2" y2="11.8"/><line x1="6" y1="19" x2="6" y2="17"/><line x1="18" y1="19" x2="18" y2="17"/></svg></span><span class="lbl">Progress</span></a>
     </div>
     <div class="cta">
       <a id="ctaStart" href="/signup">Start your journey 🚀</a>
@@ -349,7 +351,8 @@
     <h2>How Zenda works, screen by screen</h2>
     <p class="lead">Vinuy earns $1,100 a week and wants a house, a car and a trip to Peru. This is what Zenda shows him. Click any screen to try it live with his data.</p>
     <div class="rows">
-      <div class="row">
+      <div class="row" id="s-discover">
+        <a class="frame" href="/login?demo=vinuy&amp;next=%2Fdiscover" aria-label="Open the 1 · Discover screen"><iframe src="/screens/discover.html"">
         <a class="frame" href="/login?demo=vinuy&amp;next=%2Fdiscover" aria-label="Open the 1 · Discover screen"><iframe src="/screens/discover.html" loading="lazy" title="1 · Discover" tabindex="-1"></iframe></a>
         <div class="txt"><span class="n">1 · Discover</span><h3>Tell us about your money and your goals</h3><p>Enter your income and your main expenses, then pick your goals: a trip, a car, a home, study or a business. It takes two minutes and needs no bank login. Zenda shows you how much you can save each week.</p></div>
       </div>
@@ -361,7 +364,8 @@
         <a class="frame" href="/login?demo=vinuy&amp;next=%2Fprioritise" aria-label="Open the 3 · Prioritise screen"><iframe src="/screens/prioritise.html" loading="lazy" title="3 · Prioritise" tabindex="-1"></iframe></a>
         <div class="txt"><span class="n">3 · Prioritise</span><h3>Choose what matters most</h3><p>Put your goals in order. Zenda sends your savings to the most important goal first and shows you the date each goal will be reached.</p></div>
       </div>
-      <div class="row alt">
+      <div class="row alt" id="s-roadmap">
+        <a class="frame" href="/login?demo=vinuy&amp;next=%2Froadmap" aria-label="Open the 4 · Roadmap screen"><iframe src="/screens/roadmap.html"">
         <a class="frame" href="/login?demo=vinuy&amp;next=%2Froadmap" aria-label="Open the 4 · Roadmap screen"><iframe src="/screens/roadmap.html" loading="lazy" title="4 · Roadmap" tabindex="-1"></iframe></a>
         <div class="txt"><span class="n">4 · Roadmap</span><h3>Your plan, step by step</h3><p>See every goal on a timeline with its date. Move the slider to try a different weekly amount and watch the dates update instantly.</p></div>
       </div>
@@ -369,7 +373,8 @@
         <a class="frame" href="/login?demo=vinuy&amp;next=%2Froadmap" aria-label="Open the 5 · Trade-off screen"><iframe src="/screens/tradeoff.html" loading="lazy" title="5 · Trade-off" tabindex="-1"></iframe></a>
         <div class="txt"><span class="n">5 · Trade-off</span><h3>When a goal is too far, see your options</h3><p>If a goal cannot be reached in time, Zenda gives you clear choices: a smaller amount now, the full amount later, or how much more you would need to save each week.</p></div>
       </div>
-      <div class="row alt">
+      <div class="row alt" id="s-progress">
+        <a class="frame" href="/login?demo=vinuy&amp;next=%2Fprogress" aria-label="Open the 6 · Progress screen"><iframe src="/screens/progress.html"">
         <a class="frame" href="/login?demo=vinuy&amp;next=%2Fprogress" aria-label="Open the 6 · Progress screen"><iframe src="/screens/progress.html" loading="lazy" title="6 · Progress" tabindex="-1"></iframe></a>
         <div class="txt"><span class="n">6 · Progress</span><h3>One simple check-in every payday</h3><p>Each payday, Zenda asks: did you save this week? Answer yes, partly, or not this time. You see your streak and how far along you are.</p></div>
       </div>
