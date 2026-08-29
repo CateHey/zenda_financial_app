@@ -149,6 +149,38 @@
   .cmp-card .chip{flex:0 0 auto;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(0,0,0,.08)}
   .cmp-card.with .chip{background:rgba(255,255,255,.22)}
   .cmp-card p{margin:10px 0 0;font-size:15px;line-height:1.5;opacity:.92}
+
+  .coach,.faq{position:relative;z-index:1;padding:6vh 6vw;display:flex;flex-direction:column;gap:22px;align-items:center}
+  .coach h2,.faq h2{font-size:clamp(26px,3.4vw,40px);font-weight:700;letter-spacing:-.02em;margin:0;text-align:center;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);padding:12px 22px;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06)}
+  .coach .lead{margin:0;max-width:62ch;text-align:center;font-size:17px;line-height:1.5;color:rgba(44,44,50,.9);background:rgba(255,255,255,.9);backdrop-filter:blur(8px);padding:12px 22px;border-radius:14px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06)}
+  .coach-wrap{display:grid;grid-template-columns:260px 1fr;gap:24px;width:100%;max-width:960px;align-items:start}
+  @media (max-width:760px){.coach-wrap{grid-template-columns:1fr}}
+  .scen{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06)}
+  .scen .k{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(60,60,67,.7)}
+  .scen-btn{height:44px;padding:0 14px;border-radius:999px;border:1.5px solid rgba(88,86,214,.35);background:#fff;color:#5856D6;font-family:var(--font);font-size:15px;font-weight:600;text-align:left;cursor:pointer}
+  .scen-btn.on{background:#5856D6;color:#fff;border-color:#5856D6}
+  .feats{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px;color:rgba(44,44,50,.85)}
+  .feats li::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#007AFF,#AF52DE);margin-right:8px;vertical-align:middle}
+  .chat{background:#fff;border-radius:20px;box-shadow:0 12px 48px rgba(0,0,0,.14);overflow:hidden;display:flex;flex-direction:column;min-height:420px}
+  .chat-head{display:flex;align-items:baseline;gap:8px;padding:14px 16px;border-bottom:1px solid rgba(60,60,67,.12);font-weight:600}
+  .chat-head .sub{font-size:12px;font-weight:500;color:#8E8E93}
+  .chat-body{flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+  .m{max-width:86%;padding:10px 14px;border-radius:16px 16px 16px 6px;background:#F2F2F7;font-size:15px;line-height:1.45}
+  .m.me{align-self:flex-end;background:#5856D6;color:#fff;border-radius:16px 16px 6px 16px}
+  .m .t{display:block;font-size:11px;color:#8E8E93;margin-top:4px}
+  .m.me .t{color:rgba(255,255,255,.75)}
+  .prop{max-width:86%;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.08);font-size:14px}
+  .prop b{height:34px;padding:0 14px;border-radius:999px;background:#5856D6;color:#fff;display:inline-flex;align-items:center;font-weight:600}
+  .chat-input{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(60,60,67,.12)}
+  .chat-input span{flex:1;height:44px;padding:0 14px;border:1px solid rgba(60,60,67,.2);border-radius:999px;display:flex;align-items:center;color:#8E8E93;font-size:15px}
+  .chat-input b{height:44px;padding:0 16px;border-radius:999px;background:#5856D6;color:#fff;display:flex;align-items:center;font-weight:600}
+  #faqSearch{width:100%;max-width:720px;height:48px;padding:0 18px;border-radius:999px;border:1px solid rgba(60,60,67,.22);background:rgba(255,255,255,.95);font-family:var(--font);font-size:16px}
+  .faq-list{width:100%;max-width:720px;display:flex;flex-direction:column;gap:10px}
+  .faq-list details{background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-radius:14px;padding:4px 18px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06)}
+  .faq-list summary{cursor:pointer;font-size:17px;font-weight:600;padding:12px 0;list-style:none;display:flex;justify-content:space-between;align-items:center}
+  .faq-list summary::after{content:"+";font-size:22px;color:#5856D6;font-weight:400}
+  .faq-list details[open] summary::after{content:"–"}
+  .faq-list p{margin:0 0 14px;font-size:15px;line-height:1.5;color:rgba(44,44,50,.88)}
 </style>
 </head>
 <body>
@@ -196,7 +228,7 @@
     </div>
     <div class="cta">
       <a id="ctaStart" href="/signup">Start your journey 🚀</a>
-      <a id="ctaVinuy" href="/login?demo=vinuy" class="ghost">See Vinuy's journey</a>
+      <a id="ctaVinuy" href="/login?demo=vinuy" class="ghost">Live demo</a>
     </div>
   </section>
 
@@ -269,13 +301,94 @@
         <div class="txt"><span class="n">9 · Ask Zenda</span><h3>Ask anything about your plan</h3><p>A built-in assistant on every screen. Ask why a date lands where it does or what to do this payday — it answers using your own numbers, never guesses, and never sells you anything.</p></div>
       </div>
     </div>
-    <div class="cta"><a id="ctaStart2" href="/signup">Start your journey 🚀</a><a href="/login?demo=vinuy" class="ghost">See Vinuy's journey</a></div>
+    <div class="cta"><a id="ctaStart2" href="/signup">Start your journey 🚀</a><a href="/login?demo=vinuy" class="ghost">Live demo</a></div>
   </section>
+  <section class="coach" id="coach">
+    <h2>Your coach, in action.</h2>
+    <p class="lead">Zenda doesn't show you last month in a pie chart. Tell the coach what's going on — a ticket, a raise, a bonus — and it shows exactly what moves, using your own numbers. One tap applies the change.</p>
+    <div class="coach-wrap">
+      <div class="scen">
+        <span class="k">Switch the scenario</span>
+        <button type="button" class="scen-btn on" data-s="0">Concert ticket ($180)</button>
+        <button type="button" class="scen-btn" data-s="1">Rent went up $40</button>
+        <button type="button" class="scen-btn" data-s="2">A $1,000 bonus</button>
+        <ul class="feats">
+          <li>Knows your whole path</li>
+          <li>Honest numbers, never guesses</li>
+          <li>Proposes a change — you apply it</li>
+        </ul>
+      </div>
+      <div class="chat">
+        <div class="chat-head"><span>Zenda Coach</span><span class="sub">knows your whole path</span></div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-input"><span>Ask, or share a plan…</span><b>Send</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <h2>Questions</h2>
+    <input id="faqSearch" type="search" placeholder="Search — privacy, pricing, advice…" aria-label="Search questions">
+    <div class="faq-list">
+      <details open><summary>Can my employer see my numbers?</summary><p>No. Employer-blindness is enforced in the database, not in the interface: there is no access path from an employer account to any employee's income, goals or progress. The employer sees seat counts and headcount only, and only above a minimum group size.</p></details>
+      <details><summary>How does Zenda charge?</summary><p>Zenda is a workplace benefit: the employer pays a flat fee per seat, per month. Employees pay nothing, ever. We never take a percentage of anyone's savings and never touch anyone's money.</p></details>
+      <details><summary>Do I connect my bank?</summary><p>No bank login. You enter your numbers in two minutes; nothing connects to your accounts and Zenda cannot move money. The check-in each payday is one tap.</p></details>
+      <details><summary>Is this financial advice?</summary><p>No. Zenda gives general information, not personal financial advice. Every projection carries that disclaimer, and Zenda never names products, funds, brokers or coins and never tells you to buy or sell anything.</p></details>
+      <details><summary>How does the coach work?</summary><p>The coach runs on Claude and uses only the numbers Zenda's engine computed for you — it never does its own arithmetic. It can propose a change to a goal; you apply it with one tap, or ignore it. The app works fully without it.</p></details>
+      <details><summary>What happens when my situation changes?</summary><p>Update anything — rent, pay, a new goal — and the roadmap redraws. Nothing you have saved is lost; your progress stays and only the dates move.</p></details>
+      <details><summary>What if I leave the company?</summary><p>Your account, goals and progress are yours. They stay with you when you change jobs.</p></details>
+      <details><summary>Who is Zenda for?</summary><p>Companies first — a benefit for their people. Universities, NGOs and high schools are next.</p></details>
+    </div>
+  </section>
+
   <div class="spacer" style="height:12vh"></div>
 
 
 </main>
 
+<script>
+(function(){
+  var S = [
+    [["me","I want to buy a $180 concert ticket this week.","7:42 PM"],
+     ["z","That's about one payday of your $260 toward Peru — Peru moves from about 10 January to 17 January 2027. Want to keep January? Set aside $320 instead of $260 on the next three paydays.","7:42 PM"],
+     ["me","Keep January.","7:43 PM"],
+     ["z","Done — $320 on the next three paydays, then back to $260. Peru stays January 2027, and your streak keeps counting.","7:43 PM"],
+     ["p","Keep Peru at January 2027 · +$60 for 3 paydays"]],
+    [["me","My rent just went up $40.","6:10 PM"],
+     ["z","Your engine drops from $260 to $220 a week. Peru moves about two paydays later (early February 2027) and the car from February to June 2029. Or trim fun from $250 to $210 until Peru is funded and every date holds.","6:10 PM"],
+     ["me","Trim fun until Peru.","6:11 PM"],
+     ["z","Done — fun is $210 for the next 12 paydays, then back to $250. All dates unchanged; nothing you've saved moves.","6:11 PM"],
+     ["p","Trim fun to $210 until Peru is funded"]],
+    [["me","I got a $1,000 bonus. What should I do with it?","9:05 AM"],
+     ["z","Put toward Peru it's four fewer paydays — funded by mid-December 2026 instead of January. Your emergency fund then starts earlier too. Want me to move it?","9:05 AM"],
+     ["me","Yes, move it.","9:06 AM"],
+     ["z","Done — Peru is now mid-December 2026. Everything after it moved earlier by four paydays.","9:06 AM"],
+     ["p","Move Peru to December 2026"]]
+  ];
+  var body = document.getElementById("chatBody");
+  function render(i){
+    body.innerHTML = "";
+    S[i].forEach(function(m){
+      var el;
+      if (m[0] === "p") { el = document.createElement("div"); el.className = "prop"; el.innerHTML = "<span>" + m[1] + "</span><b>Applied</b>"; }
+      else { el = document.createElement("div"); el.className = "m" + (m[0] === "me" ? " me" : ""); el.innerHTML = m[1] + '<span class="t">' + m[2] + "</span>"; }
+      body.appendChild(el);
+    });
+  }
+  document.querySelectorAll(".scen-btn").forEach(function(b){
+    b.addEventListener("click", function(){
+      document.querySelectorAll(".scen-btn").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on"); render(Number(b.getAttribute("data-s")));
+    });
+  });
+  render(0);
+  var q = document.getElementById("faqSearch");
+  if (q) q.addEventListener("input", function(){
+    var v = q.value.trim().toLowerCase();
+    document.querySelectorAll(".faq-list details").forEach(function(d){ d.style.display = !v || d.textContent.toLowerCase().indexOf(v) >= 0 ? "" : "none"; });
+  });
+})();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
