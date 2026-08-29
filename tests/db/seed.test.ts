@@ -58,12 +58,19 @@ describe.skipIf(!envReady)("seed state — e2e (layer 2)", () => {
     expect(buffer!.status).toBe("reached");
   });
 
-  it("Peru projection: completion_month = 5, achievable = true", async () => {
+  // Corrected per ZENDA_TEST_SPEC.md's addendum: completion_month = 4 (= January 2027 — the
+  // $1,040 already saved counts per A4 and the buffer is reached at month 1; the no-contribution
+  // D6 vector's 5 does not apply to this seeded state). This holds only because
+  // scripts/reset-e2e.ts recomputes the waterfall a *second* time after marking the buffer
+  // `reached` (T2 fix) — the first pass (buffer still `active`, already over target) gives the
+  // buffer cursor = 0 instead of A4's `max(cursor, reachedAtMonth)`, which understates every
+  // later goal's start_month by one waterfall step.
+  it("Peru projection: completion_month = 4, achievable = true", async () => {
     const peru = goals.find((g) => g.kind === "travel");
     expect(peru).toBeDefined();
     const { data, error } = await e2e.from("goal_projections").select("completion_month, achievable").eq("goal_id", peru!.id).single();
     expect(error).toBeNull();
-    expect(data!.completion_month).toBe(5);
+    expect(data!.completion_month).toBe(4);
     expect(data!.achievable).toBe(true);
   });
 

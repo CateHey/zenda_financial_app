@@ -7,7 +7,12 @@
 // `on delete cascade` FKs in supabase/migrations/0001_zenda.sql), events, and profile, then
 // re-creates them identical to Vinuy's seed state (scripts/seed.ts) — vinuy@ itself is never
 // touched by any test. Also deletes any auth user left over from a signup test
-// (e2e-fresh-*@demo.zenda.app). Prints one line: `e2e reset: <n goals>, <n contributions>`.
+// (e2e-fresh-*@demo.zenda.app). Also resets judge@demo.zenda.app back to the D8 "fresh account"
+// state (orchestrator instruction): its auth user and profile row (org member, Vinuy's numbers)
+// are kept as-is — only its goals (cascades contributions/projections), and events are deleted —
+// so the demo account lands on /discover again after manual verification runs left it with a
+// full goal set. Prints one line: `e2e reset: <n goals>, <n contributions> | judge reset: <n
+// goals deleted>`.
 //
 // Writes tests/fixtures/ids.json (e2e user id, e2e goal ids by kind, judge user id, org id) so
 // layer-2/3 tests can address specific rows without re-deriving them.
@@ -212,12 +217,14 @@ async function main() {
   const { error: insertContributionsError } = await admin.from("contributions").insert(contributionRows);
   if (insertContributionsError) throw insertContributionsError;
 
-  console.log("reset-e2e: running the engine (lib/data/recompute)…");
-  // Computed while the buffer goal is still `active`, same order as scripts/seed.ts, so it gets
-  // a real projection row before being frozen as reached (A4).
-  const projections = await recompute(admin, e2eId);
-  if (projections.length !== 5) {
-    console.warn(`reset-e2e: expected 5 projections, recompute() wrote ${projections.length}`);
+  console.log("reset-e2e: running the engine (lib/data/recompute), pass 1…");
+  // Pass 1, computed while the buffer goal is still `active`, same order as scripts/seed.ts, so
+  // it gets a real projection row before being frozen as reached (A4: a reached goal's row is
+  // "frozen — keep the stored row; do not recompute" once it's reached, so this is buffer's only
+  // chance to get one — the waterfall skips `reached` goals entirely).
+  const pass1 = await recompute(admin, e2eId);
+  if (pass1.length !== 5) {
+    console.warn(`reset-e2e: expected 5 projections from pass 1, recompute() wrote ${pass1.length}`);
   }
 
   console.log("reset-e2e: marking e2e's buffer goal reached…");
@@ -226,6 +233,20 @@ async function main() {
     .update({ status: "reached", reached_at: "2026-09-14T00:00:00.000Z" })
     .eq("id", goalIdByKind.buffer);
   if (reachedError) throw reachedError;
+
+  console.log("reset-e2e: running the engine (lib/data/recompute), pass 2…");
+  // Pass 2, now that the buffer is `reached`: A4 says a reached goal's cursor contribution is
+  // `max(cursor, reachedAtMonth)`, not "completes instantly at month 0" (what pass 1 saw with
+  // the buffer still `active` and already over target) — so every other goal's start_month must
+  // be recomputed against the buffer's real reached_at, or every downstream date is one waterfall
+  // step earlier than the live client-side waterfall() (roadmap/what-if, trade-off, adapt) ever
+  // shows for the exact same numbers. The waterfall skips `reached` goals (no row emitted), so
+  // this pass's upsert only touches travel/emergency/car/home — the buffer's pass-1 row (its
+  // true state while still active) stays untouched, exactly the "frozen" row A4 describes.
+  const pass2 = await recompute(admin, e2eId);
+  if (pass2.length !== 4) {
+    console.warn(`reset-e2e: expected 4 projections from pass 2 (buffer excluded, frozen), recompute() wrote ${pass2.length}`);
+  }
 
   console.log("reset-e2e: re-creating e2e's events…");
   const events: { kind: EventKind; goal_id: string | null; message: string; payload: Record<string, unknown>; seen_at: string | null }[] = [
@@ -253,6 +274,25 @@ async function main() {
     .insert(events.map((e) => ({ user_id: e2eId, kind: e.kind, goal_id: e.goal_id, message: e.message, payload: e.payload, seen_at: e.seen_at })));
   if (insertEventsError) throw insertEventsError;
 
+  // judge@: reset to the D8 "fresh account" state — keep the auth user and profile row (org
+  // member, Vinuy's numbers stand), delete only goals (cascades contributions + projections) and
+  // events, so the account has zero goals and lands on /discover again (D3 redirect rule).
+  let judgeGoalsDeleted = 0;
+  if (judgeId) {
+    console.log("reset-e2e: resetting judge's goals (cascades contributions + projections) and events…");
+    const { data: judgeGoalRows, error: judgeGoalsReadError } = await admin
+      .from("goals")
+      .select("id")
+      .eq("user_id", judgeId);
+    if (judgeGoalsReadError) throw judgeGoalsReadError;
+    judgeGoalsDeleted = (judgeGoalRows ?? []).length;
+
+    const { error: deleteJudgeGoalsError } = await admin.from("goals").delete().eq("user_id", judgeId);
+    if (deleteJudgeGoalsError) throw deleteJudgeGoalsError;
+    const { error: deleteJudgeEventsError } = await admin.from("motivational_events").delete().eq("user_id", judgeId);
+    if (deleteJudgeEventsError) throw deleteJudgeEventsError;
+  }
+
   const fixtures = {
     e2eUserId: e2eId,
     judgeUserId: judgeId,
@@ -263,7 +303,7 @@ async function main() {
   if (!existsSync(fixturesDir)) mkdirSync(fixturesDir, { recursive: true });
   writeFileSync(resolve(fixturesDir, "ids.json"), JSON.stringify(fixtures, null, 2) + "\n", "utf8");
 
-  console.log(`e2e reset: ${GOALS.length} goals, ${CONTRIBUTIONS.length} contributions`);
+  console.log(`e2e reset: ${GOALS.length} goals, ${CONTRIBUTIONS.length} contributions | judge reset: ${judgeGoalsDeleted} goals deleted`);
 }
 
 main().catch((error) => {

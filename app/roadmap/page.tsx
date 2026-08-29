@@ -224,7 +224,7 @@ export default async function RoadmapPage() {
                 {isCurrent && currentProgress ? (
                   <>
                     <div style={{ height: 6, borderRadius: 3, background: "#F2F2F7", overflow: "hidden" }}>
-                      <div style={{ width: `${currentProgress.pctComplete}%`, height: 6, borderRadius: 3, background: dotColor }} />
+                      <div data-testid="pct" style={{ width: `${currentProgress.pctComplete}%`, height: 6, borderRadius: 3, background: dotColor }} />
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: "rgba(60,60,67,0.78)" }}>
                       <span>

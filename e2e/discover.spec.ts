@@ -1,14 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 
 // e2e/discover.spec.ts — ZENDA_TEST_SPEC.md Layer 4, "discover.spec.ts". Run against a fresh
-// signup (D8: judge@ is meant to stay the "shows onboarding" account for the live demo, and
-// nothing resets it between runs — a self-contained UI signup keeps this test from leaving
-// permanent goals on a shared account; e2e@ is reserved for the seeded-persona specs).
+// signup (D8: judge@ is reset to zero goals by scripts/reset-e2e.ts so it keeps showing
+// onboarding for the live demo, but nothing else about it is test-owned — a self-contained UI
+// signup keeps this test from depending on that account's exact state; e2e@ is reserved for the
+// seeded-persona specs).
 //
-// GAP: step 1 ("engine box reads $260 / week live") names `data-testid="engine-value"`. That
-// hook exists on the Roadmap what-if slider (app/roadmap/what-if.tsx) but not on Discover's own
-// engine box (app/discover/discover-client.tsx) — this session cannot add one there (file
-// ownership: app/ non-test files aren't ours to touch). Asserted via visible text instead.
+// T2: `data-testid="engine-value"` added to Discover's own engine box (app/discover/discover-
+// client.tsx) this session (hook-only edit, file ownership §T2) — used below instead of the
+// visible-text workaround T1 needed while that hook didn't exist yet.
 
 async function signUpFresh(page: Page, displayName: string): Promise<string> {
   const email = `e2e-fresh-${Date.now()}-${Math.floor(Math.random() * 10_000)}@demo.zenda.app`;
@@ -45,8 +45,8 @@ test.describe("discover", () => {
     await fillTodayNumbers(page);
 
     // Live: $1,100 - ($400+$120+$70) - $250 = $260/wk capacity (buffer counted back in, D6 §1).
-    await expect(page.locator("body")).toContainText("$260");
-    await expect(page.locator("body")).toContainText("/ week");
+    await expect(page.getByTestId("engine-value")).toContainText("$260");
+    await expect(page.getByTestId("engine-value")).toContainText("/ week");
 
     await page.getByRole("button", { name: "Travel", exact: true }).click();
     // The chip now carries its default amount (A6: Travel -> "A trip", $4,000, +4 months).

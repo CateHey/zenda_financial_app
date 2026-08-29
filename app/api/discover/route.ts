@@ -44,7 +44,16 @@ async function ensureFoundationGoals(
 
   const inserts: Record<string, unknown>[] = [];
 
-  if (!bufferExists) {
+  // Bug 1 fix: the DB check `target_cents > 0` rejects a computed target of 0 (e.g. essentials
+  // 0 -> emergency target 0), which previously 500'd the whole /api/discover submit for a
+  // fresh/blank-numbers account. A foundation goal only gets created when its computed target is
+  // a real amount (>= 100 cents = $1); otherwise it's skipped entirely this submit — it will be
+  // created on a later submit once the underlying number is non-zero. Same guard applied to the
+  // buffer goal's target for symmetry, even though `firstMilestoneCents` is a fixed assumption
+  // that is never 0 in practice.
+  const MIN_FOUNDATION_TARGET_CENTS = 100;
+
+  if (!bufferExists && a.firstMilestoneCents >= MIN_FOUNDATION_TARGET_CENTS) {
     inserts.push({
       user_id: userId,
       kind: "buffer",
@@ -64,16 +73,19 @@ async function ensureFoundationGoals(
         : payCycle === "fortnightly"
           ? Math.round(essentialsCentsPerCycle / 2)
           : Math.round((essentialsCentsPerCycle * 12) / 52);
-    inserts.push({
-      user_id: userId,
-      kind: "emergency",
-      title: "Emergency fund",
-      target_cents: Math.round(weeklyEssentials * a.emergencyWeeks),
-      target_date: monthDate(startedOn, 6),
-      priority: 91,
-      goal_type: "savings_achievable",
-      status: "active",
-    });
+    const emergencyTargetCents = Math.round(weeklyEssentials * a.emergencyWeeks);
+    if (emergencyTargetCents >= MIN_FOUNDATION_TARGET_CENTS) {
+      inserts.push({
+        user_id: userId,
+        kind: "emergency",
+        title: "Emergency fund",
+        target_cents: emergencyTargetCents,
+        target_date: monthDate(startedOn, 6),
+        priority: 91,
+        goal_type: "savings_achievable",
+        status: "active",
+      });
+    }
   }
 
   if (inserts.length === 0) return null;
@@ -200,14 +212,41 @@ export async function POST(request: Request) {
       }
     }
 
+    // Discover is also the "edit my data" screen: a chip that gets deselected on a re-submit
+    // must never destroy a goal that already has check-in history. A goal with >=1 contribution
+    // is paused (excluded from getGoalsWithProjections/waterfall, but its id, contributions and
+    // past goal_projections rows survive — reselecting the chip later starts a fresh goal rather
+    // than reviving this one, which is an acceptable trade-off, but the history itself is never
+    // lost). Only a goal with zero contributions — nothing to lose — is still hard-deleted.
     const idsToRemove = existingChoosable.filter((g) => !keptIds.has(g.id)).map((g) => g.id);
     if (idsToRemove.length > 0) {
-      const { error: deleteError } = await supabase
-        .from("goals")
-        .delete()
-        .in("id", idsToRemove)
-        .eq("user_id", userId);
-      if (deleteError) return NextResponse.json({ error: "internal" }, { status: 500 });
+      const { data: contributionRows, error: contributionsReadError } = await supabase
+        .from("contributions")
+        .select("goal_id")
+        .in("goal_id", idsToRemove);
+      if (contributionsReadError) return NextResponse.json({ error: "internal" }, { status: 500 });
+      const idsWithContributions = new Set(
+        ((contributionRows ?? []) as { goal_id: string }[]).map((r) => r.goal_id),
+      );
+      const idsToPause = idsToRemove.filter((id) => idsWithContributions.has(id));
+      const idsToDelete = idsToRemove.filter((id) => !idsWithContributions.has(id));
+
+      if (idsToPause.length > 0) {
+        const { error: pauseError } = await supabase
+          .from("goals")
+          .update({ status: "paused" })
+          .in("id", idsToPause)
+          .eq("user_id", userId);
+        if (pauseError) return NextResponse.json({ error: "internal" }, { status: 500 });
+      }
+      if (idsToDelete.length > 0) {
+        const { error: deleteError } = await supabase
+          .from("goals")
+          .delete()
+          .in("id", idsToDelete)
+          .eq("user_id", userId);
+        if (deleteError) return NextResponse.json({ error: "internal" }, { status: 500 });
+      }
     }
 
     const foundationError = await ensureFoundationGoals(

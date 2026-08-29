@@ -144,3 +144,41 @@ file (timestamps like `created_at` stay database defaults).
 - A fresh judge account gets `started_on = todayIso()` = 2026-10-20; its goal defaults are relative to that.
 - Remove the variable after the hackathon and the app runs on the real clock with no code change.
 - `D9` env list gains `DEMO_TODAY` (optional; set for the demo). Seed contributions and dates stay absolute.
+
+## A13 · Web layout — the screens on a desktop browser (found in owner testing)
+
+The pages were built as fixed 390×844 phone frames centred on the page. The web is the priority
+platform, so every app screen gets a **responsive shell**: unchanged phone layout below 900px; a
+real web layout at ≥ 900px. Components, copy, tokens and bindings do not change — only placement.
+
+**Shell (`app/components/app-shell.tsx` + `app/web.css`, imported once in `app/layout.tsx`):**
+- Page root: `className="screen"` with `data-web` = `two-col` | `grid` | `center` (per table below).
+  Mobile: `width: 390px; margin: 0 auto; min-height: 100dvh` — **remove every fixed `height: 844`**;
+  content flows. Web (`@media (min-width: 900px)`): `width: auto; max-width: 1120px; padding: 40px`.
+- Web top bar (rendered by the shell at ≥ 900px only; hidden on mobile where the existing in-page top
+  row stays): 64px, wordmark **Zenda** in `--accent` 17px/700 at left, the page eyebrow next to it in
+  `--label-3` uppercase 12px, "Log out" quiet link at right. Mobile keeps the current row.
+- `two-col`: CSS grid `grid-template-columns: minmax(0, 1fr) 420px; gap: 40px; align-items: start`;
+  children carry `data-col="main"` or `data-col="side"`; the side child is `position: sticky; top: 88px`
+  and rendered as a card (`--surface`, `--radius-lg`, `--shadow-card`, padding 24px). Bottom-sheet styling
+  (top radius, upward shadow, drag handle) is mobile-only — hidden at ≥ 900px.
+- `grid`: `grid-template-columns: repeat(2, minmax(0, 1fr))` at ≥ 900px, `repeat(3, …)` at ≥ 1200px,
+  gap 20px, with a full-width footer row for the CTA.
+- `center`: max-width 560px centred (Celebration keeps its full-bleed gradient on `body`-height).
+
+| Screen | `data-web` | main | side / cells |
+|---|---|---|---|
+| Discover | two-col | conversation + goal chips | "Where you are today" sheet + engine box (card) |
+| Achievable | grid | verdict cards as cells | CTA row full width |
+| Prioritise | two-col | ranked list | "Where the $260 goes" bar + note + CTA |
+| Roadmap | two-col | the path (max-width 640) | what-if card |
+| Trade-off | grid (3 cells at ≥ 900px) | option cards as cells | consequence card + buttons full width |
+| Progress | two-col | nudge, progress line, dots, "Life changed?", dimmed path | check-in sheet (card) |
+| Adapt | two-col | numbers sheet (editable) | before/after table + the two choices |
+| Celebration | center | as is | — |
+| Admin | grid | stat tiles as cells | sentence full width |
+| Login / Signup | center | the form as a 420px card | — |
+
+Touch targets stay ≥ 44px; type sizes unchanged (the phone type scale reads correctly at desktop
+distances for this density); the `desktop` Playwright project (1280×800) must still pass every spec,
+and `document.documentElement.scrollWidth <= innerWidth` on every page.

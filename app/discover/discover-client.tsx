@@ -55,9 +55,63 @@ function firstOfMonthPlus(baseIso: string, monthsToAdd: number): string {
   return `${ny}-${String(nm + 1).padStart(2, "0")}-01`;
 }
 
+// Bug 3: a blank money input is a valid "0", never NaN — `Number("")` is already 0, but the
+// `Number.isFinite` guard also protects against a stray non-numeric string surviving browser
+// autofill/paste. Negative entries clamp to 0 too (money fields are never negative here).
 function toCents(v: string): number {
   const n = Number(v);
   return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : 0;
+}
+
+/** Same blank/NaN-safe treatment as toCents, for the debt-rate percentage -> basis points. */
+function toBps(v: string): number {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) : 0;
+}
+
+// Bug 2 (D3/D5 error copy): map an /api/discover error response onto the exact copy the spec
+// calls for. `showLoginLink` tells the render side to append a "Log in" link (401 only).
+type SubmitError = { message: string; showLoginLink?: boolean };
+
+const DISCOVER_FIELD_LABELS: Record<string, string> = {
+  freedom_text: "Freedom text",
+  pay_cycle: "Pay cycle",
+  take_home_cents: "Income",
+  essentials_cents: "Essentials",
+  lifestyle_cents: "Fun",
+  buffer_cents: "Buffer",
+  savings_cents: "Savings",
+  debt_cents: "Debt",
+  debt_rate_bps: "Debt rate",
+  risk_comfort: "Risk comfort",
+  goals: "Goals",
+  kind: "type",
+  title: "title",
+  target_cents: "target amount",
+  target_date: "target date",
+  starting_balance_cents: "starting balance",
+  id: "id",
+};
+
+/** "essentials_cents" -> "Essentials"; "goals.0.target_cents" -> "Goal 1 target amount". */
+function humaniseIssuePath(path: Array<string | number>): string {
+  if (path.length === 0) return "That";
+  if (path[0] === "goals") {
+    const index = typeof path[1] === "number" ? path[1] + 1 : null;
+    const field = path[path.length - 1];
+    const label = typeof field === "string" ? (DISCOVER_FIELD_LABELS[field] ?? field) : "value";
+    return index !== null ? `Goal ${index} ${label}` : `Goal ${label}`;
+  }
+  const field = path[0];
+  return typeof field === "string" ? (DISCOVER_FIELD_LABELS[field] ?? field) : "That";
+}
+
+/** D3/D5: "400 validation -> 'Check the numbers - <first Zod issue message, humanised>'." */
+function buildValidationError(issues: unknown): string {
+  const first = Array.isArray(issues) ? (issues[0] as { path?: Array<string | number>; message?: string } | undefined) : undefined;
+  if (!first?.message) return "Check the numbers and try again.";
+  const label = humaniseIssuePath(first.path ?? []);
+  return `Check the numbers — ${label}: ${first.message}`;
 }
 
 const rowStyle: CSSProperties = {
@@ -118,7 +172,7 @@ export function DiscoverClient({
     initialProfile ? String(initialProfile.debtRateBps / 100) : "",
   );
 
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<SubmitError | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const currency = initialProfile?.currency ?? "AUD";
@@ -179,12 +233,17 @@ export function DiscoverClient({
       return { id: g.id, kind: k, title: g.title, target_cents: g.targetCents, target_date: g.targetDate };
     });
     if (goalsPayload.length === 0) {
-      setSubmitError("Pick at least one place to go.");
+      setSubmitError({ message: "Pick at least one place to go." });
       return;
     }
     setSubmitting(true);
+
+    // Bug 2 fix: the fetch itself failing (offline, DNS, CORS, etc.) is the only case that gets
+    // the generic "Couldn't reach Zenda" copy — a response that came back with a non-2xx status
+    // is reached-and-answered, so it gets the specific D3/D5 copy for its status code below.
+    let response: Response;
     try {
-      const response = await fetch("/api/discover", {
+      response = await fetch("/api/discover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -196,22 +255,37 @@ export function DiscoverClient({
           buffer_cents: toCents(bufferDollars),
           savings_cents: toCents(savingsDollars),
           debt_cents: toCents(debtDollars),
-          debt_rate_bps: Math.max(0, Math.round((Number(debtRatePercent) || 0) * 100)),
+          debt_rate_bps: toBps(debtRatePercent),
           risk_comfort: "medium",
           goals: goalsPayload,
         }),
       });
-      const data = await response.json().catch(() => null);
-      if (!response.ok || !data?.ok) {
-        setSubmitError("Couldn't reach Zenda. Try again.");
-        setSubmitting(false);
-        return;
-      }
-      router.push(data.redirect ?? "/achievable");
-    } catch {
-      setSubmitError("Couldn't reach Zenda. Try again.");
+    } catch (err) {
+      console.error("POST /api/discover — network/fetch failure:", err);
+      setSubmitError({ message: "Couldn't reach Zenda. Try again." });
       setSubmitting(false);
+      return;
     }
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok || !data?.ok) {
+      // D5: every handler's error body carries `error` (and 400 carries `issues`) — always log
+      // both for debugging, whether or not the copy below surfaces the detail to the person.
+      console.error("POST /api/discover", response.status, data?.error, data?.issues);
+      if (response.status === 400) {
+        setSubmitError({ message: buildValidationError(data?.issues) });
+      } else if (response.status === 401) {
+        setSubmitError({ message: "Your session ended. Log in again.", showLoginLink: true });
+      } else {
+        // 500, 404, and anything else unexpected — D3's server-side copy.
+        setSubmitError({ message: "Something went wrong on our side. Try again in a moment." });
+      }
+      setSubmitting(false);
+      return;
+    }
+
+    router.push(data.redirect ?? "/achievable");
   }
 
   return (
@@ -328,7 +402,17 @@ export function DiscoverClient({
       </div>
 
       {submitError && (
-        <p style={{ margin: "10px 20px 0 20px", fontSize: 13, color: "var(--danger)" }}>{submitError}</p>
+        <p style={{ margin: "10px 20px 0 20px", fontSize: 13, color: "var(--danger)" }}>
+          {submitError.message}
+          {submitError.showLoginLink && (
+            <>
+              {" "}
+              <a href="/login" style={{ color: "#5856D6", fontWeight: 600, textDecoration: "underline" }}>
+                Log in
+              </a>
+            </>
+          )}
+        </p>
       )}
 
       {/* where you are today */}
@@ -368,42 +452,43 @@ export function DiscoverClient({
         <div style={{ display: "flex", flexDirection: "column" }}>
           <label style={rowStyle}>
             <span style={{ fontSize: 15, fontWeight: 600 }}>Income</span>
-            <input type="number" inputMode="numeric" min={0} value={incomeDollars} onChange={(e) => setIncomeDollars(e.target.value)} style={{ ...rowInputStyle, fontWeight: 600 }} />
+            <input type="number" inputMode="numeric" min={0} placeholder="0" value={incomeDollars} onChange={(e) => setIncomeDollars(e.target.value)} style={{ ...rowInputStyle, fontWeight: 600 }} />
           </label>
           <label style={rowStyle}>
             <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>Rent</span>
-            <input type="number" inputMode="numeric" min={0} value={rentDollars} onChange={(e) => setRentDollars(e.target.value)} style={rowInputStyle} />
+            <input type="number" inputMode="numeric" min={0} placeholder="0" value={rentDollars} onChange={(e) => setRentDollars(e.target.value)} style={rowInputStyle} />
           </label>
           <label style={rowStyle}>
             <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>Food</span>
-            <input type="number" inputMode="numeric" min={0} value={foodDollars} onChange={(e) => setFoodDollars(e.target.value)} style={rowInputStyle} />
+            <input type="number" inputMode="numeric" min={0} placeholder="0" value={foodDollars} onChange={(e) => setFoodDollars(e.target.value)} style={rowInputStyle} />
           </label>
           <label style={rowStyle}>
             <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>Petrol · internet</span>
-            <input type="number" inputMode="numeric" min={0} value={petrolDollars} onChange={(e) => setPetrolDollars(e.target.value)} style={rowInputStyle} />
+            <input type="number" inputMode="numeric" min={0} placeholder="0" value={petrolDollars} onChange={(e) => setPetrolDollars(e.target.value)} style={rowInputStyle} />
           </label>
           <label style={rowStyle}>
             <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>Fun</span>
-            <input type="number" inputMode="numeric" min={0} value={funDollars} onChange={(e) => setFunDollars(e.target.value)} style={rowInputStyle} />
+            <input type="number" inputMode="numeric" min={0} placeholder="0" value={funDollars} onChange={(e) => setFunDollars(e.target.value)} style={rowInputStyle} />
           </label>
           <label style={rowStyle}>
             <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>Buffer</span>
-            <input type="number" inputMode="numeric" min={0} value={bufferDollars} onChange={(e) => setBufferDollars(e.target.value)} style={rowInputStyle} />
+            <input type="number" inputMode="numeric" min={0} placeholder="0" value={bufferDollars} onChange={(e) => setBufferDollars(e.target.value)} style={rowInputStyle} />
           </label>
           <label style={rowStyle}>
             <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>Savings</span>
-            <input type="number" inputMode="numeric" min={0} value={savingsDollars} onChange={(e) => setSavingsDollars(e.target.value)} style={rowInputStyle} />
+            <input type="number" inputMode="numeric" min={0} placeholder="0" value={savingsDollars} onChange={(e) => setSavingsDollars(e.target.value)} style={rowInputStyle} />
           </label>
           <label style={{ ...rowStyle, borderBottom: "none" }}>
             <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>Debt</span>
             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input type="number" inputMode="numeric" min={0} value={debtDollars} onChange={(e) => setDebtDollars(e.target.value)} style={rowInputStyle} />
+              <input type="number" inputMode="numeric" min={0} placeholder="0" value={debtDollars} onChange={(e) => setDebtDollars(e.target.value)} style={rowInputStyle} />
               <span style={{ color: "rgba(60,60,67,0.6)", fontSize: 13 }}>·</span>
               <input
                 type="number"
                 inputMode="decimal"
                 min={0}
                 step={0.1}
+                placeholder="0"
                 value={debtRatePercent}
                 onChange={(e) => setDebtRatePercent(e.target.value)}
                 style={{ ...rowInputStyle, width: 44 }}
@@ -417,7 +502,7 @@ export function DiscoverClient({
         <div style={{ marginTop: 6, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, padding: "14px 18px", borderRadius: 14, background: "#5856D6", color: "#FFFFFF" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", opacity: 0.85 }}>Your engine</span>
-            <span style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
+            <span data-testid="engine-value" style={{ fontSize: 30, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.05 }}>
               {formatMoney(capacityPerCycleCents, currency)}
               <span style={{ fontSize: 15, fontWeight: 500, opacity: 0.85 }}> / {CYCLE_WORD[payCycle]}</span>
             </span>

@@ -1,17 +1,13 @@
 // lib/engine/streak.test.ts — ZENDA_TEST_SPEC.md Layer 1, "streak.test.ts" (A3). The spec names
-// a `lib/engine/streak.ts` module; the real export is `streak()` in `lib/engine/progress.ts` —
-// imported from there per the spec's instruction to adapt names to the real exports.
-//
-// GAP: the "already checked in this cycle" row has no product export to test against — it's the
-// Progress screen's own derived boolean (D4 row 6, A3), and the Progress screen (task 8) hasn't
-// landed yet (this session cannot touch app/ or non-test lib/ files to add one). The cases below
-// exercise a local helper that implements A3's stated formula verbatim
-// ("a contribution exists with occurred_on >= today - (cycle-1) days") so the expected behaviour
-// is pinned; once task 8 exports the real check, point these assertions at it instead.
+// a `lib/engine/streak.ts` module; the real exports are `streak()` and `checkedInThisCycle()` in
+// `lib/engine/progress.ts` — imported from there per the spec's instruction to adapt names to the
+// real exports. (T1's version of this file exercised a local reimplementation of A3's formula,
+// noting `checkedInThisCycle` didn't have a product export yet at the time; task 8 has since
+// landed it in lib/engine/progress.ts, so this T2 pass points the assertions at the real export.)
 
 import { describe, expect, it } from "vitest";
 import type { EngineContribution } from "./types";
-import { streak } from "./progress";
+import { checkedInThisCycle, streak } from "./progress";
 
 function addDays(iso: string, delta: number): string {
   const [y, m, d] = iso.split("-").map(Number);
@@ -19,12 +15,6 @@ function addDays(iso: string, delta: number): string {
   date.setUTCDate(date.getUTCDate() + delta);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
-}
-
-/** A3, verbatim — see the GAP note above. */
-function checkedInThisCycle(contributions: EngineContribution[], todayIso: string, cycleDays: number): boolean {
-  const threshold = addDays(todayIso, -(cycleDays - 1));
-  return contributions.some((c) => c.occurredOn >= threshold);
 }
 
 const TODAY = "2026-10-20";
@@ -74,19 +64,19 @@ describe("streak — A3", () => {
   });
 });
 
-describe("already checked in this cycle — A3 formula (see GAP note at the top of this file)", () => {
+describe("already checked in this cycle — A3 (lib/engine/progress.ts checkedInThisCycle)", () => {
   it("latest today, weekly -> true", () => {
     const contributions: EngineContribution[] = [{ goalId: "g", amountCents: 26_000, occurredOn: TODAY }];
-    expect(checkedInThisCycle(contributions, TODAY, 7)).toBe(true);
+    expect(checkedInThisCycle(contributions, 7, TODAY)).toBe(true);
   });
 
   it("latest 7 days ago, weekly -> false", () => {
     const contributions: EngineContribution[] = [{ goalId: "g", amountCents: 26_000, occurredOn: addDays(TODAY, -7) }];
-    expect(checkedInThisCycle(contributions, TODAY, 7)).toBe(false);
+    expect(checkedInThisCycle(contributions, 7, TODAY)).toBe(false);
   });
 
   it("latest 6 days ago, weekly -> true", () => {
     const contributions: EngineContribution[] = [{ goalId: "g", amountCents: 26_000, occurredOn: addDays(TODAY, -6) }];
-    expect(checkedInThisCycle(contributions, TODAY, 7)).toBe(true);
+    expect(checkedInThisCycle(contributions, 7, TODAY)).toBe(true);
   });
 });
