@@ -4,6 +4,7 @@ import { currentUserId, supabaseServer } from "@/lib/supabase/server";
 import { recompute } from "@/lib/data/recompute";
 import { assumptionsToEngine } from "@/lib/data/queries";
 import { capacityMonthlyCents, monthDate, monthIndex } from "@/lib/engine/rates";
+import { todayIso } from "@/lib/engine/today";
 import { goalType as classifyGoalType } from "@/lib/engine/waterfall";
 import type { Assumptions, EngineProfile } from "@/lib/engine/types";
 import { DISCLAIMER } from "@/lib/engine/types";
@@ -22,14 +23,17 @@ import { runDiscoverReflection, runRoadmapCopy } from "@/lib/ai/run";
 
 const CHOOSABLE_KINDS = CHOOSABLE_GOAL_KINDS;
 
-/** A5: ensure the buffer + emergency foundation goals exist, unless one of that kind already does. */
+/** A5: the buffer + emergency foundation goals exist and stay reachable. Their dates are derived
+ *  from today and the person's current capacity (the month they land at that capacity), so a
+ *  foundation is never "out of reach" and never dated in the past. Re-applied on every submit. */
 async function ensureFoundationGoals(
   supabase: SupabaseClient,
   userId: string,
-  startedOn: string,
+  _startedOn: string,
   essentialsCentsPerCycle: number,
   payCycle: PayCycle,
   a: Assumptions,
+  capacityMonthly: number,
 ): Promise<unknown> {
   const { data: foundationRows, error: readError } = await supabase
     .from("goals")
@@ -38,54 +42,39 @@ async function ensureFoundationGoals(
     .in("kind", ["buffer", "emergency"]);
   if (readError) return readError;
   const rows = (foundationRows ?? []) as Pick<GoalRow, "id" | "kind" | "status">[];
+  const buffer = rows.find((g) => g.kind === "buffer");
+  const emergency = rows.find((g) => g.kind === "emergency");
 
-  const bufferExists = rows.some((g) => g.kind === "buffer");
-  const emergencyExists = rows.some((g) => g.kind === "emergency");
+  // A computed target of 0 would violate the DB check (target_cents > 0): skip, never 500.
+  const MIN_FOUNDATION_TARGET_CENTS = 100;
+  const today = todayIso();
+  const weeklyEssentials =
+    payCycle === "weekly"
+      ? essentialsCentsPerCycle
+      : payCycle === "fortnightly"
+        ? Math.round(essentialsCentsPerCycle / 2)
+        : Math.round((essentialsCentsPerCycle * 12) / 52);
+  const emergencyTargetCents = Math.round(weeklyEssentials * a.emergencyWeeks);
+  const monthsFor = (target: number, floor: number) =>
+    capacityMonthly > 0 && Number.isFinite(capacityMonthly) ? Math.max(floor, Math.ceil(target / capacityMonthly)) : 12;
+  const bufferMonths = monthsFor(a.firstMilestoneCents, 1);
+  const bufferDate = monthDate(today, bufferMonths);
+  const emergencyDate = monthDate(today, bufferMonths + monthsFor(emergencyTargetCents, 2));
 
   const inserts: Record<string, unknown>[] = [];
 
-  // Bug 1 fix: the DB check `target_cents > 0` rejects a computed target of 0 (e.g. essentials
-  // 0 -> emergency target 0), which previously 500'd the whole /api/discover submit for a
-  // fresh/blank-numbers account. A foundation goal only gets created when its computed target is
-  // a real amount (>= 100 cents = $1); otherwise it's skipped entirely this submit — it will be
-  // created on a later submit once the underlying number is non-zero. Same guard applied to the
-  // buffer goal's target for symmetry, even though `firstMilestoneCents` is a fixed assumption
-  // that is never 0 in practice.
-  const MIN_FOUNDATION_TARGET_CENTS = 100;
-
-  if (!bufferExists && a.firstMilestoneCents >= MIN_FOUNDATION_TARGET_CENTS) {
-    inserts.push({
-      user_id: userId,
-      kind: "buffer",
-      title: "Breathing room",
-      target_cents: a.firstMilestoneCents,
-      target_date: monthDate(startedOn, 1),
-      priority: 90,
-      goal_type: "savings_achievable",
-      status: "active",
-    });
+  if (!buffer && a.firstMilestoneCents >= MIN_FOUNDATION_TARGET_CENTS) {
+    inserts.push({ user_id: userId, kind: "buffer", title: "Breathing room", target_cents: a.firstMilestoneCents, target_date: bufferDate, priority: 90, goal_type: "savings_achievable", status: "active" });
+  } else if (buffer && buffer.status === "active") {
+    const { error } = await supabase.from("goals").update({ target_date: bufferDate }).eq("id", buffer.id).eq("user_id", userId);
+    if (error) return error;
   }
 
-  if (!emergencyExists) {
-    const weeklyEssentials =
-      payCycle === "weekly"
-        ? essentialsCentsPerCycle
-        : payCycle === "fortnightly"
-          ? Math.round(essentialsCentsPerCycle / 2)
-          : Math.round((essentialsCentsPerCycle * 12) / 52);
-    const emergencyTargetCents = Math.round(weeklyEssentials * a.emergencyWeeks);
-    if (emergencyTargetCents >= MIN_FOUNDATION_TARGET_CENTS) {
-      inserts.push({
-        user_id: userId,
-        kind: "emergency",
-        title: "Emergency fund",
-        target_cents: emergencyTargetCents,
-        target_date: monthDate(startedOn, 6),
-        priority: 91,
-        goal_type: "savings_achievable",
-        status: "active",
-      });
-    }
+  if (!emergency && emergencyTargetCents >= MIN_FOUNDATION_TARGET_CENTS) {
+    inserts.push({ user_id: userId, kind: "emergency", title: "Emergency fund", target_cents: emergencyTargetCents, target_date: emergencyDate, priority: 91, goal_type: "savings_achievable", status: "active" });
+  } else if (emergency && emergency.status === "active" && emergencyTargetCents >= MIN_FOUNDATION_TARGET_CENTS) {
+    const { error } = await supabase.from("goals").update({ target_cents: emergencyTargetCents, target_date: emergencyDate }).eq("id", emergency.id).eq("user_id", userId);
+    if (error) return error;
   }
 
   if (inserts.length === 0) return null;
@@ -249,6 +238,9 @@ export async function POST(request: Request) {
       }
     }
 
+    const perCycleCapacity = Math.max(0, body.take_home_cents - body.essentials_cents - body.lifestyle_cents);
+    const capacityMonthly =
+      body.pay_cycle === "weekly" ? Math.round((perCycleCapacity * 52) / 12) : body.pay_cycle === "fortnightly" ? Math.round((perCycleCapacity * 26) / 12) : perCycleCapacity;
     const foundationError = await ensureFoundationGoals(
       supabase,
       userId,
@@ -256,6 +248,7 @@ export async function POST(request: Request) {
       body.essentials_cents,
       body.pay_cycle,
       a,
+      capacityMonthly,
     );
     if (foundationError) return NextResponse.json({ error: "internal" }, { status: 500 });
 
