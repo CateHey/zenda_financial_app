@@ -98,6 +98,17 @@
   .scard b{font-size:17px;font-weight:600}
   .scard p{margin:0;font-size:14px;line-height:1.4;color:rgba(44,44,50,.85)}
   .scard .num{font-size:22px;font-weight:700;letter-spacing:-.02em;color:#10265F}
+
+  .screens .lead{margin:0;max-width:60ch;text-align:center;font-size:17px;line-height:1.5;color:rgba(44,44,50,.85)}
+  .shots{display:flex;gap:18px;width:100%;max-width:1240px;overflow-x:auto;padding:12px 4px 18px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .shot{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;scroll-snap-align:start}
+  .shot .frame{width:234px;height:506px;overflow:hidden;border-radius:22px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.05),0 12px 32px rgba(0,0,0,.12);position:relative;transition:transform .3s cubic-bezier(.16,1,.3,1)}
+  .shot:hover .frame{transform:translateY(-4px)}
+  .shot iframe{width:390px;height:844px;border:0;transform:scale(.6);transform-origin:top left;pointer-events:none;display:block}
+  .shot .n{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5856D6;margin-top:6px}
+  .shot b{font-size:14px;font-weight:600}
+  .screens .cta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+  #ctaStart2{background:var(--accent);color:#fff;font-family:var(--font);font-size:17px;font-weight:600;border:0;border-radius:999px;padding:16px 34px;text-decoration:none;display:inline-block}
 </style>
 </head>
 <body>
@@ -145,19 +156,44 @@
     </div>
   </section>
 
-  <section class="screens">
-    <h2>One path, three layers, every screen honest.</h2>
-    <div class="grid">
-      <div class="scard"><span class="n">1 · Discover</span><b>Where you are, where you want to go</b><p>Two minutes. Chat for the why, a keypad for the numbers. Ends on one number.</p><span class="num">$260 / week</span></div>
-      <div class="scard"><span class="n">2 · What's achievable</span><b>Honest distances, real levers</b><p>Each goal gets a verdict and the number that would change it.</p><span class="num">needs $481 / wk</span></div>
-      <div class="scard"><span class="n">3 · Prioritise</span><b>When goals compete</b><p>Rank them; the engine follows your order and the dates follow the engine.</p><span class="num">Home › Car › Peru</span></div>
-      <div class="scard"><span class="n">4 · Roadmap</span><b>Today at one end, the goal at the other</b><p>Milestones with dates, a what-if slider that moves every date live.</p><span class="num">Peru · Jan 2027</span></div>
-      <div class="scard"><span class="n">5 · Trade-off</span><b>Real options, real dates</b><p>$25k in 2029, $50k in 2030 — and what each does to the house.</p><span class="num">$25,000 · 2029</span></div>
-      <div class="scard"><span class="n">6 · Progress</span><b>One question per payday</b><p>Did you put $260 aside? Yes · Partly · Not this time. Partly counts.</p><span class="num">6 paydays in a row</span></div>
-      <div class="scard"><span class="n">7 · Life changed</span><b>The roadmap redraws</b><p>Rent went up $40 — before and after, and a choice about what to protect.</p><span class="num">$260 → $220</span></div>
-      <div class="scard"><span class="n">8 · Goal reached</span><b>The one loud moment</b><p>Peru, funded. Your $260 a week now flows to the next goal, automatically.</p><span class="num">$4,000</span></div>
+  <section class="screens" id="screens">
+    <h2>This is the product. Every screen, honest numbers.</h2>
+    <p class="lead">Vinuy, 23, earns $1,100 a week and wants a house, a car and Peru. Here is what Zenda shows him — click any screen to open it.</p>
+    <div class="shots">
+      <a class="shot" href="/screens/discover.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/discover.html" loading="lazy" title="1 · Discover" tabindex="-1"></iframe></div>
+        <span class="n">1 · Discover</span><b>Where you are, where you want to go</b>
+      </a>
+      <a class="shot" href="/screens/achievable.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/achievable.html" loading="lazy" title="2 · What's achievable" tabindex="-1"></iframe></div>
+        <span class="n">2 · What's achievable</span><b>Honest distances, real levers</b>
+      </a>
+      <a class="shot" href="/screens/prioritise.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/prioritise.html" loading="lazy" title="3 · Prioritise" tabindex="-1"></iframe></div>
+        <span class="n">3 · Prioritise</span><b>When goals compete</b>
+      </a>
+      <a class="shot" href="/screens/roadmap.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/roadmap.html" loading="lazy" title="4 · Roadmap" tabindex="-1"></iframe></div>
+        <span class="n">4 · Roadmap</span><b>Today at one end, the goal at the other</b>
+      </a>
+      <a class="shot" href="/screens/tradeoff.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/tradeoff.html" loading="lazy" title="5 · Trade-off" tabindex="-1"></iframe></div>
+        <span class="n">5 · Trade-off</span><b>Real options, real dates</b>
+      </a>
+      <a class="shot" href="/screens/progress.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/progress.html" loading="lazy" title="6 · Progress" tabindex="-1"></iframe></div>
+        <span class="n">6 · Progress</span><b>One question per payday</b>
+      </a>
+      <a class="shot" href="/screens/adapt.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/adapt.html" loading="lazy" title="7 · Life changed" tabindex="-1"></iframe></div>
+        <span class="n">7 · Life changed</span><b>The roadmap redraws</b>
+      </a>
+      <a class="shot" href="/screens/celebration.html" target="_blank" rel="noopener">
+        <div class="frame"><iframe src="/screens/celebration.html" loading="lazy" title="8 · Goal reached" tabindex="-1"></iframe></div>
+        <span class="n">8 · Goal reached</span><b>The one loud moment</b>
+      </a>
     </div>
-    <div class="cta"><a href="/login?demo=vinuy" class="ghost">See every screen with Vinuy's data →</a></div>
+    <div class="cta"><a id="ctaStart2" href="/signup">Start your journey 🚀</a><a href="/login?demo=vinuy" class="ghost">See Vinuy's journey</a></div>
   </section>
 
   <section class="beat r"><div class="card">
@@ -209,7 +245,7 @@
   var started = false;
   var pendingStart = false;
   var intro = document.getElementById("intro");
-  function closeIntro(){ intro.classList.add("gone"); try { sessionStorage.setItem("zintro", "1"); } catch (e) {} if (pendingStart) { pendingStart = false; startScene(); } }
+  function closeIntro(ev){ intro.classList.add("gone"); if (ev && ev.currentTarget && ev.currentTarget.id === "introYes") { setTimeout(function(){ var el = document.getElementById("screens"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 350); } try { sessionStorage.setItem("zintro", "1"); } catch (e) {} if (pendingStart) { pendingStart = false; startScene(); } }
   var introSeen = false; try { introSeen = !!sessionStorage.getItem("zintro"); } catch (e) {}
   if (introSeen) intro.classList.add("gone");
   document.getElementById("introYes").addEventListener("click", closeIntro);

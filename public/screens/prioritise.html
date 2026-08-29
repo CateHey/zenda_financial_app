@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif; color: #000000; background: #FFFFFF; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+    a { color: #5856D6; } a:hover { color: #3F3DB8; }
+    button { font-family: inherit; }
+  </style>
+<div style="width: 390px; height: 844px; background: #FFFFFF; position: relative; overflow: hidden; display: flex; flex-direction: column; box-sizing: border-box;">
+
+  <div style="padding: 20px 20px 0 20px; display: flex; flex-direction: column; gap: 6px;">
+    <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5856D6;">Prioritise</span>
+    <span style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1;">When goals compete, which wins?</span>
+    <span style="font-size: 15px; line-height: 1.4; color: rgba(60,60,67,0.78);">Drag to reorder. The engine follows your order; the dates follow the engine.</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding: 20px 20px 0 20px;">
+
+    <div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);">
+      <span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 999px; background: #AF52DE; color: #FFFFFF; font-size: 14px; font-weight: 700; flex-shrink: 0;">1</span>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+        <span style="font-size: 17px; font-weight: 600;">Home · $1M</span>
+        <span style="font-size: 13px; line-height: 1.3; color: rgba(60,60,67,0.78);">Gets the whole engine from 2029. Matters most, so it gets most.</span>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C7C7CC" stroke-width="2" stroke-linecap="round"><path d="M5 8h14"></path><path d="M5 12h14"></path><path d="M5 16h14"></path></svg>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);">
+      <span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 999px; background: #5856D6; color: #FFFFFF; font-size: 14px; font-weight: 700; flex-shrink: 0;">2</span>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+        <span style="font-size: 17px; font-weight: 600;">Car · $25k</span>
+        <span style="font-size: 13px; line-height: 1.3; color: rgba(60,60,67,0.78);">Engine from March 2027 to January 2029.</span>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C7C7CC" stroke-width="2" stroke-linecap="round"><path d="M5 8h14"></path><path d="M5 12h14"></path><path d="M5 16h14"></path></svg>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);">
+      <span style="display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 999px; background: #007AFF; color: #FFFFFF; font-size: 14px; font-weight: 700; flex-shrink: 0;">3</span>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+        <span style="font-size: 17px; font-weight: 600;">Peru · $4k</span>
+        <span style="font-size: 13px; line-height: 1.3; color: rgba(60,60,67,0.78);">Goes first anyway: small and soon. Done by January.</span>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C7C7CC" stroke-width="2" stroke-linecap="round"><path d="M5 8h14"></path><path d="M5 12h14"></path><path d="M5 16h14"></path></svg>
+    </div>
+  </div>
+
+  <!-- where the engine goes, over time -->
+  <div style="display: flex; flex-direction: column; gap: 10px; padding: 24px 20px 0 20px;">
+    <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(60,60,67,0.78);">Where the $260 goes</span>
+    <div style="display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 2px;">
+      <span style="width: 6%; background: #007AFF;"></span>
+      <span style="width: 4%; background: #0057D9;"></span>
+      <span style="width: 26%; background: #5856D6;"></span>
+      <span style="width: 64%; background: linear-gradient(90deg, #8450DA, #AF52DE);"></span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(60,60,67,0.78);">
+      <span>Peru</span><span>Buffer</span><span>Car</span><span>Home deposit</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600;">
+      <span>Sep 2026</span><span>2027</span><span>2029</span><span>2033</span>
+    </div>
+  </div>
+
+  <div style="margin: 20px 20px 0 20px; padding: 14px 16px; border-radius: 14px; background: #F2F2F7; font-size: 14px; line-height: 1.4; color: rgba(60,60,67,0.85);">
+    Priority order and date order are different on purpose. Peru is first because it's small and soon; the house is first because it matters most.
+  </div>
+
+  <div style="margin-top: auto; padding: 0 20px 20px 20px;">
+    <button style="width: 100%; height: 52px; border: 0; border-radius: 999px; background: #5856D6; color: #FFFFFF; font-size: 17px; font-weight: 600; cursor: pointer;">Build my roadmap</button>
+  </div>
+</div>
+</body>
+</html>
