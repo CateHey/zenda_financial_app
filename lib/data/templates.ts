@@ -57,3 +57,17 @@ export function templateNudge(
 ): string {
   return `${formatMoney(perCycleCents, currency)} is ready for ${currentGoalTitle}. ${paydaysRemaining} paydays to go.`;
 }
+
+/** templateTradeOff — a `trade_off` event's message (POST /api/goals/[id]/adjust), matching the
+ * shape of the seed script's own trade_off event copy: "Chose $X for the <kind>, landing <Month
+ * YYYY> instead of $Y by <Month YYYY>." */
+export function templateTradeOff(
+  kind: string,
+  afterCents: number,
+  afterDate: string,
+  beforeCents: number,
+  beforeDate: string,
+  currency: string,
+): string {
+  return `Chose ${formatMoney(afterCents, currency)} for the ${kind}, landing ${monthYearLabel(afterDate)} instead of ${formatMoney(beforeCents, currency)} by ${monthYearLabel(beforeDate)}.`;
+}
