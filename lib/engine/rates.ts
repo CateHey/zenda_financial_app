@@ -2,6 +2,12 @@
 
 import type { Assumptions, EngineProfile, PayCycle } from "./types";
 
+/** Guard: a non-finite (NaN/±Infinity) number becomes `fallback` instead of propagating through
+ * every downstream calculation (D6 robustness pass: "NaN/Infinity -> clamp/null"). */
+function finiteOr(n: number, fallback: number): number {
+  return Number.isFinite(n) ? n : fallback;
+}
+
 /** Per-pay-cycle amount -> monthly amount (D6 preamble: weekly x52/12, fortnightly x26/12). */
 function monthlyFactor(payCycle: PayCycle): number {
   if (payCycle === "weekly") return 52 / 12;
@@ -25,12 +31,17 @@ export function cycleDays(payCycle: PayCycle): number {
  * "surplus + buffer line, banked" derivation.
  */
 export function capacityMonthlyCents(profile: EngineProfile): number {
-  const perCycle =
-    Math.max(
-      0,
-      profile.takeHomeCents - profile.essentialsCents - profile.lifestyleCents - profile.bufferCents,
-    ) + profile.bufferCents;
-  return Math.round(perCycle * monthlyFactor(profile.payCycle));
+  // NaN/Infinity guard: a corrupted or non-numeric profile field (e.g. a bigint that came back
+  // as an unparsable string) clamps to 0 rather than turning the whole result NaN.
+  const takeHome = finiteOr(profile.takeHomeCents, 0);
+  const essentials = finiteOr(profile.essentialsCents, 0);
+  const lifestyle = finiteOr(profile.lifestyleCents, 0);
+  const buffer = finiteOr(profile.bufferCents, 0);
+  const perCycle = Math.max(0, takeHome - essentials - lifestyle - buffer) + buffer;
+  // capacity <= 0 (e.g. lifestyle spend exceeds take-home) is a legitimate, already-handled
+  // state — Math.max(0, ...) floors the surplus above; the final round/finite guard below only
+  // catches an otherwise-impossible non-finite result from a bad monthlyFactor/perCycle input.
+  return finiteOr(Math.round(perCycle * monthlyFactor(profile.payCycle)), 0);
 }
 
 /**
@@ -39,10 +50,15 @@ export function capacityMonthlyCents(profile: EngineProfile): number {
  * special-casing is needed for the edges (glideRate(glideCashBelowMonths) === cashRateAnnual).
  */
 export function glideRate(monthsToHorizon: number, a: Assumptions): number {
-  if (monthsToHorizon < a.glideCashBelowMonths) return a.cashRateAnnual;
-  if (monthsToHorizon >= a.glideGrowthAboveMonths) return a.growthRateAnnual;
+  const horizon = finiteOr(monthsToHorizon, 0);
+  if (horizon < a.glideCashBelowMonths) return a.cashRateAnnual;
+  if (horizon >= a.glideGrowthAboveMonths) return a.growthRateAnnual;
   const span = a.glideGrowthAboveMonths - a.glideCashBelowMonths;
-  const frac = (monthsToHorizon - a.glideCashBelowMonths) / span;
+  // Guard: a misconfigured assumptions row (glideGrowthAboveMonths <= glideCashBelowMonths)
+  // would divide by zero/negative and hand back NaN or a nonsensical rate; the horizon already
+  // failed both boundary checks above, so split the difference rather than propagate garbage.
+  if (span <= 0) return (a.cashRateAnnual + a.growthRateAnnual) / 2;
+  const frac = (horizon - a.glideCashBelowMonths) / span;
   return a.cashRateAnnual + (a.growthRateAnnual - a.cashRateAnnual) * frac;
 }
 
@@ -58,7 +74,14 @@ export function parseIsoDate(date: string): { y: number; m: number; d: number } 
 export function monthIndex(startedOn: string, date: string): number {
   const a = parseIsoDate(startedOn);
   const b = parseIsoDate(date);
-  return (b.y - a.y) * 12 + (b.m - a.m) + (b.d > a.d ? 1 : 0);
+  const raw = (b.y - a.y) * 12 + (b.m - a.m) + (b.d > a.d ? 1 : 0);
+  // Guard: a date at or before startedOn (a stale/corrupted target_date, or a reached_at that
+  // predates the profile's own started_on) floors at 0 rather than going negative and pulling
+  // waterfall()'s cursor/horizon maths into negative territory (D6 robustness pass: "target_date
+  // before started_on -> clamp"). The one existing test for a past date ("2026-08-15" against
+  // "2026-09-01") already lands on 0 without this — it's a no-op there, and only changes the
+  // result for dates further in the past.
+  return Math.max(0, raw);
 }
 
 /**
