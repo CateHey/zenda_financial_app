@@ -133,7 +133,6 @@
   .hicon.h3{left:8vw;bottom:10vh;animation-duration:14s;animation-delay:-9s}
   .hicon.h4{right:5vw;bottom:12vh;animation-duration:17s;animation-delay:-13s}
   @keyframes drift{0%{opacity:0;transform:translate(0,24px) scale(.9) rotate(-2deg)}12%{opacity:.28}50%{opacity:.18;transform:translate(36px,-34px) scale(1.06) rotate(3deg)}88%{opacity:.26}100%{opacity:0;transform:translate(-22px,12px) scale(.94) rotate(-1deg)}}
-  @media (prefers-reduced-motion:reduce){.hicon{animation:none}}
   @media (max-width:640px){.hicon{width:72px;opacity:.16}}
 
   .compare{position:relative;z-index:1;padding:8vh 6vw 2vh;display:flex;flex-direction:column;gap:22px;align-items:center}
@@ -229,9 +228,8 @@
   .chat .m.me{background:#5856D6}
 
   .ticker{position:sticky;top:60px;z-index:19;height:38px;overflow:hidden;background:linear-gradient(90deg,#5856D6,#8450DA 60%,#AF52DE);color:#fff;display:flex;align-items:center}
-  .ticker-track{display:flex;gap:28px;white-space:nowrap;font-size:13px;font-weight:600;letter-spacing:.04em;animation:ticker 38s linear infinite;will-change:transform;padding-left:28px}
+  .ticker-track{display:flex;gap:28px;white-space:nowrap;font-size:13px;font-weight:600;letter-spacing:.04em;animation:ticker 30s linear infinite;will-change:transform;padding-left:28px;transform:translateZ(0)}
   @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  @media (prefers-reduced-motion:reduce){.ticker-track{animation:none}}
   .pricing{position:relative;z-index:1;padding:6vh 6vw;display:flex;flex-direction:column;gap:22px;align-items:center}
   .pricing h2{font-size:clamp(26px,3.4vw,40px);font-weight:700;letter-spacing:-.02em;margin:0;text-align:center}
   .pricing .lead{margin:0;max-width:62ch;text-align:center;font-size:17px;line-height:1.5;color:rgba(44,44,50,.9)}
