@@ -34,6 +34,20 @@
 .znav-bottom a[aria-current="page"] { color: var(--accent, #5856D6); }
 .znav-bottom svg { width: 22px; height: 22px; }
 
+/* phones: a slim sticky strip with the Menu button, plus the bottom bar */
+.znav-mini {
+  position: sticky; top: 0; z-index: 30; height: 48px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px 0 6px; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--separator, rgba(60, 60, 67, 0.18));
+}
+.znav-mini .znav-brand { font-size: 16px; font-weight: 700; color: var(--accent, #5856D6); text-decoration: none; }
+.znav-menu-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 999px;
+  font-size: 15px; font-weight: 700; color: var(--accent, #5856D6); text-decoration: none;
+}
+.znav-menu-btn svg { width: 22px; height: 22px; }
+.znav-menu-btn[aria-current="page"] { background: var(--surface-sunken, #F2F2F7); }
+
 @media (max-width: 699px) {
   body.has-nav { padding-bottom: 68px; }
 }
@@ -41,6 +55,7 @@
 @media (min-width: 700px) {
   .znav-top { display: flex; }
   .znav-bottom { display: none; }
+  .znav-mini { display: none; }
 
   .screen {
     max-width: 1120px !important; margin: 0 auto !important;

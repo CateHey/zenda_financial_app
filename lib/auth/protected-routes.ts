@@ -10,6 +10,7 @@ export const PROTECTED_PREFIXES = [
   "/progress",
   "/celebrate",
   "/admin",
+  "/menu",
 ] as const;
 
 export function isProtectedPath(pathname: string): boolean {
