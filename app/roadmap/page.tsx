@@ -20,7 +20,6 @@ import {
   perCycleFromMonthlyCents,
   weeklyFromMonthlyCents,
 } from "@/lib/format";
-import { LogoutLink } from "@/app/components/logout-link";
 import { WhatIf, type WhatIfEngineGoal } from "./what-if";
 
 // S4 · Roadmap — design/screens/Roadmap.dc.html ported 1:1, bound per ZENDA_SCREEN_BINDINGS.md.
@@ -101,7 +100,6 @@ export default async function RoadmapPage() {
       <main className="screen" data-web="center" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", padding: "20px", boxSizing: "border-box", display: "flex", flexDirection: "column", gap: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Your roadmap</span>
-          <LogoutLink />
         </div>
         <span style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.12 }}>Every goal on the path is reached.</span>
         <span style={{ fontSize: 15, color: "rgba(60,60,67,0.78)" }}>{todayNodeText}</span>
@@ -150,7 +148,6 @@ export default async function RoadmapPage() {
       <div style={{ padding: "20px 20px 0 20px", display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Your roadmap</span>
-          <LogoutLink />
         </div>
         <span style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.12 }}>{titleLine}</span>
         <div style={{ display: "flex", gap: 8, marginTop: 2, flexWrap: "wrap" }}>

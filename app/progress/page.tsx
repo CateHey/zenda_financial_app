@@ -23,7 +23,6 @@ import {
   perCycleFromMonthlyCents,
 } from "@/lib/format";
 import { templateNudge } from "@/lib/data/templates";
-import { LogoutLink } from "@/app/components/logout-link";
 import { CheckinSheet } from "./checkin-sheet";
 import { ExtraSheet } from "./extra-sheet";
 
@@ -68,7 +67,8 @@ function dayMonthYearLabel(dateIso: string): string {
   return new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(date);
 }
 
-export default async function ProgressPage() {
+export default async function ProgressPage({ searchParams }: { searchParams: Promise<{ goal?: string }> }) {
+  const { goal: goalParam } = await searchParams;
   const supabase = await supabaseServer();
   if (!supabase) redirect("/login");
 
@@ -80,10 +80,17 @@ export default async function ProgressPage() {
   if (!profile) redirect("/login");
 
   const activeGoals = goals.filter((g) => g.status === "active");
-  const currentGoal = activeGoals.length
+  const soonestGoal = activeGoals.length
     ? activeGoals.reduce((soonest, g) => (g.target_date < soonest.target_date ? g : soonest), activeGoals[0])
     : null;
+  // ?goal=<id>: look at any goal on the path — active or already reached — not only the soonest.
+  const viewable = goals
+    .filter((g) => g.status === "active" || g.status === "reached")
+    .sort((x, y) => (x.target_date < y.target_date ? -1 : x.target_date > y.target_date ? 1 : 0));
+  const pickedGoal = goalParam ? viewable.find((g) => g.id === goalParam) ?? null : null;
+  const currentGoal = pickedGoal ?? soonestGoal;
   if (!currentGoal) redirect("/roadmap"); // D4: "No active goal -> /roadmap"
+  const isReached = currentGoal.status === "reached";
 
   const a = assumptionsToEngine(assumptionRows);
   const engineProfile: EngineProfile = {
@@ -172,10 +179,29 @@ export default async function ProgressPage() {
     <main className="screen" data-web="two-col" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0 20px" }}>
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Progress</span>
-        <LogoutLink />
       </div>
 
-      {!alreadyCheckedIn && (
+      {/* every goal on the path is one tap away — the check-in and charts below follow the chosen one */}
+      {viewable.length > 1 && (
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "12px 20px 0 20px" }}>
+          {viewable.map((g) => {
+            const on = g.id === currentGoal.id;
+            const color = KIND_COLOR[g.kind] ?? "#5856D6";
+            return (
+              <Link
+                key={g.id}
+                href={on ? "/progress" : `/progress?goal=${g.id}`}
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, height: 32, padding: "0 12px", borderRadius: 999, border: `1.5px solid ${on ? color : "rgba(60,60,67,0.18)"}`, background: on ? color : "#FFFFFF", color: on ? "#FFFFFF" : "rgba(60,60,67,0.9)", fontSize: 13, fontWeight: 600, textDecoration: "none" }}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: on ? "#FFFFFF" : color }} />
+                {g.title}{g.status === "reached" ? " ✓" : ""}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {!alreadyCheckedIn && !isReached && (
         <div style={{ margin: "16px 20px 0 20px", display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 14, background: "#FFFFFF", boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.10)" }}>
           <span style={{ width: 34, height: 34, borderRadius: 10, background: "linear-gradient(135deg, #007AFF, #AF52DE)", flexShrink: 0 }} />
           <div style={{ display: "flex", flexDirection: "column", gap: 1, flexGrow: 1 }}>
@@ -294,6 +320,15 @@ export default async function ProgressPage() {
       )}
 
       <div data-col="side">
+      {isReached ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "16px 20px" }}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Reached</span>
+          <span style={{ fontSize: 17, lineHeight: 1.35 }}>
+            {currentGoal.title} is funded — {formatMoney(currentGoal.target_cents, profile.currency)} saved{currentGoal.reached_at ? ` on ${dayMonthYearLabel(currentGoal.reached_at.slice(0, 10))}` : ""}.
+          </span>
+          <Link href="/progress" style={{ fontSize: 14, fontWeight: 600, color: "#5856D6", textDecoration: "none" }}>Back to your current goal →</Link>
+        </div>
+      ) : (
       <CheckinSheet
         goalId={currentGoal.id}
         capacityPerCycleCents={capacityPerCycle}
@@ -301,8 +336,8 @@ export default async function ProgressPage() {
         alreadyCheckedIn={alreadyCheckedIn}
         nextPaydayLabel={nextPaydayLabel}
       />
-
-            <ExtraSheet
+      )}
+      <ExtraSheet
         currency={profile.currency}
         defaultGoalId={currentGoal.id}
         goals={activeGoals

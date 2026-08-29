@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { capacityMonthlyCents } from "@/lib/engine/rates";
 import { CYCLE_WORD, KIND_LABEL, formatMoney, formatMoneyCompact, perCycleFromMonthlyCents } from "@/lib/format";
 import type { PayCycle } from "@/lib/data/types";
-import { LogoutLink } from "@/app/components/logout-link";
 import { GoalSheet, type GoalSheetValues } from "./goal-sheet";
 
 // S1 · Discover — design/screens/Main.dc.html ported 1:1, bound per ZENDA_SCREEN_BINDINGS.md.
@@ -375,7 +374,6 @@ export function DiscoverClient({
               />
             ))}
           </div>
-          <LogoutLink />
         </div>
       </div>
 

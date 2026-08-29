@@ -130,3 +130,31 @@
 .ask-form input { flex: 1; height: 44px; padding: 0 14px; border: 1px solid rgba(60,60,67,0.2); border-radius: 999px; font: inherit; font-size: 15px; }
 .ask-form button { height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--accent, #5856D6); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
 .ask-form button:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------- motion: screens arrive, steps settle in, cards lift, the line draws ---------- */
+@keyframes zrise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes zdrawx { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes zdrawy { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes zgrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes zfab { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+.screen > * { animation: zrise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.screen > :nth-child(2) { animation-delay: 0.06s; }
+.screen > :nth-child(3) { animation-delay: 0.12s; }
+.screen > :nth-child(4) { animation-delay: 0.18s; }
+.screen > :nth-child(5) { animation-delay: 0.24s; }
+.screen > :nth-child(6) { animation-delay: 0.30s; }
+.screen > :nth-child(n + 7) { animation-delay: 0.36s; }
+.path-nodes > * { animation: zrise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: 0.2s; }
+.path-nodes > :nth-child(2) { animation-delay: 0.3s; }
+.path-nodes > :nth-child(3) { animation-delay: 0.4s; }
+.path-nodes > :nth-child(4) { animation-delay: 0.5s; }
+.path-nodes > :nth-child(5) { animation-delay: 0.6s; }
+.path-nodes > :nth-child(n + 6) { animation-delay: 0.7s; }
+.path-line { transform-origin: top center; animation: zdrawy 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.15s both; }
+div[data-testid="pct"] { transform-origin: left center; animation: zgrow 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.4s both; }
+.cards > *, .charts > *, .path-nodes > * > :last-child { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+.cards > *:hover, .charts > *:hover, .path-nodes > * > :last-child:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0, 0, 0, 0.10); }
+.ask-fab { animation: zfab 2.8s ease-in-out infinite; }
+@media (min-width: 1000px) {
+  .path-line { transform-origin: left center; animation-name: zdrawx; }
+}

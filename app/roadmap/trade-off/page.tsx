@@ -6,7 +6,6 @@ import { todayIso } from "@/lib/engine/today";
 import { DISCLAIMER } from "@/lib/engine/types";
 import type { EngineGoal, EngineProfile } from "@/lib/engine/types";
 import { KIND_LABEL, formatMoney, joinTitles, monthYearLabel, weeklyFromMonthlyCents } from "@/lib/format";
-import { LogoutLink } from "@/app/components/logout-link";
 import { TradeoffClient } from "./trade-off-client";
 
 // S5 · The trade-off — design/screens/Tradeoff.dc.html ported 1:1, bound per
@@ -95,7 +94,6 @@ export default async function TradeoffPage({
   return (
     <main className="screen" data-web="grid" style={{ maxWidth: 390, margin: "0 auto", minHeight: "100vh", background: "#FFFFFF", display: "flex", flexDirection: "column", boxSizing: "border-box" }}>
       <div style={{ padding: "16px 20px 0 20px", display: "flex", justifyContent: "flex-end" }}>
-        <LogoutLink />
       </div>
 
       <div style={{ padding: "4px 20px 0 20px", display: "flex", flexDirection: "column", gap: 6 }}>

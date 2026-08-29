@@ -7,7 +7,6 @@ import { capacityMonthlyCents, monthDate } from "@/lib/engine/rates";
 import type { Assumptions, EngineGoal } from "@/lib/engine/types";
 import { formatMoney, formatMoneyCompact, monthYearLabel, perCycleFromMonthlyCents } from "@/lib/format";
 import type { PayCycle, RiskComfort } from "@/lib/data/types";
-import { LogoutLink } from "@/app/components/logout-link";
 
 // S7 · Life changed — design/screens/Adapt.dc.html ported 1:1, bound per
 // ZENDA_SCREEN_BINDINGS.md. The numbers sheet is the same rows as Discover's, inline (not a
@@ -196,7 +195,6 @@ export function AdaptClient({
           </a>
           <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5856D6" }}>Life changed</span>
         </div>
-        <LogoutLink />
       </div>
 
       <div style={{ padding: "4px 20px 0 20px", display: "flex", flexDirection: "column", gap: 6 }}>

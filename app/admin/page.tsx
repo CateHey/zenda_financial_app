@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getProfile } from "@/lib/data/queries";
-import { LogoutLink } from "@/app/components/logout-link";
 
 // S9 · Employer view — MISSING SCREEN (D4 row 9, "cuttable"). /admin. Server Component: loads
 // the caller's own profile (RLS-scoped, D2), redirects non-admins to /roadmap, then calls the
@@ -79,7 +78,6 @@ export default async function AdminPage() {
         >
           Your organisation
         </span>
-        <LogoutLink />
       </div>
 
       <span style={{ fontSize: 26, fontWeight: 600, letterSpacing: "-0.01em", lineHeight: 1.12, color: "var(--label)" }}>

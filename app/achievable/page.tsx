@@ -6,7 +6,6 @@ import { CHOOSABLE_GOAL_KINDS } from "@/lib/data/types";
 import { monthDate, monthIndex } from "@/lib/engine/rates";
 import { DISCLAIMER } from "@/lib/engine/types";
 import { KIND_COLOR, KIND_LABEL, formatMoney, monthYearLabel, weeklyFromMonthlyCents } from "@/lib/format";
-import { LogoutLink } from "@/app/components/logout-link";
 
 // S2 · What's achievable — design/screens/Achievable.dc.html ported 1:1, bound per
 // ZENDA_SCREEN_BINDINGS.md. Server Component: reads goals + goal_projections. A projection
@@ -40,7 +39,6 @@ export default async function AchievablePage() {
               <span key={i} style={{ width: 18, height: 4, borderRadius: 2, background: "#5856D6" }} />
             ))}
           </div>
-          <LogoutLink />
         </div>
       </div>
 
