@@ -25,7 +25,6 @@ export default async function TradeoffPage({
   if (!supabase) redirect("/login");
 
   const { goal: goalId } = await searchParams;
-  if (!goalId) redirect("/roadmap");
 
   const [goals, profile, assumptionRows] = await Promise.all([
     getGoalsWithProjections(supabase),
@@ -35,8 +34,9 @@ export default async function TradeoffPage({
   if (!profile) redirect("/login");
   if (goals.length === 0) redirect("/discover");
 
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal) redirect("/roadmap"); // RLS-hidden or unknown id
+  // With no id (e.g. from the landing page) open the first goal that needs a trade-off.
+  const goal = goalId ? goals.find((g) => g.id === goalId) : goals.find((g) => g.projection && !g.projection.achievable);
+  if (!goal) redirect("/roadmap"); // RLS-hidden, unknown id, or nothing needs a trade-off
   const projection = goal.projection;
   // D4: "Opened for a goal that is achievable -> redirect /roadmap."
   if (!projection || projection.achievable) redirect("/roadmap");

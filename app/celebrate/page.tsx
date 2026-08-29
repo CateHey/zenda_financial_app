@@ -22,6 +22,17 @@ const NEXT_STEP_LABEL: Record<string, string> = {
   other: "Take the next step",
 };
 
+async function latestMilestone(supabase: Parameters<typeof getEventById>[0]) {
+  const { data } = await supabase
+    .from("motivational_events")
+    .select("*")
+    .eq("kind", "milestone_reached")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data ?? null) as Awaited<ReturnType<typeof getEventById>>;
+}
+
 export default async function CelebratePage({
   searchParams,
 }: {
@@ -31,9 +42,8 @@ export default async function CelebratePage({
   if (!supabase) redirect("/login");
 
   const { event: eventId } = await searchParams;
-  if (!eventId) redirect("/roadmap");
-
-  const event = await getEventById(supabase, eventId);
+  // With no id (e.g. from the landing page) show the latest milestone reached.
+  const event = eventId ? await getEventById(supabase, eventId) : await latestMilestone(supabase);
   if (!event || !event.goal_id) redirect("/roadmap"); // D4: "Event not found / not owned -> /roadmap"
 
   const [goal, profile, goals] = await Promise.all([
