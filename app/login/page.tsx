@@ -6,31 +6,31 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { isProtectedPath } from "@/lib/auth/protected-routes";
 import "../auth-form.css";
 
-// D8 seed credentials — prefilled only when the landing page's "See Vinuy's journey" CTA
-// arrives with ?demo=vinuy (D3 mapping table).
-const VINUY_EMAIL = "vinuy@demo.zenda.app";
-const VINUY_PASSWORD = "Zenda-demo-2026!";
+// D8 seed credentials — prefilled only when the landing page's "See Vinay's journey" CTA
+// arrives with ?demo=vinay (D3 mapping table).
+const VINAY_EMAIL = "vinay@demo.zenda.app";
+const VINAY_PASSWORD = "Zenda-demo-2026!";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isVinuyDemo = searchParams.get("demo") === "vinuy";
+  const isVinayDemo = searchParams.get("demo") === "vinay";
   const nextParam = searchParams.get("next");
 
-  const [email, setEmail] = useState(isVinuyDemo ? VINUY_EMAIL : "");
-  const [password, setPassword] = useState(isVinuyDemo ? VINUY_PASSWORD : "");
+  const [email, setEmail] = useState(isVinayDemo ? VINAY_EMAIL : "");
+  const [password, setPassword] = useState(isVinayDemo ? VINAY_PASSWORD : "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const autoSubmitted = useRef(false);
-  // "See Vinuy's journey": the credentials are prefilled, so sign in without another click.
+  // "See Vinay's journey": the credentials are prefilled, so sign in without another click.
   useEffect(() => {
-    if (isVinuyDemo && !autoSubmitted.current) {
+    if (isVinayDemo && !autoSubmitted.current) {
       autoSubmitted.current = true;
       const t = setTimeout(() => formRef.current?.requestSubmit(), 250);
       return () => clearTimeout(t);
     }
-  }, [isVinuyDemo]);
+  }, [isVinayDemo]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();

@@ -1,4 +1,4 @@
-// lib/engine/engine.test.ts — every row of the D6 worked example (Vinuy), tolerance ±1 dollar
+// lib/engine/engine.test.ts — every row of the D6 worked example (Vinay), tolerance ±1 dollar
 // (±100 cents) on money values, exact match on months/rates, plus the A3 streak rule.
 
 import { describe, expect, it } from "vitest";
@@ -36,7 +36,7 @@ const profile: EngineProfile = {
 const capacity = capacityMonthlyCents(profile);
 
 describe("capacityMonthlyCents", () => {
-  it("Vinuy: (1,100 − 590 − 250 − 100) + 100 = $260/wk -> $1,126.67/month", () => {
+  it("Vinay: (1,100 − 590 − 250 − 100) + 100 = $260/wk -> $1,126.67/month", () => {
     expectCentsClose(capacity, 112_667);
   });
 });
@@ -110,7 +110,7 @@ describe("glideRate", () => {
   });
 });
 
-describe("waterfall — Vinuy's full roadmap", () => {
+describe("waterfall — Vinay's full roadmap", () => {
   const bufferGoal: EngineGoal = {
     id: "buffer",
     kind: "buffer",

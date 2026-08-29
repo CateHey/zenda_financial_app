@@ -209,7 +209,7 @@ pure function of `t` (damped). Sections are HTML overlaying the canvas.
 
 | # | `t` | Section (HTML) | Scene beat |
 |---|---|---|---|
-| 1 | 0.00–0.12 | **Hero** — "Discover your path to financial freedom." + sub-copy + the three-circle module row (🔍 DISCOVER ─ 🗺 ROADMAP ─ 📊 PROGRESS, HTML badges) + two CTAs: "Start your journey 🚀" · "See Vinuy's journey" (all of it fades out by t ≈ 0.12) | **Stairs, then the journey (autonomous intro, no scroll needed):** the path now *begins* as a flight of three broad stairs rising to its start, tinted with the ramp's first stops; the ribbon draws itself on from the top step toward the horizon; the first node ignites; the camera glides along the *same* rail. On scroll the stairs **dissolve** (noise dissolve with a luminous edge, `t` 0.05–0.13) into the particle stream already flowing through them — the journey continues *from* them, never *after* them (§5.11, §5.12). |
+| 1 | 0.00–0.12 | **Hero** — "Discover your path to financial freedom." + sub-copy + the three-circle module row (🔍 DISCOVER ─ 🗺 ROADMAP ─ 📊 PROGRESS, HTML badges) + two CTAs: "Start your journey 🚀" · "See Vinay's journey" (all of it fades out by t ≈ 0.12) | **Stairs, then the journey (autonomous intro, no scroll needed):** the path now *begins* as a flight of three broad stairs rising to its start, tinted with the ramp's first stops; the ribbon draws itself on from the top step toward the horizon; the first node ignites; the camera glides along the *same* rail. On scroll the stairs **dissolve** (noise dissolve with a luminous edge, `t` 0.05–0.13) into the particle stream already flowing through them — the journey continues *from* them, never *after* them (§5.11, §5.12). |
 | 2 | 0.12–0.28 | **The problem** — money stress at work, in numbers | Camera lifts a little. The path ahead desaturates toward grey; some particles fall away from the ribbon and fade — money leaking. The quietest beat on the page. |
 | 3 | 0.28–0.45 | **How it works** — three steps | Camera travels forward. Three nodes ignite in sequence, one per step as it scrolls into view: conversation (blue) → roadmap (indigo) → check-in (indigo). Stray particles rejoin the stream. |
 | 4 | 0.45–0.62 | **The employee view** — product UI | Camera swings to a ¾ side view. A device frame with the real roadmap screen docks into the empty half of the viewport. The ribbon ahead brightens through indigo. |
@@ -408,12 +408,12 @@ beneath. The row sits between the sub-copy and the CTAs, staggers in during the 
 >
 > ( 🔍 DISCOVER ─ 🗺 ROADMAP ─ 📊 PROGRESS )
 >
-> [ Start your journey 🚀 ]   [ See Vinuy's journey ]
+> [ Start your journey 🚀 ]   [ See Vinay's journey ]
 
 - "Start your journey 🚀" — primary CTA, indigo pill. On the real page it opens onboarding
   (module 1); in the demo it smooth-scrolls into the journey — which also triggers the stair
   dissolve, so the button literally starts the journey.
-- "See Vinuy's journey" — quiet secondary. On the real page it opens the Vinuy demo persona's
+- "See Vinay's journey" — quiet secondary. On the real page it opens the Vinay demo persona's
   pre-built journey (try-before-you-tell-us); in the demo it scrolls deeper into the ride.
 - The §0 core line ("Your paycheck is the engine…") is unchanged as the brand spine — it still
   leads the app welcome screen and the sales deck; the landing hero now leads with "Discover"

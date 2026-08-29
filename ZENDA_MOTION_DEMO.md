@@ -508,7 +508,7 @@ deck): eyebrow "Zenda", headline "Discover your path to financial freedom.", sub
 personal direction, a `.steps` row of three circular badges (Discover / Roadmap / Progress, each
 a hand-written inline SVG icon — magnifying glass, folded map with route + pin, gauge dashboard —
 24×24, `#5856D6` stroke, under 6 elements apiece) joined by `.connector` lines, and two CTAs:
-`#ctaStart` ("Start your journey 🚀", solid indigo pill) and `#ctaVinuy` ("See Vinuy's journey",
+`#ctaStart` ("Start your journey 🚀", solid indigo pill) and `#ctaVinay` ("See Vinay's journey",
 transparent/ghost). CSS added: `.sub` (44ch, 17px), `.steps`/`.step`/`.circle`/`.lbl`/`.connector`
 per the token values already in the file (card shadow, `--label2`, `--accent`), `.cta` and its two
 button styles (`#ctaStart` hover brightens, `.ghost` hover underlines; both share `#play`'s
@@ -526,7 +526,7 @@ all, so `.step` simply renders at its default `opacity: 1` with no JS-driven `.i
 any of the three capability checks that can `return` early into the poster fallback — so the
 buttons work even if the scene never starts (the poster hides `<main>` via CSS, it doesn't remove
 it from the DOM). `#ctaStart` → `window.scrollTo({top: innerHeight*1.05, behavior:"smooth"})`
-(also triggers the stairs' dissolve, since that scroll pushes `t` past `0.05`); `#ctaVinuy` →
+(also triggers the stairs' dissolve, since that scroll pushes `t` past `0.05`); `#ctaVinay` →
 `window.scrollTo({top: innerHeight*3.15, behavior:"smooth"})`, riding deeper to the employee-view
 beat.
 

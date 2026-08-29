@@ -22,7 +22,7 @@ affected section changes, nothing else:
 1. The "old, unrelated schema" to drop is Free Me's `public.sessions` / `public.plans` (+ one trigger, one
    function, two policies). Rows in `auth.users` from the old demo are left in place — harmless.
 2. The demo organisation is joined with a company code, `DEMO`, typed at signup. No invite emails.
-3. The landing page's two buttons become links (`/signup`, `/login?demo=vinuy`). That is the only
+3. The landing page's two buttons become links (`/signup`, `/login?demo=vinay`). That is the only
    edit to a design asset.
 
 ---
@@ -37,7 +37,7 @@ affected section changes, nothing else:
 | `CLAUDE.md` | Working rules: numbers from the engine never the LLM, banned-terms gate, server-only keys, no raw hex | **EXTEND** — D1 replaces the stack section (no monorepo, no Tailwind); rules stay |
 | `ZENDA_DESIGN.md` | Tokens (the actual values), type scale, motion, palette contrast table, landing-scene plan | **REUSE** — §1 token values become `app/tokens.css` verbatim |
 | `ZENDA_MOTION_DEMO.md` | Documents the landing prototype | REUSE as reference only |
-| `VINUY_JOURNEY.md` | The persona profile and the computed roadmap (source of every seed number) | **REUSE** — seed data + engine test vector |
+| `VINAY_JOURNEY.md` | The persona profile and the computed roadmap (source of every seed number) | **REUSE** — seed data + engine test vector |
 | `demo/zenda-path.html` | The landing page: hero, three-circle module row, CTAs, WebGL scene, poster fallback, reduced-motion handling | **REUSE** — becomes `public/landing.html`, served at `/`; buttons → links (assumption 3) |
 | `design/screens/Main.dc.html` | Discover screen (chat + goal chips + "where you are today" sheet + engine box) | **REUSE** — port 1:1 to `/discover` |
 | `design/screens/Achievable.dc.html` | Verdict cards per goal | **REUSE** → `/achievable` |
@@ -314,7 +314,7 @@ create policy "read lessons"     on public.lessons     for select to authenticat
 ```
 
 **Employer-blindness proof (D10 task 4 acceptance):** as the `admin@demo.zenda.app` session, `select * from
-goals` returns zero rows and `select * from profiles` returns exactly one row (the admin's own). As Vinuy,
+goals` returns zero rows and `select * from profiles` returns exactly one row (the admin's own). As Vinay,
 `select org_seat_stats('<org id>')` returns zero rows. Both are RLS outcomes, not application checks.
 
 ---
@@ -340,7 +340,7 @@ Honour `?next=` when present and protected.
 | Design element | Becomes | Supabase call |
 |---|---|---|
 | `#ctaStart` "Start your journey 🚀" | `<a href="/signup">` | — |
-| `#ctaVinuy` "See Vinuy's journey" | `<a href="/login?demo=vinuy">` | — (login page prefills the D8 credentials when `demo=vinuy`) |
+| `#ctaVinay` "See Vinay's journey" | `<a href="/login?demo=vinay">` | — (login page prefills the D8 credentials when `demo=vinay`) |
 
 **Missing screens — login and signup are not designed.** Build both from the tokens, single column, 390px max
 width centred, the eyebrow + title pattern of the Discover screen:
@@ -451,7 +451,7 @@ export const DISCLAIMER =
 
 **Functions (signature → behaviour):**
 
-1. `capacityMonthlyCents(profile)` → `max(0, takeHome − essentials − lifestyle)`, converted per `pay_cycle` to monthly. The buffer line is **inside** this number, not added to it — it is savings the person already sets aside, and the design's "$260 = $156 unallocated + $100 buffer" is the same figure decomposed. (Vinuy: 1100 − 590 − 250 = 260/wk → **112,667 cents/month**.) *Corrected after task 4: an earlier draft double-counted the buffer; the implemented engine is right.*
+1. `capacityMonthlyCents(profile)` → `max(0, takeHome − essentials − lifestyle)`, converted per `pay_cycle` to monthly. The buffer line is **inside** this number, not added to it — it is savings the person already sets aside, and the design's "$260 = $156 unallocated + $100 buffer" is the same figure decomposed. (Vinay: 1100 − 590 − 250 = 260/wk → **112,667 cents/month**.) *Corrected after task 4: an earlier draft double-counted the buffer; the implemented engine is right.*
 2. `glideRate(monthsToHorizon, a)` → `a.cashRateAnnual` when `< glideCashBelowMonths`; `a.growthRateAnnual` when `≥ glideGrowthAboveMonths`; linear blend between. A `growth_required` goal never goes below the blend; a goal with `< glideCashBelowMonths` to go is always cash. *Risk reduces as the deadline approaches.*
 3. `requiredMonthlyCents(targetCents, startingBalanceCents, months, rateAnnual)` → PMT: `(FV − PV·g)·r / (g − 1)` with `g = (1+r)^months`; `months ≤ 0` → `FV − PV` (immediate); `r = 0` → `(FV − PV)/months`.
 4. `monthsToReach(targetCents, startingBalanceCents, monthlyCents, rateAnnual)` → smallest integer `n` with `FV(n) ≥ target`: `n = ceil( ln((FV + P/r)/(PV + P/r)) / ln(1+r) )`; `null` when `monthlyCents ≤ 0` and `PV < target`.
@@ -461,7 +461,7 @@ export const DISCLAIMER =
 8. `waterfall(goals, capacityMonthlyCents, a)` — the roadmap. Active goals sorted by `targetMonth` ascending (ties: `priority`). `cursor = 0`. For each goal: `rate = glideRate(targetMonth − cursor)`; `n = monthsToReach(target, startingBalance, capacity, rate)`; `startMonth = cursor`; `completionMonth = cursor + n`; `requiredMonthly = requiredMonthlyCents(target, startingBalance, targetMonth − cursor, rate)`; `achievable = completionMonth ≤ targetMonth`; `curve = projectCurve(...)` from start to `min(completionMonth, targetMonth) + 1`; if not achievable → `alternatives`. **Only `savings_achievable` goals advance the cursor**; a `growth_required` goal (the home deposit) receives capacity from the cursor onward until its `targetMonth` and does not block anything after it. Returns one `GoalProjection` per goal. Priority is used for tie-breaks and for the Prioritise screen's copy; date order drives funding — *stated in the design as "different on purpose".*
 9. `goalType(goal, capacity, a)` → `growth_required` when `requiredMonthlyCents > capacity` **and** horizon `≥ glideGrowthAboveMonths`; else `savings_achievable`. Applied at `/api/discover` unless the client sent an explicit type.
 
-**Worked example — Vinuy (turn into `lib/engine/engine.test.ts`; expected values are exact to the cent-rounded dollar, tolerance ±1 dollar):**
+**Worked example — Vinay (turn into `lib/engine/engine.test.ts`; expected values are exact to the cent-rounded dollar, tolerance ±1 dollar):**
 
 Inputs: weekly take-home 1,100 · essentials 590 · lifestyle 250 · buffer 100 → capacity **$1,126.67/month**. Rates: cash 5%, growth 9%. `started_on` 2026-09-01.
 
@@ -531,11 +531,11 @@ reads `.env.local`). Idempotent: looks up by email/join code and updates rather 
 
 1. Organisation: `{ name: "Demo Co Pty Ltd", join_code: "DEMO", seat_limit: 50 }`.
 2. Auth users via `auth.admin.createUser({ email, password, email_confirm: true })`:
-   - **`vinuy@demo.zenda.app` / `Zenda-demo-2026!`** — the populated persona (publish this pair)
+   - **`vinay@demo.zenda.app` / `Zenda-demo-2026!`** — the populated persona (publish this pair)
    - `judge@demo.zenda.app` / `Zenda-demo-2026!` — fresh account, lands on Discover (for showing onboarding)
    - `admin@demo.zenda.app` / `Zenda-demo-2026!` — role `admin`, for the blindness proof and `/admin`
-3. Vinuy's profile: weekly; take-home 110,000; essentials 59,000; lifestyle 25,000; buffer 10,000; savings 0; debt 3,000,000 at 280 bps; risk `high`; `freedom_text` = "A house — a real one, around a million. A car I don't have to worry about. And Peru in January."; `started_on` 2026-09-01; `last_seen_at` now.
-4. Vinuy's goals (priority · kind · title · target · date · type · status):
+3. Vinay's profile: weekly; take-home 110,000; essentials 59,000; lifestyle 25,000; buffer 10,000; savings 0; debt 3,000,000 at 280 bps; risk `high`; `freedom_text` = "A house — a real one, around a million. A car I don't have to worry about. And Peru in January."; `started_on` 2026-09-01; `last_seen_at` now.
+4. Vinay's goals (priority · kind · title · target · date · type · status):
    1 · home · "A first home" · 24,000,000 · 2033-09-01 · `growth_required` · active (**Decision:** the goal row holds the *deposit* target; `why` explains the $1M price)
    2 · car · "The car, no loan" · 2,500,000 · 2029-01-14 · savings · active (the trade-off already taken; a `trade_off` event records before 5,000,000 / 2028-09-01)
    3 · travel · "Peru" · 400,000 · 2027-01-10 · savings · active
@@ -544,9 +544,9 @@ reads `.env.local`). Idempotent: looks up by email/join code and updates rather 
 5. Contributions (all `seed`, 26,000 each): buffer 2026-09-07, 2026-09-14; Peru 2026-09-21, 09-28, 10-05, 10-12.
 6. Run the engine (import `lib/engine` — the script is ESM; build once or use `tsx`) and upsert `goal_projections` for all five.
 7. Events: `milestone_reached` (buffer, "$500 of breathing room — done. Peru just moved closer.", seen); `streak` ("Six paydays in a row.", unseen); `trade_off` (car, payload before/after).
-8. Lessons (5 rows, `body_md` ≤ 120 words each, content lifted from VINUY_JOURNEY.md §5): `debt-vs-savings`, `match-money-to-horizon`, `twelve-percent-is-upside`, `buffer-double-duty`, `super-already-running`.
+8. Lessons (5 rows, `body_md` ≤ 120 words each, content lifted from VINAY_JOURNEY.md §5): `debt-vs-savings`, `match-money-to-horizon`, `twelve-percent-is-upside`, `buffer-double-duty`, `super-already-running`.
 
-**Publish in the submission:** `vinuy@demo.zenda.app` · `Zenda-demo-2026!` (and the judge account for a fresh run).
+**Publish in the submission:** `vinay@demo.zenda.app` · `Zenda-demo-2026!` (and the judge account for a fresh run).
 
 ---
 
@@ -561,7 +561,7 @@ reads `.env.local`). Idempotent: looks up by email/join code and updates rather 
 6. **Custom domain.** Optional; skip for the hackathon. `NEXT_PUBLIC_APP_URL` = the Vercel URL.
 7. **Smoke test against the live URL** (all must pass before the submission is written):
    - `/` renders the landing; both CTAs navigate.
-   - `/login?demo=vinuy` → credentials prefilled → Log in → lands on `/roadmap` showing **$260 / week**, Peru **26%**, **12 paydays**.
+   - `/login?demo=vinay` → credentials prefilled → Log in → lands on `/roadmap` showing **$260 / week**, Peru **26%**, **12 paydays**.
    - `/achievable` shows Peru and the $25k car **On track** and the house **Adjusted** with an engine-derived "needs $…/wk" figure (computed from the house's waterfall start month, so higher than the from-day-one $474 — ~$799/wk for the seeded persona).
    - `/progress` → **Yes** → `/progress` again shows streak **7**.
    - `/progress/adapt` → rent +$40 → before/after shows engine **$220**; Accept → roadmap dates move.
@@ -581,15 +581,15 @@ Each task is one session or less. **★ = demo-critical**, ○ = cuttable. Every
 | 2 ★ | Migrations written and applied | `supabase/migrations/0000_teardown.sql`, `0001_zenda.sql` (verbatim from D2) | Both run clean in the SQL editor; `select count(*) from assumptions` = 8 |
 | 3 ★ | Supabase clients + auth pages + proxy | `lib/supabase/browser.ts`, `server.ts`, `proxy.ts`, `app/login/page.tsx`, `app/signup/page.tsx`, `app/api/profile/route.ts` | Signup with code `DEMO` creates a profile; login redirects per D3; protected routes bounce to `/login` |
 | 4 ★ | Engine + tests | `lib/engine/{types,rates,solver,waterfall,progress}.ts`, `lib/engine/engine.test.ts` | `npm test` green on every row of the D6 table |
-| 5 ★ | Recompute service + Discover | `lib/data/recompute.ts`, `app/discover/page.tsx` (+ goal-detail sheet), `app/api/discover/route.ts` | Submitting Vinuy's numbers produces 5 projection rows matching D6 |
-| 6 ★ | Seed script | `scripts/seed.mjs`, `supabase/seed-lessons.sql` | D8 accounts exist; Vinuy login shows populated data |
+| 5 ★ | Recompute service + Discover | `lib/data/recompute.ts`, `app/discover/page.tsx` (+ goal-detail sheet), `app/api/discover/route.ts` | Submitting Vinay's numbers produces 5 projection rows matching D6 |
+| 6 ★ | Seed script | `scripts/seed.mjs`, `supabase/seed-lessons.sql` | D8 accounts exist; Vinay login shows populated data |
 | 7 ★ | Roadmap + what-if | `app/roadmap/page.tsx`, client `WhatIf` component importing `lib/engine` | Slider at $300 shows "Peru in December, the car in August 2028" recomputed live |
 | 8 ★ | Progress + check-in + Celebration | `app/progress/page.tsx`, `app/api/checkin/route.ts`, `app/celebrate/page.tsx`, `app/api/events/[id]/seen/route.ts` | Yes → streak 7; a check-in that completes a goal redirects to `/celebrate` |
 | 9 ★ | Achievable + Prioritise | `app/achievable/page.tsx`, `app/prioritise/page.tsx`, `app/api/prioritise/route.ts` | Reorder persists; verdict tags match `achievable` |
 | 10 ★ | Trade-off + Adapt | `app/roadmap/trade-off/page.tsx`, `app/api/goals/[id]/adjust/route.ts`, `app/progress/adapt/page.tsx`, `app/api/adapt/route.ts` | Choosing $25k updates the goal and re-runs the engine; adapt shows the D4 before/after |
 | 11 ○ | AI calls | `lib/ai/client.ts` (copied), `lib/ai/banned-terms.ts` (copied), `lib/ai/prompts.ts`, `lib/ai/run.ts`, `after()` wiring in discover/checkin/adjust handlers | With the key present, `goals.why` upgrades within ~10 s; with the key absent, nothing breaks |
 | 12 ★ | Deploy + smoke test | Vercel project, env vars, D9 checklist | Every D9 smoke line passes on the public URL |
-| 13 ○ | `/admin` | `app/admin/page.tsx` | Admin sees counts; Vinuy is redirected |
+| 13 ○ | `/admin` | `app/admin/page.tsx` | Admin sees counts; Vinay is redirected |
 | 14 ○ | Installable on a phone | `public/manifest.json`, icons, `<meta name="theme-color">`, viewport meta | Add-to-home-screen opens standalone |
 
 Order is the dependency order. Tasks 7–10 can be split across sessions without conflict.
@@ -600,8 +600,8 @@ Order is the dependency order. Tasks 7–10 can be split across sessions without
 
 | t | Click | Say | On screen |
 |---|---|---|---|
-| 0:00 | Open `/` | "Zenda is the path from your paycheck to your goal. Vinuy, 23, wants a house, a car, and Peru." | Landing, the path scene |
-| 0:10 | "See Vinuy's journey" → Log in | "He told us where he is and where he wants to go. One number came out." | Roadmap · **$260 / week** |
+| 0:00 | Open `/` | "Zenda is the path from your paycheck to your goal. Vinay, 23, wants a house, a car, and Peru." | Landing, the path scene |
+| 0:10 | "See Vinay's journey" → Log in | "He told us where he is and where he wants to go. One number came out." | Roadmap · **$260 / week** |
 | 0:20 | Scroll the roadmap | "Peru is on track for January. The car needed a trade-off — February 2029, no loan. The house is adjusted, honestly." | Peru **26%** · **12 paydays** · tags |
 | 0:35 | Drag what-if to $350 | "Every date moves live. This is arithmetic, not a model guessing." | "Peru in December, the car in June 2028" |
 | 0:45 | `/achievable` | "This is the moment competitors skip: what $260 can actually reach. The car already took its trade-off. The house: honest — at this engine the deposit needs about $800 a week from 2029, so the first place is ~$450k and the levers are income and time." | Peru **On track** · Car **On track $25,000** · Home **Adjusted**, needs $~799/wk |

@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 
 const E2E_EMAIL = "e2e@demo.zenda.app";
 const E2E_PASSWORD = "Zenda-demo-2026!";
-const VINUY_EMAIL = "vinuy@demo.zenda.app";
+const VINAY_EMAIL = "vinay@demo.zenda.app";
 
 test.describe("auth", () => {
   test("@smoke / renders; \"Start your journey\" -> /signup", async ({ page }) => {
@@ -15,11 +15,11 @@ test.describe("auth", () => {
     await expect(page).toHaveURL(/\/signup$/);
   });
 
-  test("@smoke / \"See Vinuy's journey\" -> /login with email prefilled", async ({ page }) => {
+  test("@smoke / \"See Vinay's journey\" -> /login with email prefilled", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /See Vinuy.s journey/i }).click();
-    await expect(page).toHaveURL(/\/login\?demo=vinuy$/);
-    await expect(page.getByLabel("Email")).toHaveValue(VINUY_EMAIL);
+    await page.getByRole("link", { name: /See Vinay.s journey/i }).click();
+    await expect(page).toHaveURL(/\/login\?demo=vinay$/);
+    await expect(page.getByLabel("Email")).toHaveValue(VINAY_EMAIL);
   });
 
   test("@smoke login e2e@ -> lands /roadmap", async ({ page }) => {
@@ -66,7 +66,7 @@ test.describe("auth", () => {
   test("signup: existing email -> \"already has an account\"", async ({ page }) => {
     await page.goto("/signup");
     await page.getByLabel("Display name").fill("Existing Email");
-    await page.getByLabel("Email").fill(VINUY_EMAIL);
+    await page.getByLabel("Email").fill(VINAY_EMAIL);
     await page.getByLabel("Password").fill("TestPass123!");
     await page.getByLabel("Company code").fill("DEMO");
     await page.getByRole("button", { name: "Start your journey" }).click();

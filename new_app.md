@@ -873,7 +873,7 @@ spectacle in the whole product — the app itself stays quiet.
    the whole thesis.)* Headline **"Discover your path to financial freedom."**, the sub-copy
    ("Financial advice is everywhere. Personal direction isn't. …"), the three-circle module row
    (🔍 DISCOVER ─ 🗺 ROADMAP ─ 📊 PROGRESS), and two CTAs: **"Start your journey 🚀"** +
-   **"See Vinuy's journey"** (demo persona). The core line above stays the brand spine for the
+   **"See Vinay's journey"** (demo persona). The core line above stays the brand spine for the
    app welcome screen and the sales deck.
 2. The problem — money stress at work, in numbers, with sources.
 3. How it works — three steps, scroll-choreographed.

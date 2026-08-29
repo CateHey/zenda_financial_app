@@ -25,6 +25,7 @@ import {
 import { templateNudge } from "@/lib/data/templates";
 import { LogoutLink } from "@/app/components/logout-link";
 import { CheckinSheet } from "./checkin-sheet";
+import { ExtraSheet } from "./extra-sheet";
 
 // S6 · Progress — design/screens/Tracking.dc.html ported 1:1, bound per ZENDA_SCREEN_BINDINGS.md.
 // Server Component: reads the current goal (soonest active), the combined contributions of that
@@ -301,7 +302,20 @@ export default async function ProgressPage() {
         nextPaydayLabel={nextPaydayLabel}
       />
 
-      </div>
+            <ExtraSheet
+        currency={profile.currency}
+        defaultGoalId={currentGoal.id}
+        goals={activeGoals
+          .slice()
+          .sort((x, y) => (x.target_date < y.target_date ? -1 : 1))
+          .map((g) => ({
+            id: g.id,
+            title: g.title,
+            kind: g.kind,
+            remainingCents: Math.max(0, g.target_cents - g.starting_balance_cents - contributionRows.filter((c) => c.goal_id === g.id).reduce((acc, c) => acc + c.amount_cents, 0)),
+          }))}
+      />
+</div>
     </main>
   );
 }

@@ -1,9 +1,9 @@
-# Vinuy's journey — from the whiteboard to the roadmap
+# Vinay's journey — from the whiteboard to the roadmap
 
 > The first real run of the product loop on a real profile. The whiteboard was **module 1
 > (discover)**; this document is **module 2 (the roadmap)** computed the way the rules engine
-> will: deterministic arithmetic, honest distances, every milestone with a `why`. Vinuy becomes
-> the demo persona behind the landing page's "See Vinuy's journey" CTA.
+> will: deterministic arithmetic, honest distances, every milestone with a `why`. Vinay becomes
+> the demo persona behind the landing page's "See Vinay's journey" CTA.
 >
 > Start date assumed: **1 September 2026**. Figures in AUD. Education, not advice.
 
@@ -48,7 +48,7 @@ context: riskComfort HIGH · assumes 12% nominal on growth assets · 5% on cash 
 `$260/wk` is the number the whole roadmap runs on. Everything below is "at $260".
 The what-if slider moves this one number and every date recomputes.
 
-**Planning rates.** Vinuy's 12% nominal assumption is shown as the *upside* case; the roadmap
+**Planning rates.** Vinay's 12% nominal assumption is shown as the *upside* case; the roadmap
 plans at **9%** for money invested 5+ years, and **5%** (cash) for anything needed inside
 3 years. Short-horizon money does not get the long-run average — it gets whatever the next two
 years happen to be.
@@ -65,7 +65,7 @@ years happen to be.
 | 4 | **Month 6 · Mar 2027** | **The car decision** | — | The honest math is below. Choose the number, and the date follows. | Pick a car target on the what-if slider. |
 | 5 | **Month 28 · ~Jan 2029** | The car (chosen: $25k) | $25,000 | $260/wk in the saver reaches $25k in ~94 weeks. A good used car, no loan. | Keep the buffer and emergency fund untouched. |
 | 6 | **2029 → 2033** | House deposit engine | $75k–$130k by mid-2033 | This is where the whole engine points for four years. The honest distance to $1M is below. | Move deposit money to growth assets once the horizon is 5+ years. |
-| 7 | **Mid-2033** | The house conversation | — | With the deposit above, Vinuy walks into a broker's office knowing the real number. | See the levers. |
+| 7 | **Mid-2033** | The house conversation | — | With the deposit above, Vinay walks into a broker's office knowing the real number. | See the levers. |
 
 **The debt ($30k at 2.8%) is deliberately not a milestone.** It costs 2.8%; the saver pays 5%.
 Every extra dollar earns more in the saver than it saves on the debt, so the engine pays the
@@ -73,7 +73,7 @@ minimum and puts the surplus where it earns more. (Recomputes instantly if the r
 than assumed.)
 
 **Super is already running.** Employer contributions at 12% of $70k ≈ $8,400/yr — the long-game
-engine Vinuy never has to touch. Not counted in any milestone above.
+engine Vinay never has to touch. Not counted in any milestone above.
 
 ---
 

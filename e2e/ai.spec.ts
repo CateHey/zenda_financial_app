@@ -67,11 +67,11 @@ async function signUpFresh(page: Page, displayName: string): Promise<{ email: st
   return { email, password: SIGNUP_PASSWORD };
 }
 
-/** Vinuy's numbers (ZENDA_BUILD_SPEC.md D8): weekly take-home $1,100, essentials $590 (rent 400
+/** Vinay's numbers (ZENDA_BUILD_SPEC.md D8): weekly take-home $1,100, essentials $590 (rent 400
  * + food 120 + petrol/internet 70), lifestyle $250, buffer $100, savings $0, debt $30,000 at
- * 2.8%. Plus the Travel chip (A6 default: "A trip", $4,000, +4 months) — the task's "Vinuy's
+ * 2.8%. Plus the Travel chip (A6 default: "A trip", $4,000, +4 months) — the task's "Vinay's
  * numbers and the Travel chip". */
-async function completeDiscoverWithVinuysNumbersAndTravel(page: Page): Promise<void> {
+async function completeDiscoverWithVinaysNumbersAndTravel(page: Page): Promise<void> {
   await page.getByPlaceholder("Tell us in your words…").fill("And Peru in January.");
   await page.getByLabel("Income").fill("1100");
   await page.getByLabel("Rent").fill("400");
@@ -125,7 +125,7 @@ async function pollForUpgradedWhys(email: string, password: string): Promise<str
 }
 
 test.describe("T-AI — AI upgrade verification (manual-trigger, costs money)", () => {
-  test("fresh signup, Discover with Vinuy's numbers + Travel -> goals.why upgrades within 20s and is clean", async ({
+  test("fresh signup, Discover with Vinay's numbers + Travel -> goals.why upgrades within 20s and is clean", async ({
     page,
   }) => {
     test.skip(!process.env.RUN_AI, "RUN_AI not set — this test calls the real Anthropic API and costs money.");
@@ -133,7 +133,7 @@ test.describe("T-AI — AI upgrade verification (manual-trigger, costs money)", 
     loadPublicSupabaseEnv();
 
     const { email, password } = await signUpFresh(page, "AI E2E");
-    await completeDiscoverWithVinuysNumbersAndTravel(page);
+    await completeDiscoverWithVinaysNumbersAndTravel(page);
 
     const upgraded = await pollForUpgradedWhys(email, password);
 

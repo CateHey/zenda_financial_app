@@ -14,11 +14,11 @@ Demo accounts (password for all: `Zenda-demo-2026!`):
 
 | Account | What you see |
 |---|---|
-| `vinuy@demo.zenda.app` | Vinuy, 23 — a populated roadmap: Peru on track, the car after a trade-off, the house adjusted honestly |
+| `vinay@demo.zenda.app` | Vinay, 23 — a populated roadmap: Peru on track, the car after a trade-off, the house adjusted honestly |
 | `judge@demo.zenda.app` | A fresh employee — start at Discover and build a roadmap in under two minutes |
 | `admin@demo.zenda.app` | The employer's view: seats and headcount, never a goal or a number |
 
-Landing page → "See Vinuy's journey" prefills the first account.
+Landing page → "See Vinay's journey" prefills the first account.
 
 ## Run locally
 

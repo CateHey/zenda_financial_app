@@ -37,7 +37,7 @@ export function WhatIf({
 }) {
   // S4's what-if card always speaks in "/ week" and "a week" literally (unlike the header chip,
   // which binds an explicit "<cycle word>") — so the slider runs in weekly cents regardless of
-  // the profile's actual pay cycle; only Vinuy (weekly) is demoed, so this never diverges.
+  // the profile's actual pay cycle; only Vinay (weekly) is demoed, so this never diverges.
   const min = Math.max(STEP_CENTS, roundToStep(weeklyCapacityCents * 0.5, STEP_CENTS));
   const max = roundToStep(weeklyCapacityCents * 2, STEP_CENTS);
   const [valueWeeklyCents, setValueWeeklyCents] = useState(roundToStep(weeklyCapacityCents, STEP_CENTS));

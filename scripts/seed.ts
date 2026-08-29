@@ -215,7 +215,7 @@ async function ensureLesson(lesson: LessonSpec): Promise<void> {
   if (error) throw error;
 }
 
-// ---------- D8 step 8: five lessons, body text from VINUY_JOURNEY.md §5 (the debt and super
+// ---------- D8 step 8: five lessons, body text from VINAY_JOURNEY.md §5 (the debt and super
 // notes sit in §3's footer, immediately above §5's own list — same "flags for the person"
 // material; content, not location, is what D8 asks for). trigger_tag values from the
 // public.lessons table comment in supabase/migrations/0001_zenda.sql. ----------
@@ -280,16 +280,16 @@ async function main() {
   const orgId = await ensureOrganisation();
 
   console.log("seed: auth users…");
-  const vinuyId = await ensureUser("vinuy@demo.zenda.app");
+  const vinayId = await ensureUser("vinay@demo.zenda.app");
   const judgeId = await ensureUser("judge@demo.zenda.app");
   const adminId = await ensureUser("admin@demo.zenda.app");
-  // T1 (ZENDA_TEST_SPEC.md "Test data"): a fourth account, a Vinuy clone used only by mutating
-  // tests — vinuy@ itself must stay pristine. Reset to this same state by scripts/reset-e2e.ts.
+  // T1 (ZENDA_TEST_SPEC.md "Test data"): a fourth account, a Vinay clone used only by mutating
+  // tests — vinay@ itself must stay pristine. Reset to this same state by scripts/reset-e2e.ts.
   const e2eId = await ensureUser("e2e@demo.zenda.app");
 
   console.log("seed: profiles…");
-  await upsertProfile(vinuyId, orgId, {
-    display_name: "Vinuy",
+  await upsertProfile(vinayId, orgId, {
+    display_name: "Vinay",
     pay_cycle: "weekly",
     take_home_cents: 110_000,
     essentials_cents: 59_000,
@@ -319,8 +319,8 @@ async function main() {
     started_on: STARTED_ON,
   });
 
-  console.log("seed: Vinuy's goals…");
-  const homeId = await ensureGoal(vinuyId, {
+  console.log("seed: Vinay's goals…");
+  const homeId = await ensureGoal(vinayId, {
     kind: "home",
     title: "A first home",
     target_cents: 24_000_000,
@@ -328,7 +328,7 @@ async function main() {
     priority: 1,
     goal_type: "growth_required",
   });
-  const carId = await ensureGoal(vinuyId, {
+  const carId = await ensureGoal(vinayId, {
     kind: "car",
     title: "The car, no loan",
     target_cents: 2_500_000,
@@ -336,7 +336,7 @@ async function main() {
     priority: 2,
     goal_type: "savings_achievable",
   });
-  const peruId = await ensureGoal(vinuyId, {
+  const peruId = await ensureGoal(vinayId, {
     kind: "travel",
     title: "Peru",
     target_cents: 400_000,
@@ -344,7 +344,7 @@ async function main() {
     priority: 3,
     goal_type: "savings_achievable",
   });
-  const emergencyId = await ensureGoal(vinuyId, {
+  const emergencyId = await ensureGoal(vinayId, {
     kind: "emergency",
     title: "Emergency fund",
     target_cents: 236_000,
@@ -352,7 +352,7 @@ async function main() {
     priority: 4,
     goal_type: "savings_achievable",
   });
-  const bufferId = await ensureGoal(vinuyId, {
+  const bufferId = await ensureGoal(vinayId, {
     kind: "buffer",
     title: "Breathing room",
     target_cents: 50_000,
@@ -363,18 +363,18 @@ async function main() {
   void homeId;
 
   console.log("seed: contributions…");
-  await ensureContribution(vinuyId, bufferId, 26_000, "2026-09-07", "seed");
-  await ensureContribution(vinuyId, bufferId, 26_000, "2026-09-14", "seed");
-  await ensureContribution(vinuyId, peruId, 26_000, "2026-09-21", "seed");
-  await ensureContribution(vinuyId, peruId, 26_000, "2026-09-28", "seed");
-  await ensureContribution(vinuyId, peruId, 26_000, "2026-10-05", "seed");
-  await ensureContribution(vinuyId, peruId, 26_000, "2026-10-12", "seed");
+  await ensureContribution(vinayId, bufferId, 26_000, "2026-09-07", "seed");
+  await ensureContribution(vinayId, bufferId, 26_000, "2026-09-14", "seed");
+  await ensureContribution(vinayId, peruId, 26_000, "2026-09-21", "seed");
+  await ensureContribution(vinayId, peruId, 26_000, "2026-09-28", "seed");
+  await ensureContribution(vinayId, peruId, 26_000, "2026-10-05", "seed");
+  await ensureContribution(vinayId, peruId, 26_000, "2026-10-12", "seed");
 
   console.log("seed: running the engine (lib/data/recompute — the only writer of goal_projections)…");
   // Computed once while the buffer goal is still `active`, so it gets a real projection row
   // too (D8 step 6: "upsert goal_projections for all five") before being frozen as reached
   // (A4: a reached goal's projection is frozen — recompute() never emits one for it again).
-  const projections = await recompute(admin, vinuyId);
+  const projections = await recompute(admin, vinayId);
   if (projections.length !== 5) {
     console.warn(`seed: expected 5 projections, recompute() wrote ${projections.length}`);
   }
@@ -384,16 +384,16 @@ async function main() {
 
   console.log("seed: events…");
   await ensureEvent(
-    vinuyId,
+    vinayId,
     "milestone_reached",
     bufferId,
     "$500 of breathing room — done. Peru just moved closer.",
     {},
     "2026-09-14T00:00:00.000Z",
   );
-  await ensureEvent(vinuyId, "streak", null, "Six paydays in a row.", {}, null);
+  await ensureEvent(vinayId, "streak", null, "Six paydays in a row.", {}, null);
   await ensureEvent(
-    vinuyId,
+    vinayId,
     "trade_off",
     carId,
     "Chose $25,000 for the car, landing January 2029 instead of $50,000 in September 2028.",
@@ -405,10 +405,10 @@ async function main() {
   );
   void emergencyId;
 
-  // ---------- T1: e2e@demo.zenda.app — a Vinuy clone (ZENDA_TEST_SPEC.md "Test data") ----------
-  // Same shape as Vinuy's block above; scripts/reset-e2e.ts restores exactly this state between
-  // mutating test runs so vinuy@ itself never has to be touched.
-  console.log("seed: e2e's goals (Vinuy clone)…");
+  // ---------- T1: e2e@demo.zenda.app — a Vinay clone (ZENDA_TEST_SPEC.md "Test data") ----------
+  // Same shape as Vinay's block above; scripts/reset-e2e.ts restores exactly this state between
+  // mutating test runs so vinay@ itself never has to be touched.
+  console.log("seed: e2e's goals (Vinay clone)…");
   const e2eHomeId = await ensureGoal(e2eId, {
     kind: "home",
     title: "A first home",
@@ -495,7 +495,7 @@ async function main() {
   for (const lesson of LESSONS) await ensureLesson(lesson);
 
   console.log("seed: done.");
-  console.log("  vinuy@demo.zenda.app / Zenda-demo-2026!  (populated persona)");
+  console.log("  vinay@demo.zenda.app / Zenda-demo-2026!  (populated persona)");
   console.log("  judge@demo.zenda.app / Zenda-demo-2026!  (fresh account)");
   console.log("  admin@demo.zenda.app / Zenda-demo-2026!  (org admin)");
   console.log("  e2e@demo.zenda.app / Zenda-demo-2026!    (test account — mutated by tests, reset via npm run reset:e2e)");

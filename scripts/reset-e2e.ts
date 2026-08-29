@@ -5,10 +5,10 @@
 //
 // Deletes e2e@demo.zenda.app's goals (cascades to contributions/projections per the
 // `on delete cascade` FKs in supabase/migrations/0001_zenda.sql), events, and profile, then
-// re-creates them identical to Vinuy's seed state (scripts/seed.ts) — vinuy@ itself is never
+// re-creates them identical to Vinay's seed state (scripts/seed.ts) — vinay@ itself is never
 // touched by any test. Also deletes any auth user left over from a signup test
 // (e2e-fresh-*@demo.zenda.app). Also resets judge@demo.zenda.app back to the D8 "fresh account"
-// state (orchestrator instruction): its auth user and profile row (org member, Vinuy's numbers)
+// state (orchestrator instruction): its auth user and profile row (org member, Vinay's numbers)
 // are kept as-is — only its goals (cascades contributions/projections), and events are deleted —
 // so the demo account lands on /discover again after manual verification runs left it with a
 // full goal set. Prints one line: `e2e reset: <n goals>, <n contributions> | judge reset: <n
@@ -115,8 +115,8 @@ type GoalSpec = {
   goal_type: GoalType;
 };
 
-// Identical to Vinuy's seed state (scripts/seed.ts) — see ZENDA_TEST_SPEC.md "Test data": "a
-// Vinuy clone", profile/goals/contributions/projections/events identical, display_name "E2E".
+// Identical to Vinay's seed state (scripts/seed.ts) — see ZENDA_TEST_SPEC.md "Test data": "a
+// Vinay clone", profile/goals/contributions/projections/events identical, display_name "E2E".
 const GOALS: GoalSpec[] = [
   { kind: "home", title: "A first home", target_cents: 24_000_000, target_date: "2033-09-01", priority: 1, goal_type: "growth_required" },
   { kind: "car", title: "The car, no loan", target_cents: 2_500_000, target_date: "2029-01-14", priority: 2, goal_type: "savings_achievable" },
@@ -163,7 +163,7 @@ async function main() {
   const { error: deleteProfileError } = await admin.from("profiles").delete().eq("user_id", e2eId);
   if (deleteProfileError) throw deleteProfileError;
 
-  console.log("reset-e2e: re-creating e2e's profile (identical to Vinuy's)…");
+  console.log("reset-e2e: re-creating e2e's profile (identical to Vinay's)…");
   const { error: insertProfileError } = await admin.from("profiles").insert({
     user_id: e2eId,
     org_id: orgId,
@@ -275,7 +275,7 @@ async function main() {
   if (insertEventsError) throw insertEventsError;
 
   // judge@: reset to the D8 "fresh account" state — keep the auth user and profile row (org
-  // member, Vinuy's numbers stand), delete only goals (cascades contributions + projections) and
+  // member, Vinay's numbers stand), delete only goals (cascades contributions + projections) and
   // events, so the account has zero goals and lands on /discover again (D3 redirect rule).
   let judgeGoalsDeleted = 0;
   if (judgeId) {

@@ -6,17 +6,17 @@
 >
 > **Expected values are engine-derived, never copied from mockup text.** Where a design mock and the engine disagree, the engine wins and the mock copy is illustrative (the $300 what-if line, "11 paydays", the node months).
 >
-> **Standing rule for all layers:** tests never mutate `vinuy@demo.zenda.app` — the demo account stays
-> pristine. Mutating tests use `e2e@demo.zenda.app` (a Vinuy clone) which is reset before every run.
+> **Standing rule for all layers:** tests never mutate `vinay@demo.zenda.app` — the demo account stays
+> pristine. Mutating tests use `e2e@demo.zenda.app` (a Vinay clone) which is reset before every run.
 > **All UI/API runs execute with `ANTHROPIC_API_KEY` unset** — the templates path is the product; AI
 > is verified once, separately, in T-AI.
 
 ## Test data (additions to `scripts/seed.ts` — D8)
 
 - Fourth account **`e2e@demo.zenda.app` / `Zenda-demo-2026!`**, profile/goals/contributions/projections/events
-  identical to Vinuy's, `display_name` "E2E".
+  identical to Vinay's, `display_name` "E2E".
 - **`scripts/reset-e2e.ts`** (service role, reads `.env.local` like the seed): deletes the e2e user's goals
-  (cascades to contributions/projections), events, and profile, then re-creates them identical to Vinuy's
+  (cascades to contributions/projections), events, and profile, then re-creates them identical to Vinay's
   seed state. Also deletes any auth user whose email matches `e2e-fresh-*@demo.zenda.app` (signup-test
   leftovers). Prints one line: `e2e reset: <n goals>, <n contributions>`. Run by Playwright's `globalSetup`
   and available as `npm run reset:e2e`.
@@ -129,7 +129,7 @@ Selectors: prefer role/text (`getByRole('button', { name: 'Yes' })`, `getByText(
 `data-testid` only where text is dynamic (`engine-value`, `whatif-sentence`, `streak-title`, `pct`).
 
 **`auth.spec.ts`** (`@smoke` where marked)
-1. `@smoke` `/` renders; "Start your journey" → `/signup`; "See Vinuy's journey" → `/login` with email prefilled `vinuy@demo.zenda.app`.
+1. `@smoke` `/` renders; "Start your journey" → `/signup`; "See Vinay's journey" → `/login` with email prefilled `vinay@demo.zenda.app`.
 2. `@smoke` login `e2e@` → lands `/roadmap`.
 3. wrong password → text "Email or password didn't match."
 4. signup `e2e-fresh-<Date.now()>@demo.zenda.app`, code `DEMO` → lands `/discover`; wrong code `NOPE` → "We don't know that company code."; existing email → "already has an account".

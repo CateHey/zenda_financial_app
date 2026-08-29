@@ -1,5 +1,5 @@
 // tests/db/seed.test.ts — ZENDA_TEST_SPEC.md Layer 2, "seed.test.ts". Verifies the e2e account
-// (a Vinuy clone) sits in exactly the state scripts/seed.ts / scripts/reset-e2e.ts put it in.
+// (a Vinay clone) sits in exactly the state scripts/seed.ts / scripts/reset-e2e.ts put it in.
 // Run `npm run seed` then `npm run reset:e2e` before this suite (Playwright's globalSetup does
 // the reset automatically; this file assumes the accounts already exist).
 

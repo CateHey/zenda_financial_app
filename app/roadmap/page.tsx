@@ -74,8 +74,8 @@ export default async function RoadmapPage() {
     : null;
 
   const todayNodeText = lastReached
-    ? `Today · ${lastReached.title} ${formatMoney(lastReached.target_cents, profile.currency)} done`
-    : `Today · ${formatMoney(capacityPerCycle, profile.currency)} / ${cycleWord}`;
+    ? `You are here · ${lastReached.title} reached (${formatMoney(lastReached.target_cents, profile.currency)})`
+    : `You are here · ${formatMoney(capacityPerCycle, profile.currency)} / ${cycleWord} goes to your path`;
 
   // Engine goals for the client what-if slider — mirrors lib/data/recompute.ts's construction.
   // A goal's own stored curve[0] balance already equals starting_balance_cents + contributions

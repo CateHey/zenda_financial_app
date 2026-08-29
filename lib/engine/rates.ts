@@ -27,7 +27,7 @@ export function cycleDays(payCycle: PayCycle): number {
  * The buffer line is money already set aside (banked as savings capacity): it is subtracted
  * out of the surplus calculation, then added back in — it cancels, but the max(0, ...) floor
  * must apply to (take-home − essentials − lifestyle − buffer), matching the worked example
- * ((1,100 − 590 − 250 − 100) + 100 = $260/wk -> $112,667/month) and VINUY_JOURNEY.md §2's
+ * ((1,100 − 590 − 250 − 100) + 100 = $260/wk -> $112,667/month) and VINAY_JOURNEY.md §2's
  * "surplus + buffer line, banked" derivation.
  */
 export function capacityMonthlyCents(profile: EngineProfile): number {

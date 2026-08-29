@@ -12,7 +12,7 @@ Specs — read before any task, in this order:
 - ZENDA_SCREEN_BINDINGS.md  element-level data bindings for every screen
 - ZENDA_TEST_SPEC.md        five test layers (unit, RLS/db, API, e2e, prod smoke); test:all must be green
 - design/screens/*.dc.html  the eight screens — visual truth, port as-is, never redesign
-- VINUY_JOURNEY.md          the demo persona: every seed number and the engine test vector
+- VINAY_JOURNEY.md          the demo persona: every seed number and the engine test vector
 - ZENDA_DESIGN.md §1        token values (app/tokens.css); new_app.md — the product brief
 
 ## Who does what (models)
@@ -55,7 +55,7 @@ npm run dev             http://localhost:3000 (`/` serves public/landing.html vi
 npm run build           must pass before a task is called done
 npm test                vitest — the D6 worked example; must stay green
 npm run seed            `tsx scripts/seed.ts` — needs .env.local and applied migrations
-npm run reset:e2e       resets e2e@ (Vinuy clone) and judge@ (fresh) test accounts
+npm run reset:e2e       resets e2e@ (Vinay clone) and judge@ (fresh) test accounts
 DEMO_TODAY              defaults to 2026-10-20 in next.config.ts; set "" for the real clock
 
 ## Where things live
@@ -71,7 +71,7 @@ lib/data/                 types.ts (row types), queries.ts (all reads), recomput
 lib/supabase/             browser.ts, server.ts (user client only)
 lib/ai/                   client.ts, banned-terms.ts, prompts.ts, run.ts
 supabase/migrations/      0000_teardown.sql, 0001_zenda.sql (applied by the owner in the SQL editor)
-scripts/seed.ts           demo org, three accounts, Vinuy's data, lessons
+scripts/seed.ts           demo org, three accounts, Vinay's data, lessons
 public/landing.html       the landing page (from demo/zenda-path.html; CTAs are links)
 design/, demo/, *.md      design truth and specs — Fable-owned
 

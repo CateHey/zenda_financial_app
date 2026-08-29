@@ -35,7 +35,7 @@ timezone.
 - Month `m` on a curve corresponds to the calendar date `startedOn + m months` (same day-of-month, clamped to
   month end). Screens format that as "Jan 2027" / "January 2027".
 - "N paydays" = `ceil(remainingCents / perCycleCapacityCents)` where per-cycle capacity is the profile's
-  pay-cycle amount (Vinuy: 26,000 cents weekly).
+  pay-cycle amount (Vinay: 26,000 cents weekly).
 
 ## A3 · Streak and pay-cycle rules (D6 §6 precision)
 
