@@ -5,6 +5,11 @@ import { aiEnabled } from "@/lib/ai/enabled";
 import { findBannedTerms } from "@/lib/ai/banned-terms";
 import { DISCLAIMER } from "@/lib/engine/types";
 import { todayIso } from "@/lib/engine/today";
+import { waterfall } from "@/lib/engine/waterfall";
+import { capacityMonthlyCents, monthDate, monthIndex, todayMonth } from "@/lib/engine/rates";
+import { assumptionsToEngine } from "@/lib/data/queries";
+import type { AssumptionRow } from "@/lib/data/types";
+import type { EngineGoal } from "@/lib/engine/types";
 import { HttpError, ok, requireUser, withHandler } from "@/lib/api/respond";
 
 const body = z.object({
@@ -31,6 +36,7 @@ Rules:
 - Be warm, direct and plain. At most 80 words. No lists unless asked. Name the goal and the date that moves.
 - Never shame. A spend is a choice; show what it costs in paydays and offer one way to protect the date.
 - When a concrete change to a goal would help and they seem to want it, return a proposal with the goal_id and the new target_date and/or target_cents (only values you can justify from the numbers given) and a short label like "Move Peru to 17 January 2027". Otherwise proposal is null. Never propose changes they did not ask for.
+- ORDER: money flows to goals in date order. If the person wants one goal to come after/before another ("Peru after the car", "car first"), use the matching "Reorder scenario" below verbatim — its dates come from the engine — and return exactly its proposal (goal_id + target_date + the label given). Say what moves earlier and what moves later. Never invent a reorder date yourself.
 - Never give personal financial advice: no products, banks, funds, tickers or coins, never "you should buy/sell", never the word "impossible". If asked, say Zenda gives general information only.`;
 
 function isoPlusDays(iso: string, days: number): string {
@@ -49,11 +55,12 @@ export const POST = withHandler(async (request: Request) => {
   if (!parsed.success) throw new HttpError(400, "validation", { issues: parsed.error.issues });
   const { question, history = [] } = parsed.data;
 
-  const [{ data: profile }, { data: goals }, { data: projections }, { data: contributions }] = await Promise.all([
+  const [{ data: profile }, { data: goals }, { data: projections }, { data: contributions }, { data: assumptionRows }] = await Promise.all([
     supabase.from("profiles").select("display_name, pay_cycle, take_home_cents, essentials_cents, lifestyle_cents, buffer_cents, savings_cents, debt_cents, debt_rate_bps, started_on").eq("user_id", userId).maybeSingle(),
     supabase.from("goals").select("id, kind, title, target_cents, target_date, priority, goal_type, status, why, starting_balance_cents").eq("user_id", userId).order("target_date"),
     supabase.from("goal_projections").select("goal_id, completion_month, required_monthly_cents, capacity_monthly_cents, achievable, alt_later_months, alt_smaller_target_cents, alt_extra_monthly_cents").eq("user_id", userId),
     supabase.from("contributions").select("goal_id, amount_cents, occurred_on").eq("user_id", userId).order("occurred_on", { ascending: false }).limit(60),
+    supabase.from("assumptions").select("*"),
   ]);
 
   const today = todayIso();
@@ -109,6 +116,67 @@ export const POST = withHandler(async (request: Request) => {
       if (weeklyDown > 0 && cents < perCycleCapacity) {
         lines.push(`Precomputed effect if capacity per payday drops by ${money(cents)} (to ${money(weeklyDown)}): "${current.title}" takes ${Math.ceil(remaining / weeklyDown)} paydays (about ${isoPlusDays(today, Math.ceil(remaining / weeklyDown) * cycleDays)}); if it rises by ${money(cents)} (to ${money(perCycleCapacity + cents)}): ${Math.ceil(remaining / (perCycleCapacity + cents))} paydays (about ${isoPlusDays(today, Math.ceil(remaining / (perCycleCapacity + cents)) * cycleDays)}).`);
       }
+    }
+  }
+  // Reorder scenarios ("Peru after the car"): the engine's waterfall funds goals in date order, so
+  // putting A after B means giving A the first date it can land once B is funded. Computed here,
+  // deterministically, for the two goals the question mentions — the model only relays them.
+  if (profile && (goals ?? []).length > 1) {
+    const q = question.toLowerCase();
+    const SYN: Record<string, string[]> = { travel: ["trip", "holiday", "travel", "flight"], car: ["car"], home: ["home", "house", "deposit"], emergency: ["emergency"], buffer: ["buffer", "breathing"], debt: ["debt", "loan"] };
+    const mentioned = (goals ?? [])
+      .filter((g) => g.status !== "paused")
+      .map((g) => {
+        const words = [...String(g.title).toLowerCase().split(/[^a-z]+/).filter((w: string) => w.length >= 3 && !["the", "and", "for", "fund"].includes(w)), ...(SYN[g.kind] ?? [])];
+        const at = words.map((w) => q.indexOf(w)).filter((i) => i >= 0);
+        return { g, at: at.length ? Math.min(...at) : -1 };
+      })
+      .filter((m) => m.at >= 0)
+      .sort((x, y) => x.at - y.at)
+      .map((m) => m.g);
+    if (mentioned.length >= 2 && /\b(after|before|first|behind|ahead|later than|earlier than|instead|priorit)/.test(q)) {
+      const a = assumptionsToEngine((assumptionRows ?? []) as AssumptionRow[]);
+      const capacity = capacityMonthlyCents({ payCycle: profile.pay_cycle, takeHomeCents: profile.take_home_cents, essentialsCents: profile.essentials_cents, lifestyleCents: profile.lifestyle_cents, bufferCents: profile.buffer_cents });
+      const todayFraction = todayMonth(profile.started_on, today);
+      const engineGoals: EngineGoal[] = (goals ?? []).map((g) => ({
+        id: g.id,
+        kind: g.kind,
+        targetCents: g.target_cents,
+        startingBalanceCents: (g.starting_balance_cents ?? 0) + (savedByGoal.get(g.id) ?? 0),
+        targetMonth: monthIndex(profile.started_on, g.target_date),
+        priority: g.priority,
+        goalType: g.goal_type,
+        status: g.status,
+        reachedAtMonth: null,
+      }));
+      const monthLabel = (m: number | null) => (m === null ? "not reached" : new Intl.DateTimeFormat("en-AU", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${monthDate(profile.started_on, m)}T00:00:00Z`)));
+      const current = new Map(waterfall(engineGoals, capacity, a, todayFraction).map((p) => [p.goalId, p]));
+      const scenario = (A: EngineGoal, B: EngineGoal) => {
+        if (A.status !== "active") return null;
+        // pass 1: A sorted right after B → where does A actually land once B is funded?
+        const p1 = waterfall(engineGoals.map((g) => (g.id === A.id ? { ...g, targetMonth: B.targetMonth + 1 } : g)), capacity, a, todayFraction);
+        const aDone = p1.find((p) => p.goalId === A.id)?.completionMonth ?? null;
+        if (aDone === null) return null;
+        // pass 2: give A exactly that month as its date, and read every goal's new landing month
+        const newTarget = Math.max(aDone, B.targetMonth + 1);
+        const p2 = waterfall(engineGoals.map((g) => (g.id === A.id ? { ...g, targetMonth: newTarget } : g)), capacity, a, todayFraction);
+        const changes = p2
+          .map((p) => {
+            const g = engineGoals.find((x) => x.id === p.goalId)!;
+            const title = (goals ?? []).find((x) => x.id === p.goalId)?.title ?? g.kind;
+            const was = current.get(p.goalId)?.completionMonth ?? null;
+            return `${title}: lands ${monthLabel(p.completionMonth)}${was !== p.completionMonth ? ` (was ${monthLabel(was)})` : " (unchanged)"}${p.achievable ? "" : " — needs a trade-off"}`;
+          })
+          .join("; ");
+        const date = monthDate(profile.started_on, newTarget);
+        const titleA = (goals ?? []).find((x) => x.id === A.id)?.title ?? A.kind;
+        const titleB = (goals ?? []).find((x) => x.id === B.id)?.title ?? B.kind;
+        return `Reorder scenario — "${titleA}" after "${titleB}": set ${titleA}'s target date to ${date} (${monthLabel(newTarget)}). Result: ${changes}. Proposal to return if they want this: goal_id ${A.id}, target_date ${date}, label "${titleA} after ${titleB} → lands ${monthLabel(p2.find((p) => p.goalId === A.id)?.completionMonth ?? newTarget)}".`;
+      };
+      const [g1, g2] = mentioned;
+      const e1 = engineGoals.find((g) => g.id === g1.id)!;
+      const e2 = engineGoals.find((g) => g.id === g2.id)!;
+      for (const line of [scenario(e1, e2), scenario(e2, e1)]) if (line) lines.push(line);
     }
   }
   lines.push(`Planning rates: 5% cash for money needed within 3 years, 9% growth for 5+ years, 12% shown only as upside.`);
