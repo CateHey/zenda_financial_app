@@ -1,0 +1,29 @@
+{
+  "name": "zenda",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run",
+    "seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "next": "^16.3.3",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "@supabase/ssr": "^0.12.5",
+    "@supabase/supabase-js": "^2.112.4",
+    "@anthropic-ai/sdk": "^0.121.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^24",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.0",
+    "vitest": "^3",
+    "tsx": "^4"
+  }
+}

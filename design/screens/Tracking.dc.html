@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif; color: #000000; background: #FFFFFF; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+    a { color: #5856D6; } a:hover { color: #3F3DB8; }
+    button { font-family: inherit; }
+  </style>
+</helmet>
+<div style="width: 390px; height: 844px; background: #FFFFFF; position: relative; overflow: hidden; display: flex; flex-direction: column; box-sizing: border-box;">
+
+  <!-- in-app nudge (the notification layer, in-app form) -->
+  <div style="margin: 16px 12px 0 12px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.10);">
+    <span style="width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, #007AFF, #AF52DE); flex-shrink: 0;"></span>
+    <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1;">
+      <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(60,60,67,0.78);">Payday</span>
+      <span style="font-size: 15px; line-height: 1.3;">$260 is ready for Peru. 11 paydays to go.</span>
+    </div>
+  </div>
+
+  <!-- progress line -->
+  <div style="padding: 26px 20px 0 20px; display: flex; flex-direction: column; gap: 6px;">
+    <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5856D6;">Progress</span>
+    <span style="font-size: 26px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15;">Six paydays in a row.</span>
+    <span style="font-size: 17px; line-height: 1.4; color: rgba(60,60,67,0.78);">You're 26% of the way to Peru.</span>
+    <div style="display: flex; gap: 6px; margin-top: 10px;">
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #10265F;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #10265F;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #007AFF;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #007AFF;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #007AFF;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #007AFF;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #F2F2F7; box-shadow: inset 0 0 0 2px #D1D1D6;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #F2F2F7; box-shadow: inset 0 0 0 2px #D1D1D6;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #F2F2F7; box-shadow: inset 0 0 0 2px #D1D1D6;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #F2F2F7; box-shadow: inset 0 0 0 2px #D1D1D6;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #F2F2F7; box-shadow: inset 0 0 0 2px #D1D1D6;"></span>
+      <span style="width: 18px; height: 18px; border-radius: 50%; background: #F2F2F7; box-shadow: inset 0 0 0 2px #D1D1D6;"></span>
+    </div>
+    <span style="font-size: 13px; color: rgba(60,60,67,0.78);">Breathing room, then Peru. Each dot is a payday.</span>
+    <div style="display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 12px 14px; border-radius: 14px; background: #F2F2F7;">
+      <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 10px; background: #FFFFFF; flex-shrink: 0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"></path><path d="M20 4v5h-5"></path></svg></span>
+      <div style="display: flex; flex-direction: column; gap: 1px; flex-grow: 1;">
+        <span style="font-size: 14px; font-weight: 600;">Life changed?</span>
+        <span style="font-size: 13px; line-height: 1.3; color: rgba(60,60,67,0.78);">Rent up, bonus in, new goal — update anything and the path redraws.</span>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+    </div>
+  </div>
+
+  <!-- the path, quiet, behind the sheet -->
+  <div style="position: relative; padding: 18px 20px 0 20px; display: flex; flex-direction: column; flex-grow: 1; opacity: 0.55;">
+    <div style="position: absolute; left: 33px; top: 30px; bottom: 0; width: 3px; border-radius: 2px; background: linear-gradient(180deg, #5856D6 0%, #007AFF 60%, #10265F 100%);"></div>
+    <div style="display: flex; gap: 18px; padding: 0 0 18px 0;">
+      <div style="width: 30px; display: flex; justify-content: center; flex-shrink: 0; padding-top: 4px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #007AFF; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 5px #007AFF;"></span></div>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #007AFF;">March 2027</span>
+        <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="font-size: 17px; font-weight: 600;">Emergency fund</span><span style="font-size: 17px; font-weight: 700;">$2,360</span></div>
+      </div>
+    </div>
+    <div style="display: flex; gap: 18px; padding: 0 0 18px 0;">
+      <div style="width: 30px; display: flex; justify-content: center; flex-shrink: 0; padding-top: 2px;"><span style="width: 16px; height: 16px; border-radius: 50%; background: #007AFF; box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 6px rgba(0,122,255,0.35);"></span></div>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #007AFF;">Now · January 2027</span>
+        <div style="display: flex; justify-content: space-between; gap: 12px;"><span style="font-size: 17px; font-weight: 600;">Peru, funded</span><span style="font-size: 17px; font-weight: 700;">$4,000</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- the check-in sheet: the only recurring input -->
+  <div style="background: #FFFFFF; border-radius: 20px 20px 0 0; box-shadow: 0 -8px 40px rgba(0,0,0,0.12); padding: 14px 20px 22px 20px; display: flex; flex-direction: column; gap: 12px;">
+    <div style="width: 36px; height: 4px; border-radius: 2px; background: #D1D1D6; align-self: center;"></div>
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+      <span style="font-size: 24px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15;">Did you put $260 aside?</span>
+      <span style="font-size: 15px; line-height: 1.4; color: rgba(60,60,67,0.78);">Partly still counts. Tell us what you managed.</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 4px;">
+      <button style="height: 52px; border: 0; border-radius: 999px; background: #5856D6; color: #FFFFFF; font-size: 17px; font-weight: 600; cursor: pointer;">Yes</button>
+      <button style="height: 52px; border: 2px solid #5856D6; border-radius: 999px; background: #FFFFFF; color: #5856D6; font-size: 17px; font-weight: 600; cursor: pointer;">Partly</button>
+      <button style="height: 44px; border: 0; border-radius: 999px; background: transparent; color: rgba(60,60,67,0.78); font-size: 15px; font-weight: 600; cursor: pointer;">Not this time</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

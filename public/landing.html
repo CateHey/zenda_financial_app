@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Zenda Path</title>
+<style>
+  :root{
+    --surface:#FFFFFF; --label:#000000; --label2:rgba(44,44,50,.85);
+    --accent:#5856D6; --blue:#007AFF; --purple:#AF52DE;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+  }
+  html{scroll-behavior:auto}
+  body{background:var(--surface);color:var(--label);font-family:var(--font);margin:0}
+  #scene{position:fixed;inset:0;z-index:0;display:block}
+  /* ---- copy beats ---- */
+  main{position:relative;z-index:1}
+  .beat{min-height:100vh;display:flex;align-items:center;padding:0 6vw;box-sizing:border-box}
+  .beat.r{justify-content:flex-end}
+  .card{max-width:340px;background:rgba(255,255,255,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+        border-radius:14px;padding:22px 24px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06)}
+  .eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  .card h2{font-size:26px;line-height:1.2;font-weight:600;letter-spacing:-.01em;margin:0 0 8px;text-wrap:balance}
+  .card p{font-size:15px;line-height:1.45;color:var(--label2);margin:0}
+  #hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:10vh 8vw;box-sizing:border-box;background:radial-gradient(ellipse 70% 64% at 50% 50%,rgba(255,255,255,.95) 0%,rgba(255,255,255,.82) 52%,rgba(255,255,255,0) 82%)}
+  #hero .eyebrow{font-size:13px;margin-bottom:14px}
+  #hero h1{font-size:clamp(40px,6.4vw,78px);line-height:1.05;font-weight:700;letter-spacing:-.02em;margin:0;max-width:21ch;text-wrap:balance}
+  #hero .sub{font-size:20px;line-height:1.5;color:rgba(20,20,26,.92);margin:16px 0 0;max-width:52ch}
+  @media (max-width:640px){ #hero{padding:6vh 6vw} }
+  .steps{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:18px;margin-top:34px}
+  .step{display:flex;flex-direction:column;align-items:center}
+  .circle{width:68px;height:68px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06);
+        display:flex;align-items:center;justify-content:center}
+  .circle svg{width:28px;height:28px}
+  .lbl{margin-top:10px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(20,20,26,.9);text-align:center}
+  .connector{width:44px;height:1px;background:rgba(60,60,67,.25)}
+  @media (max-width:480px){ .connector{display:none} }
+  @media (prefers-reduced-motion: no-preference){
+    .step{opacity:0;animation:stepIn 300ms cubic-bezier(0.16,1,0.3,1) forwards}
+    .step:nth-child(1){animation-delay:900ms}
+    .step:nth-child(3){animation-delay:1050ms}
+    .step:nth-child(5){animation-delay:1200ms}
+    @keyframes stepIn{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  }
+  .cta{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:36px}
+  #ctaStart{background:var(--accent);color:#fff;font-family:var(--font);font-size:17px;font-weight:600;
+        border:0;border-radius:999px;padding:16px 34px;cursor:pointer;text-decoration:none;display:inline-block}
+  #ctaStart:hover{filter:brightness(1.08)}
+  #ctaStart:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
+  .ghost{background:transparent;color:var(--accent);font-family:var(--font);font-size:17px;font-weight:600;
+        border:0;padding:16px 34px;cursor:pointer;text-decoration:none;display:inline-block}
+  .ghost:hover{text-decoration:underline}
+  .ghost:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
+  .spacer{height:55vh}
+  /* ---- HUD ---- */
+  #hud{position:fixed;top:16px;left:16px;z-index:2;background:rgba(255,255,255,.78);backdrop-filter:blur(8px);
+       -webkit-backdrop-filter:blur(8px);border-radius:12px;padding:10px 14px;box-shadow:0 1px 2px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.07);
+       font-size:12px;line-height:1.5;min-width:210px}
+  #hud .brand{display:flex;align-items:center;gap:7px;font-weight:600;font-size:12px;margin-bottom:3px}
+  #hud .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple))}
+  #hud .beatname{color:var(--label);font-weight:500}
+  #hud .stats{color:var(--label2);font-variant-numeric:tabular-nums}
+  #hint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:2;color:var(--label2);
+        font-size:12px;letter-spacing:.06em;text-transform:uppercase;transition:opacity .5s;pointer-events:none}
+  #hint::after{content:"";display:block;width:1px;height:26px;background:var(--label2);margin:8px auto 0;
+        animation:drip 1.6s cubic-bezier(.16,1,.3,1) infinite}
+  @keyframes drip{from{transform:scaleY(0);transform-origin:top}60%{transform:scaleY(1);transform-origin:top}
+        61%{transform-origin:bottom}to{transform:scaleY(0);transform-origin:bottom}}
+  /* ---- fallback poster ---- */
+  #poster{display:none;position:fixed;inset:0;z-index:3;background:#fff;align-items:center;justify-content:center;text-align:center;padding:6vw}
+  #poster .inner{position:relative;max-width:560px}
+  #poster .streak{position:absolute;left:-10%;bottom:18%;width:120%;height:20vh;border-radius:50%;
+        background:linear-gradient(90deg,#007AFF,#5856D6 55%,#AF52DE);filter:blur(46px);opacity:.28;transform:rotate(-7deg)}
+  #poster h1{position:relative;font-size:clamp(30px,5vw,52px);font-weight:700;letter-spacing:-.02em;margin:0 0 10px}
+  #poster p{position:relative;color:var(--label2);font-size:15px;max-width:44ch;margin:0 auto}
+  #reason{margin-top:10px !important;font-size:13px !important}
+  #play{position:relative;display:none;margin:22px auto 0;padding:12px 26px;border:0;border-radius:999px;
+        background:var(--accent);color:#fff;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer}
+  #play:hover{filter:brightness(1.08)}
+  #play:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
+  .fallback #poster{display:flex}
+  .fallback #scene,.fallback #hud,.fallback #hint{visibility:hidden}
+  .fallback main{display:none}
+  @media (max-width:640px){ .card{max-width:78vw} #hud{min-width:0} }
+</style>
+</head>
+<body>
+
+
+<canvas id="scene"></canvas>
+
+<div id="hud">
+  <div class="brand"><span class="dot"></span>Zenda — scene demo</div>
+  <div class="beatname" id="beatname">01 · Hero — three steps up</div>
+  <div class="stats"><span id="tval">t 0.00</span> · <span id="fps">— fps</span></div>
+</div>
+<div id="hint">scroll</div>
+
+<div id="poster"><div class="inner">
+  <div class="streak"></div>
+  <h1>Your paycheck is the engine.</h1>
+  <p>The path runs from today, through your milestones, to the goal.</p>
+  <p id="reason"></p>
+  <button id="play" type="button">▶&nbsp; Play the scene</button>
+</div></div>
+
+<main>
+  <section id="hero">
+    <p class="eyebrow">Zenda</p>
+    <h1>Discover your path to financial freedom.</h1>
+    <p class="sub">Financial advice is everywhere. Personal direction isn't. Tell us what freedom means to you and we'll turn it into a journey you can actually see, understand and follow.</p>
+    <div class="steps" aria-label="How it works">
+      <div class="step"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="6"/><line x1="19" y1="19" x2="14.5" y2="14.5"/></svg></span><span class="lbl">Discover</span></div>
+      <div class="connector"></div>
+      <div class="step"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/><path d="M6 11l3.5 2.5 3-3.5 4 1.5" stroke-dasharray="1 2.6"/><circle cx="16.5" cy="10.5" r="0.9" fill="#5856D6" stroke="none"/></svg></span><span class="lbl">Roadmap</span></div>
+      <div class="connector"></div>
+      <div class="step"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7.5 15a4.5 4.5 0 0 1 9 0"/><line x1="12" y1="15" x2="14.2" y2="11.8"/><line x1="6" y1="19" x2="6" y2="17"/><line x1="18" y1="19" x2="18" y2="17"/></svg></span><span class="lbl">Progress</span></div>
+    </div>
+    <div class="cta">
+      <a id="ctaStart" href="/signup">Start your journey 🚀</a>
+      <a id="ctaVinuy" href="/login?demo=vinuy" class="ghost">See Vinuy's journey</a>
+    </div>
+  </section>
+
+  <section class="beat r"><div class="card">
+    <p class="eyebrow">02 · The problem</p>
+    <h2>Money leaks.</h2>
+    <p>The path ahead greys out; particles fall away from the stream. The quietest beat on the page.</p>
+  </div></section>
+
+  <section class="beat"><div class="card">
+    <p class="eyebrow">03 · How it works</p>
+    <h2>Milestones ignite.</h2>
+    <p>Conversation → roadmap → check-in. Three nodes light in sequence as you pass them.</p>
+  </div></section>
+
+  <section class="beat r"><div class="card">
+    <p class="eyebrow">04 · The employee view</p>
+    <h2>The ¾ swing.</h2>
+    <p>Camera moves beside the path. On the real page, the product UI docks into this half of the screen.</p>
+  </div></section>
+
+  <section class="beat"><div class="card">
+    <p class="eyebrow">05 · The HR view</p>
+    <h2>You see the current, never the swimmer.</h2>
+    <p>The organisation appears as anonymous parallel paths — readable only as a flow. The privacy promise, drawn.</p>
+  </div></section>
+
+  <section class="beat r"><div class="card">
+    <p class="eyebrow">06 · Proof</p>
+    <h2>Convergence.</h2>
+    <p>Every path bends toward the same horizon.</p>
+  </div></section>
+
+  <section class="beat"><div class="card">
+    <p class="eyebrow">07 · Freedom</p>
+    <h2>Arrival.</h2>
+    <p>The goal — the one loud moment of the page. The call to action lives here.</p>
+  </div></section>
+
+  <div class="spacer"></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // CTAs are now real links (/signup, /login?demo=vinuy) — no click-scroll wiring needed.
+
+  var started = false;
+  function showPoster(reason, allowPlay){
+    document.documentElement.classList.add("fallback");
+    document.getElementById("reason").textContent = reason;
+    if (allowPlay){
+      var btn = document.getElementById("play");
+      btn.style.display = "inline-block";
+      btn.addEventListener("click", function(){
+        document.documentElement.classList.remove("fallback");
+        startScene();
+      });
+      btn.focus();
+    }
+  }
+
+  // ---------- capability checks (poster only when the scene truly can't run) ----------
+  if (!window.THREE){
+    showPoster("The three.js script didn't load — check your internet connection and reload.", false);
+    return;
+  }
+  var testCanvas = document.createElement("canvas");
+  var glTest = testCanvas.getContext("webgl2") || testCanvas.getContext("webgl");
+  if (!glTest){
+    showPoster("WebGL isn't available in this browser, so this is the poster frame.", false);
+    return;
+  }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches){
+    // The production page stops here. The demo offers a manual start so the scene can be reviewed.
+    showPoster("Your system asks for reduced motion (Windows: Settings → Accessibility → Visual effects → Animation effects). The scene will only play if you press the button.", true);
+    return;
+  }
+  startScene();
+
+  function startScene(){
+  if (started) return; started = true;
+
+  // ---------- palette (tokens → linear space for shader mixing) ----------
+  function lin(hex){
+    var c = new THREE.Color(hex);
+    return new THREE.Vector3(Math.pow(c.r,2.2), Math.pow(c.g,2.2), Math.pow(c.b,2.2));
+  }
+  // Six-stop journey ramp (ZENDA_DESIGN.md §1 `journey.light`): deep navy underfoot →
+  // rich blue → luminous blue → indigo → blue-violet → purple at the goal.
+  var C0=lin("#10265F"), C1=lin("#0057D9"), C2=lin("#007AFF"),
+      C3=lin("#5856D6"), C4=lin("#8450DA"), C5=lin("#AF52DE");
+  var C_GREY = lin("#9A9AA2");
+  // Atmosphere drift stops (§1 `atmosphere.light`) — cool navy-white → violet-white.
+  var ATMO_A = new THREE.Color("#F7F9FE"), ATMO_B = new THREE.Color("#FAF7FE");
+  var atmoColor = new THREE.Color();
+
+  var isSmall = innerWidth < 768 || (navigator.deviceMemory && navigator.deviceMemory <= 4);
+  var N_PART = isSmall ? 3000 : 7000;
+  var DPR = Math.min(devicePixelRatio || 1, isSmall ? 1.5 : 1.75);
+
+  // ---------- renderer ----------
+  var canvas = document.getElementById("scene");
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setClearColor(0xffffff, 1);
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 300);
+
+  // ---------- the path ----------
+  var curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3( 0.0, 0.00,   4),
+    new THREE.Vector3( 0.6, 0.15,  -4),
+    new THREE.Vector3(-2.2, 0.50, -13),
+    new THREE.Vector3( 1.8, 0.95, -24),
+    new THREE.Vector3(-1.4, 1.50, -36),
+    new THREE.Vector3( 0.4, 2.00, -48),
+    new THREE.Vector3( 0.0, 2.40, -58)
+  ]);
+  var GOAL = curve.getPointAt(1);
+
+  // Bake curve into a float texture for the particle vertex shader (no CPU updates).
+  var PATH_RES = 512;
+  var pathData = new Float32Array(PATH_RES * 4);
+  for (var i = 0; i < PATH_RES; i++){
+    var p = curve.getPointAt(i/(PATH_RES-1));
+    pathData[i*4] = p.x; pathData[i*4+1] = p.y; pathData[i*4+2] = p.z; pathData[i*4+3] = 1;
+  }
+  var pathTex = new THREE.DataTexture(pathData, PATH_RES, 1, THREE.RGBAFormat, THREE.FloatType);
+  pathTex.minFilter = pathTex.magFilter = THREE.NearestFilter;
+  pathTex.needsUpdate = true;
+
+  // Shared shader chunks -------------------------------------------------
+  var RAMP = [
+    "uniform vec3 uC0,uC1,uC2,uC3,uC4,uC5;",
+    "vec3 ramp(float x){ x=clamp(x,0.0,1.0)*5.0;",
+    "  vec3 c=mix(uC0,uC1,clamp(x,0.0,1.0));",
+    "  c=mix(c,uC2,clamp(x-1.0,0.0,1.0));",
+    "  c=mix(c,uC3,clamp(x-2.0,0.0,1.0));",
+    "  c=mix(c,uC4,clamp(x-3.0,0.0,1.0));",
+    "  c=mix(c,uC5,clamp(x-4.0,0.0,1.0));",
+    "  return c; }"
+  ].join("\n");
+  var SNOISE = [ // Ashima 3D simplex noise (public domain)
+    "vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}",
+    "vec4 mod289(vec4 x){return x-floor(x*(1.0/289.0))*289.0;}",
+    "vec4 permute(vec4 x){return mod289(((x*34.0)+1.0)*x);}",
+    "vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}",
+    "float snoise(vec3 v){",
+    "  const vec2 C=vec2(1.0/6.0,1.0/3.0); const vec4 D=vec4(0.0,0.5,1.0,2.0);",
+    "  vec3 i=floor(v+dot(v,C.yyy)); vec3 x0=v-i+dot(i,C.xxx);",
+    "  vec3 g=step(x0.yzx,x0.xyz); vec3 l=1.0-g; vec3 i1=min(g.xyz,l.zxy); vec3 i2=max(g.xyz,l.zxy);",
+    "  vec3 x1=x0-i1+C.xxx; vec3 x2=x0-i2+C.yyy; vec3 x3=x0-D.yyy;",
+    "  i=mod289(i);",
+    "  vec4 p=permute(permute(permute(i.z+vec4(0.0,i1.z,i2.z,1.0))+i.y+vec4(0.0,i1.y,i2.y,1.0))+i.x+vec4(0.0,i1.x,i2.x,1.0));",
+    "  float n_=0.142857142857; vec3 ns=n_*D.wyz-D.xzx;",
+    "  vec4 j=p-49.0*floor(p*ns.z*ns.z);",
+    "  vec4 x_=floor(j*ns.z); vec4 y_=floor(j-7.0*x_);",
+    "  vec4 x=x_*ns.x+ns.yyyy; vec4 y=y_*ns.x+ns.yyyy; vec4 h=1.0-abs(x)-abs(y);",
+    "  vec4 b0=vec4(x.xy,y.xy); vec4 b1=vec4(x.zw,y.zw);",
+    "  vec4 s0=floor(b0)*2.0+1.0; vec4 s1=floor(b1)*2.0+1.0; vec4 sh=-step(h,vec4(0.0));",
+    "  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy; vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;",
+    "  vec3 p0=vec3(a0.xy,h.x); vec3 p1=vec3(a0.zw,h.y); vec3 p2=vec3(a1.xy,h.z); vec3 p3=vec3(a1.zw,h.w);",
+    "  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));",
+    "  p0*=norm.x; p1*=norm.y; p2*=norm.z; p3*=norm.w;",
+    "  vec4 m=max(0.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.0); m=m*m;",
+    "  return 42.0*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));",
+    "}"
+  ].join("\n");
+  var FOG = "float fogAt(float d){return smoothstep(18.0,62.0,d);}";
+  var GAMMA = "vec3 toSRGB(vec3 c){return pow(max(c,0.0),vec3(1.0/2.2));}";
+
+  var shared = {
+    uTime:{value:0}, uProg:{value:0}, uDesat:{value:0}, uScatter:{value:0},
+    uOrbit:{value:0}, uConverge:{value:0}, uOrgAlpha:{value:0},
+    uC0:{value:C0}, uC1:{value:C1}, uC2:{value:C2}, uC3:{value:C3}, uC4:{value:C4}, uC5:{value:C5},
+    uGrey:{value:C_GREY}, uGoal:{value:GOAL}, uPath:{value:pathTex},
+    uReveal:{value:0}, uFogCol:{value:lin("#F7F9FE")}, uDissolve:{value:0}
+  };
+  function U(names){ var o={}; names.forEach(function(n){o[n]=shared[n];}); return o; }
+
+  // ---------- the goal-rain atlas: 5-cell canvas texture, built once before materials ----------
+  // Each life-goal emoji is drawn full-colour on a temp canvas, then recoloured to a white
+  // silhouette via source-in compositing (alpha preserved) so the fragment shader can tint it
+  // per-particle along the journey ramp instead of rendering full-colour emoji (§5.13).
+  function buildGoalAtlas(){
+    var EMO=["✈️","🏠","🚗","🎓","👪"]; // ✈️🏠🚗🎓👪
+    var atlas=document.createElement("canvas"); atlas.width=640; atlas.height=128;
+    var ax=atlas.getContext("2d");
+    for (var i=0;i<5;i++){
+      var c=document.createElement("canvas"); c.width=c.height=128;
+      var x=c.getContext("2d");
+      x.font="100px "+'"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+      x.textAlign="center"; x.textBaseline="middle";
+      x.fillText(EMO[i],64,70);
+      x.globalCompositeOperation="source-in";   // recolour: white silhouette, alpha preserved
+      x.fillStyle="#fff"; x.fillRect(0,0,128,128);
+      ax.drawImage(c,i*128,0);
+    }
+    var tex=new THREE.CanvasTexture(atlas); tex.minFilter=THREE.LinearFilter; return tex;
+  }
+  var goalAtlas = buildGoalAtlas();
+
+  // ---------- horizon aurora (§5.15 A) — one plane, drawn behind everything ----------
+  // A soft, slow-breathing wash of light behind the goal: blue early, warming toward violet
+  // as t rises, foreshadowing the arrival. renderOrder -1 + depthTest false puts it behind
+  // every other element regardless of scene-add order; no fog mix — it IS the horizon light.
+  (function(){
+    var g = new THREE.PlaneGeometry(140, 34);
+    var m = new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false, depthTest:false,
+      uniforms:U(["uTime","uReveal","uProg","uC2","uC4","uC5"]),
+      vertexShader:
+        "varying vec2 vUv;"+
+        "void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }",
+      fragmentShader: GAMMA+
+        "uniform float uTime,uReveal,uProg; uniform vec3 uC2,uC4,uC5;"+
+        "varying vec2 vUv;"+
+        "void main(){"+
+        " vec2 d=(vUv-0.5)*vec2(2.2,2.6); float mask=1.0-smoothstep(0.55,1.0,length(d));"+
+        " float n=0.5+0.5*sin(vUv.x*7.0+uTime*0.10)*sin(vUv.x*3.1-uTime*0.06+vUv.y*2.0);"+
+        " float band=smoothstep(0.15,0.5,vUv.y)*(1.0-smoothstep(0.5,0.95,vUv.y));"+
+        " vec3 c=mix(uC2,mix(uC4,uC5,0.5),clamp(uProg*1.2,0.0,1.0));"+
+        " float breathe=0.75+0.25*sin(uTime*0.15);"+
+        " float a=mask*band*(0.045+0.035*n)*breathe*uReveal;"+
+        " gl_FragColor=vec4(toSRGB(c),a); }"
+    });
+    var mesh = new THREE.Mesh(g,m);
+    mesh.position.set(0,9,-78);
+    mesh.renderOrder=-1; mesh.frustumCulled=false;
+    scene.add(mesh);
+  })();
+
+  // ---------- ground dot grid (parallax cue) ----------
+  var ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(240, 240),
+    new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms:U(["uTime"]),
+      vertexShader:"varying vec3 vW; varying float vD; void main(){ vW=(modelMatrix*vec4(position,1.0)).xyz; vec4 mv=modelViewMatrix*vec4(position,1.0); vD=-mv.z; gl_Position=projectionMatrix*mv; }",
+      fragmentShader: FOG+"uniform float uTime; varying vec3 vW; varying float vD;"+
+        "void main(){ vec2 g=fract(vW.xz*0.5)-0.5; float d=length(g);"+
+        " float a=smoothstep(0.055,0.02,d)*0.16*(1.0-fogAt(vD));"+
+        // ground ripples (§5.15 C): thin rings expanding from the base of the stairs,
+        // the journey radiating from where you stand — an extension of this fragment only.
+        " float rr=length(vW.xz-vec2(0.0,4.0));"+
+        " float rc=fract(rr*0.5-uTime*0.10);"+
+        " float ring=smoothstep(0.0,0.12,rc)*(1.0-smoothstep(0.18,0.30,rc));"+
+        " float ringA=ring*0.05*(1.0-smoothstep(6.0,16.0,rr))*(1.0-fogAt(vD));"+
+        " a=max(a,ringA);"+
+        " gl_FragColor=vec4(vec3(0.24,0.24,0.27),a); }"
+    })
+  );
+  ground.rotation.x = -Math.PI/2; ground.position.y = -0.02; ground.position.z = -25;
+  ground.renderOrder = 0; ground.frustumCulled = false;
+  scene.add(ground);
+
+  // ---------- the ribbon ----------
+  (function(){
+    var SEG = 400, up = new THREE.Vector3(0,1,0);
+    var pos = new Float32Array((SEG+1)*2*3), aT = new Float32Array((SEG+1)*2), aS = new Float32Array((SEG+1)*2);
+    var idx = [];
+    for (var i=0;i<=SEG;i++){
+      var t=i/SEG, pt=curve.getPointAt(t), tan=curve.getTangentAt(t);
+      var bin=new THREE.Vector3().crossVectors(tan,up).normalize();
+      var w=(0.7*(1-t)+0.28*t)/2;
+      for (var s=0;s<2;s++){
+        var sign=s===0?-1:1, k=(i*2+s);
+        pos[k*3]=pt.x+bin.x*w*sign; pos[k*3+1]=pt.y+0.02; pos[k*3+2]=pt.z+bin.z*w*sign;
+        aT[k]=t; aS[k]=sign;
+      }
+      if(i<SEG){ var a=i*2,b=i*2+1,c=i*2+2,d=i*2+3; idx.push(a,b,c,b,d,c); }
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+    g.setAttribute("aT",new THREE.BufferAttribute(aT,1));
+    g.setAttribute("aSide",new THREE.BufferAttribute(aS,1));
+    g.setIndex(idx);
+    var m=new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false, side:THREE.DoubleSide,
+      uniforms:U(["uTime","uDesat","uC0","uC1","uC2","uC3","uC4","uC5","uGrey","uReveal","uFogCol"]),
+      vertexShader: SNOISE+
+        "attribute float aT; attribute float aSide; uniform float uTime;"+
+        "varying float vT; varying float vS; varying float vD;"+
+        "void main(){ vT=aT; vS=aSide;"+
+        " vec3 p=position;"+
+        " p.y += snoise(vec3(aT*6.0, uTime*0.25, 3.7))*0.12*(0.3+aT);"+
+        " p.x += snoise(vec3(aT*4.0, uTime*0.2, 9.1))*0.05;"+
+        " vec4 mv=modelViewMatrix*vec4(p,1.0); vD=-mv.z; gl_Position=projectionMatrix*mv; }",
+      fragmentShader: RAMP+FOG+GAMMA+
+        "uniform float uDesat; uniform vec3 uGrey; uniform float uReveal; uniform vec3 uFogCol;"+
+        "varying float vT; varying float vS; varying float vD;"+
+        "void main(){ vec3 c=ramp(vT);"+
+        " float w=uDesat*smoothstep(0.05,0.45,vT);"+
+        " c=mix(c,uGrey,w);"+
+        " float front=smoothstep(uReveal-0.06,uReveal-0.02,vT)*(1.0-smoothstep(uReveal-0.02,uReveal,vT));"+
+        " c=mix(c,uC2*1.6,front*0.8);"+
+        " float f=fogAt(vD); c=mix(c,uFogCol,f);"+
+        " float edge=1.0-smoothstep(0.45,1.0,abs(vS));"+
+        " float reveal=1.0-smoothstep(uReveal-0.02,uReveal,vT);"+
+        " float a=edge*(1.0-f*0.9)*0.92*reveal;"+
+        " a *= smoothstep(0.004,0.03,vT);"+ // soft head fade — ribbon emerges from behind the top step
+        " gl_FragColor=vec4(toSRGB(c),a); }"
+    });
+    var mesh=new THREE.Mesh(g,m); mesh.renderOrder=2; mesh.frustumCulled=false;
+    scene.add(mesh);
+  })();
+
+  // ---------- org paths (beat 5: the anonymous currents) ----------
+  (function(){
+    var LINES=40, PTS=110, up=new THREE.Vector3(0,1,0);
+    var verts=[], lats=[], ts=[], seeds=[];
+    for (var l=0;l<LINES;l++){
+      var side=l<LINES/2?-1:1;
+      var L=side*(1.6+(l%(LINES/2))*0.62+Math.random()*0.4);
+      var jy=0.15+Math.random()*0.5, seed=Math.random();
+      var prev=null;
+      for (var i2=0;i2<PTS;i2++){
+        var t=i2/(PTS-1), pt=curve.getPointAt(t), tan=curve.getTangentAt(t);
+        var bin=new THREE.Vector3().crossVectors(tan,up).normalize();
+        var lat=[bin.x*L, jy, bin.z*L];
+        var v=[pt.x+lat[0], pt.y*0.9+lat[1], pt.z+lat[2]];
+        if (prev){
+          verts.push(prev.v[0],prev.v[1],prev.v[2], v[0],v[1],v[2]);
+          lats.push(prev.lat[0],prev.lat[1]-jy,prev.lat[2], lat[0],lat[1]-jy,lat[2]);
+          ts.push(prev.t,t); seeds.push(seed,seed);
+        }
+        prev={v:v,lat:lat,t:t};
+      }
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position",new THREE.BufferAttribute(new Float32Array(verts),3));
+    g.setAttribute("aLat",new THREE.BufferAttribute(new Float32Array(lats),3));
+    g.setAttribute("aT",new THREE.BufferAttribute(new Float32Array(ts),1));
+    g.setAttribute("aSeed",new THREE.BufferAttribute(new Float32Array(seeds),1));
+    var m=new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms:U(["uConverge","uOrgAlpha"]),
+      vertexShader:
+        "attribute vec3 aLat; attribute float aT; attribute float aSeed; uniform float uConverge;"+
+        "varying float vT; varying float vSeed; varying float vD;"+
+        "void main(){ vT=aT; vSeed=aSeed;"+
+        " vec3 p=position - aLat*(uConverge*smoothstep(0.15,1.0,aT));"+
+        " vec4 mv=modelViewMatrix*vec4(p,1.0); vD=-mv.z; gl_Position=projectionMatrix*mv; }",
+      fragmentShader: FOG+GAMMA+
+        "uniform float uOrgAlpha; varying float vT; varying float vSeed; varying float vD;"+
+        "void main(){ float dash=step(fract(vT*38.0+vSeed*7.0),0.55);"+
+        " float a=uOrgAlpha*0.4*dash*(1.0-fogAt(vD));"+
+        " vec3 c=mix(vec3(0.30,0.30,0.42),vec3(0.35,0.34,0.75),0.5);"+
+        " gl_FragColor=vec4(toSRGB(c),a); }"
+    });
+    var lines=new THREE.LineSegments(g,m); lines.renderOrder=1; lines.frustumCulled=false;
+    scene.add(lines);
+  })();
+
+  // ---------- paycheck particles ----------
+  (function(){
+    var pos=new Float32Array(N_PART*3); // dummy — real position from path texture
+    var seed=new Float32Array(N_PART*4), scat=new Float32Array(N_PART*3), rand=new Float32Array(N_PART);
+    for (var i3=0;i3<N_PART;i3++){
+      seed[i3*4]=Math.random(); seed[i3*4+1]=0.5+Math.random(); seed[i3*4+2]=Math.random(); seed[i3*4+3]=Math.random();
+      var a=Math.random()*Math.PI*2, e=Math.random()*2-1;
+      scat[i3*3]=Math.cos(a)*Math.sqrt(1-e*e); scat[i3*3+1]=Math.abs(e)*-0.8; scat[i3*3+2]=Math.sin(a)*Math.sqrt(1-e*e);
+      rand[i3]=Math.random();
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+    g.setAttribute("aSeed",new THREE.BufferAttribute(seed,4));
+    g.setAttribute("aScatter",new THREE.BufferAttribute(scat,3));
+    g.setAttribute("aRand",new THREE.BufferAttribute(rand,1));
+    var m=new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms:U(["uTime","uScatter","uOrbit","uGoal","uPath","uC0","uC1","uC2","uC3","uC4","uC5","uReveal","uFogCol"]),
+      vertexShader:
+        "attribute vec4 aSeed; attribute vec3 aScatter; attribute float aRand;"+
+        "uniform sampler2D uPath; uniform float uTime,uScatter,uOrbit; uniform vec3 uGoal;"+
+        "varying float vProg; varying float vFade; varying float vD;"+
+        "vec3 samplePath(float t){ t=clamp(t,0.0,1.0); float fi=t*511.0; float i0=floor(fi); float f=fi-i0;"+
+        " vec3 a=texture2D(uPath,vec2((i0+0.5)/512.0,0.5)).xyz;"+
+        " vec3 b=texture2D(uPath,vec2((min(i0+1.0,511.0)+0.5)/512.0,0.5)).xyz; return mix(a,b,f); }"+
+        "void main(){"+
+        " float prog=fract(aSeed.x + uTime*0.03*aSeed.y); vProg=prog;"+
+        " vec3 p=samplePath(prog);"+
+        " vec3 tn=normalize(samplePath(min(prog+0.01,1.0))-samplePath(max(prog-0.01,0.0)));"+
+        " vec3 bn=normalize(cross(tn,vec3(0.0,1.0,0.0))); vec3 nr=normalize(cross(bn,tn));"+
+        " float ang=aSeed.z*6.2831+uTime*0.3*aRand; float rad=0.16+aSeed.w*0.55;"+
+        " p+=(bn*cos(ang)+nr*(0.45*abs(sin(ang))+0.1))*rad;"+
+        " float sc=uScatter*smoothstep(0.5,0.9,aRand);"+
+        " p+=aScatter*sc*3.5; vFade=sc;"+
+        " float oa=aSeed.z*6.2831+uTime*(0.25+0.35*aRand);"+
+        " vec3 op=uGoal+vec3(cos(oa)*(1.0+aRand*1.5),0.28*sin(oa*1.6)+0.25,sin(oa)*(1.0+aRand*1.5));"+
+        " p=mix(p,op,uOrbit*(0.3+0.7*aRand));"+
+        " vec4 mv=modelViewMatrix*vec4(p,1.0); vD=-mv.z;"+
+        " gl_PointSize=clamp((2.0+2.6*aRand)*(150.0/vD),1.0,13.0);"+
+        " gl_Position=projectionMatrix*mv; }",
+      fragmentShader: RAMP+FOG+GAMMA+
+        "uniform float uReveal; uniform vec3 uFogCol;"+
+        "varying float vProg; varying float vFade; varying float vD;"+
+        "void main(){ float d=length(gl_PointCoord-0.5); if(d>0.5) discard;"+
+        " vec3 c=mix(ramp(vProg),vec3(1.0),0.25);"+
+        " float f=fogAt(vD); c=mix(c,uFogCol,f);"+
+        " float reveal=1.0-smoothstep(uReveal-0.05,uReveal,vProg);"+
+        " float a=smoothstep(0.5,0.12,d)*0.6*(1.0-f)*(1.0-vFade*0.85)*reveal;"+
+        " gl_FragColor=vec4(toSRGB(c),a); }"
+    });
+    var pts=new THREE.Points(g,m); pts.renderOrder=3; pts.frustumCulled=false;
+    scene.add(pts);
+  })();
+
+  // ---------- milestone nodes ----------
+  var NODE_T=[0.02,0.31,0.37,0.43,1.0];
+  var NODE_COL=[C2,C3,C3,C3,C5];
+  var nodeLit=[0,0,0,0,0], nodeTarget=[0,0,0,0,0];
+  var nodesUniforms={ uTime:shared.uTime, uLit:{value:new Float32Array(5)}, uFogCol:shared.uFogCol };
+  (function(){
+    var pos=new Float32Array(15), aIdx=new Float32Array(5), aCol=new Float32Array(15);
+    for (var i4=0;i4<5;i4++){
+      var p=curve.getPointAt(NODE_T[i4]);
+      pos[i4*3]=p.x; pos[i4*3+1]=p.y+0.06; pos[i4*3+2]=p.z;
+      aIdx[i4]=i4; aCol[i4*3]=NODE_COL[i4].x; aCol[i4*3+1]=NODE_COL[i4].y; aCol[i4*3+2]=NODE_COL[i4].z;
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+    g.setAttribute("aIdx",new THREE.BufferAttribute(aIdx,1));
+    g.setAttribute("aCol",new THREE.BufferAttribute(aCol,3));
+    var m=new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms:nodesUniforms,
+      vertexShader:
+        "attribute float aIdx; attribute vec3 aCol; uniform float uTime; uniform float uLit[5];"+
+        "varying float vLit; varying vec3 vCol; varying float vD;"+
+        "void main(){ int idx=int(aIdx+0.5); vLit=uLit[idx]; vCol=aCol;"+
+        " vec4 mv=modelViewMatrix*vec4(position,1.0); vD=-mv.z;"+
+        " float pulse=1.0+0.06*sin(uTime*2.0+aIdx*2.1);"+
+        " gl_PointSize=clamp((20.0+26.0*vLit)*pulse*(150.0/vD),4.0,110.0);"+
+        " gl_Position=projectionMatrix*mv; }",
+      fragmentShader: FOG+GAMMA+
+        "uniform vec3 uFogCol;"+
+        "varying float vLit; varying vec3 vCol; varying float vD;"+
+        "void main(){ float d=length(gl_PointCoord-0.5); if(d>0.5) discard;"+
+        " vec3 dim=vec3(0.45,0.45,0.52);"+
+        " vec3 c=mix(dim,vCol,vLit);"+
+        " float f=fogAt(vD); c=mix(c,uFogCol,f*0.8);"+
+        " float core=smoothstep(0.16,0.05,d);"+
+        " float halo=smoothstep(0.5,0.18,d)*0.30*(0.4+0.6*vLit);"+
+        " float a=(core+halo)*(0.35+0.65*vLit)*(1.0-f*0.85);"+
+        " gl_FragColor=vec4(toSRGB(c),a); }"
+    });
+    var pts=new THREE.Points(g,m); pts.renderOrder=4; pts.frustumCulled=false;
+    scene.add(pts);
+  })();
+
+  // ---------- the stairs: the path's opening form (§5.12) ----------
+  // Three broad steps rising to the ribbon's start at (0,0,4); one merged BufferGeometry,
+  // one draw call. They dissolve on scroll (uDissolve, driven by t — re-forms on scroll-up)
+  // into the particle stream already flowing through them: a t-driven evolution the camera
+  // passes through, not a scene cut (§5.11 continuity law).
+  (function(){
+    var STEP_CX=0.9, STEP_W=2.4, STEP_D=0.8, STEP_BOTTOM=-1.2;
+    var STEPS=[
+      {y:-0.50, z:5.6}, // bottom step, nearest the t=0 camera
+      {y:-0.25, z:4.9},
+      {y: 0.00, z:4.2}  // top step — meets the ribbon's start (0,0,4)
+    ];
+    var positions=[], normals=[], aStep=[], indices=[], vBase=0;
+    STEPS.forEach(function(st,si){
+      var h=st.y-STEP_BOTTOM;
+      var bg=new THREE.BoxGeometry(STEP_W,h,STEP_D);
+      bg.translate(STEP_CX, STEP_BOTTOM+h/2, st.z);
+      var p=bg.attributes.position.array, n=bg.attributes.normal.array, ix=bg.index.array;
+      for (var i=0;i<p.length;i++) positions.push(p[i]);
+      for (var i=0;i<n.length;i++) normals.push(n[i]);
+      var vCount=p.length/3;
+      for (var i=0;i<vCount;i++) aStep.push(si);
+      for (var i=0;i<ix.length;i++) indices.push(ix[i]+vBase);
+      vBase+=vCount;
+    });
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position",new THREE.Float32BufferAttribute(positions,3));
+    g.setAttribute("normal",new THREE.Float32BufferAttribute(normals,3));
+    g.setAttribute("aStep",new THREE.Float32BufferAttribute(aStep,1));
+    g.setIndex(indices);
+    var m=new THREE.ShaderMaterial({
+      transparent:false, depthWrite:true, depthTest:true,
+      uniforms:U(["uC0","uC1","uC2","uDissolve","uFogCol"]),
+      vertexShader:
+        "attribute float aStep;"+
+        "varying vec3 vW; varying vec3 vN; varying float vStep; varying float vD;"+
+        "void main(){ vW=(modelMatrix*vec4(position,1.0)).xyz;"+
+        " vN=normalize(mat3(modelMatrix)*normal); vStep=aStep;"+
+        " vec4 mv=modelViewMatrix*vec4(position,1.0); vD=-mv.z; gl_Position=projectionMatrix*mv; }",
+      fragmentShader: SNOISE+FOG+GAMMA+
+        "uniform vec3 uC0,uC1,uC2; uniform float uDissolve; uniform vec3 uFogCol;"+
+        "varying vec3 vW; varying vec3 vN; varying float vStep; varying float vD;"+
+        "void main(){"+
+        " if(uDissolve>0.995) discard;"+
+        " float n=snoise(vW*2.3)*0.5+0.5;"+
+        " if(n<uDissolve) discard;"+
+        " vec3 nrm=normalize(vN);"+
+        " vec3 tint=vStep<0.5?uC0:(vStep<1.5?uC1:uC2);"+
+        " float amt=nrm.y>0.5?0.16:0.10;"+
+        " vec3 c=mix(vec3(0.955),tint,amt);"+
+        " c*=1.0-(1.0-abs(nrm.y))*0.06;"+
+        " float edge=smoothstep(uDissolve+0.10,uDissolve,n)*step(0.001,uDissolve);"+
+        " c=mix(c,uC2*1.7,edge*0.85);"+
+        " float f=fogAt(vD); c=mix(c,uFogCol,f);"+
+        " gl_FragColor=vec4(toSRGB(c),1.0); }"
+    });
+    var mesh=new THREE.Mesh(g,m); mesh.renderOrder=1; mesh.frustumCulled=false;
+    scene.add(mesh);
+  })();
+
+  // ---------- the goal rain: drifting life-goal emojis (§5.13) ----------
+  // Ambient life-goal glyphs drifting in the hero's air, around the stairs' start — objects in
+  // the 3D scene, not DOM sprinkles, per the continuity law (§5.11). One Points buffer sampling
+  // the atlas built above; alpha is gated by (1-uDissolve) so they leave with the stairs on
+  // scroll and re-form on scroll-up, and by uReveal so they fade in during the intro — same
+  // mechanism as every other element in the scene.
+  (function(){
+    var N = isSmall ? 11 : 22;
+    var pos = new Float32Array(N*3); // dummy zero positions — real position from the vertex shader
+    var aCell = new Float32Array(N), aSeed = new Float32Array(N*4), aSize = new Float32Array(N), aTint = new Float32Array(N);
+    for (var i5=0;i5<N;i5++){
+      aCell[i5] = i5 % 5;
+      aSeed[i5*4]   = Math.random();          // spawnX 0..1
+      aSeed[i5*4+1] = (i5 + Math.random()*0.8)/N; // phase spread evenly across the cycle
+      aSeed[i5*4+2] = 0.55 + Math.random()*0.45; // speed 0.55..1.0
+      aSeed[i5*4+3] = Math.random();          // zSeed 0..1
+      aSize[i5] = 0.35 + Math.random()*0.5;   // 0.35..0.85
+      aTint[i5] = Math.random();
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    g.setAttribute("aCell", new THREE.BufferAttribute(aCell,1));
+    g.setAttribute("aSeed", new THREE.BufferAttribute(aSeed,4));
+    g.setAttribute("aSize", new THREE.BufferAttribute(aSize,1));
+    g.setAttribute("aTint", new THREE.BufferAttribute(aTint,1));
+    var rainUniforms = U(["uTime","uDissolve","uReveal","uC0","uC1","uC2","uC3","uC4","uC5"]);
+    rainUniforms.uAtlas = { value: goalAtlas }; // atlas texture — this material only, not in `shared`
+    var m = new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms: rainUniforms,
+      vertexShader:
+        "attribute float aCell; attribute vec4 aSeed; attribute float aSize; attribute float aTint;"+
+        "uniform float uTime;"+
+        "varying float vCell; varying float vTint; varying float vCycle; varying float vD;"+
+        "void main(){"+
+        " vCell=aCell; vTint=aTint;"+
+        " float cyc=fract(aSeed.y + uTime*0.013*aSeed.z);"+ // one fall ~= 40-90s
+        " vCycle=cyc;"+
+        " vec3 p;"+
+        " p.x = mix(-4.5,4.5,aSeed.x) + sin(uTime*0.32 + aSeed.y*6.2831)*0.26;"+
+        " p.y = 4.0 - cyc*5.5;"+
+        " p.z = mix(1.0,6.0,aSeed.w);"+
+        " vec4 mv=modelViewMatrix*vec4(p,1.0); vD=-mv.z;"+
+        " gl_PointSize=clamp(aSize*(230.0/vD)*1.3,10.0,64.0);"+
+        " gl_Position=projectionMatrix*mv; }",
+      fragmentShader: RAMP+GAMMA+
+        "uniform sampler2D uAtlas; uniform float uDissolve; uniform float uReveal;"+
+        "varying float vCell; varying float vTint; varying float vCycle; varying float vD;"+
+        "void main(){"+
+        " vec2 uv=vec2((vCell+gl_PointCoord.x)/5.0, gl_PointCoord.y);"+
+        " vec4 tx=texture2D(uAtlas,uv);"+
+        " if(tx.a<0.05) discard;"+
+        " vec3 tint=ramp(0.4+vTint*0.6);"+ // blue -> indigo -> purple span only, never navy
+        " float edgeFade=smoothstep(0.0,0.15,vCycle)*(1.0-smoothstep(0.85,1.0,vCycle));"+ // soft respawn
+        " float a=tx.a*0.62*edgeFade*(1.0-uDissolve)*uReveal;"+
+        " gl_FragColor=vec4(toSRGB(tint),a); }"
+    });
+    var pts = new THREE.Points(g,m); pts.renderOrder=2; pts.frustumCulled=false;
+    scene.add(pts);
+  })();
+
+  // ---------- depth motes (§5.15 B) — faint bokeh discs along the whole ride ----------
+  // Ambient depth cue, not a hero prop: spawns span the full path (z: hero to goal region),
+  // so the atmosphere travels with the visitor rather than sitting only around the stairs.
+  // Fades in with uReveal like everything else in the intro, but does NOT gate on uDissolve —
+  // atmosphere persists through the stairs' dissolve (§5.15 behaviour rules).
+  (function(){
+    var N = isSmall ? 7 : 14;
+    var pos=new Float32Array(N*3); // dummy — real position from aPos below
+    var aPosArr=new Float32Array(N*3), seed=new Float32Array(N*2);
+    for (var i6=0;i6<N;i6++){
+      var mx;
+      do { mx = (Math.random()*2-1)*11; } while (Math.abs(mx) < 2.5);
+      var my = 0.5 + Math.random()*6.0;
+      var mz = 6 - (i6/N)*66 + (Math.random()*2-1)*3;
+      aPosArr[i6*3]=mx; aPosArr[i6*3+1]=my; aPosArr[i6*3+2]=mz;
+      seed[i6*2]=Math.random(); seed[i6*2+1]=Math.random();
+    }
+    var g=new THREE.BufferGeometry();
+    g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+    g.setAttribute("aPos",new THREE.BufferAttribute(aPosArr,3));
+    g.setAttribute("aSeed",new THREE.BufferAttribute(seed,2));
+    var m=new THREE.ShaderMaterial({
+      transparent:true, depthWrite:false,
+      uniforms:U(["uTime","uReveal","uC2","uC3"]),
+      vertexShader:
+        "attribute vec3 aPos; attribute vec2 aSeed; uniform float uTime;"+
+        "varying vec2 vSeed; varying float vD;"+
+        "void main(){ vSeed=aSeed;"+
+        " vec3 p=aPos+vec3(sin(uTime*0.07+aSeed.x*6.2831)*0.6, sin(uTime*0.05+aSeed.y*6.2831)*0.4, 0.0);"+
+        " vec4 mv=modelViewMatrix*vec4(p,1.0); vD=-mv.z;"+
+        " gl_PointSize=clamp((3.0+aSeed.y*4.0)*(230.0/vD)*1.3,80.0,220.0);"+
+        " gl_Position=projectionMatrix*mv; }",
+      fragmentShader: FOG+GAMMA+
+        "uniform float uReveal; uniform vec3 uC2,uC3;"+
+        "varying vec2 vSeed; varying float vD;"+
+        "void main(){ float dd=length(gl_PointCoord-0.5); if(dd>0.5) discard;"+
+        " vec3 c=mix(uC2,uC3,vSeed.y);"+
+        " float soft=1.0-smoothstep(0.0,0.5,dd);"+
+        " float a=soft*soft*(0.025+0.025*vSeed.x)*(1.0-fogAt(vD)*0.6)*uReveal;"+
+        " gl_FragColor=vec4(toSRGB(c),a); }"
+    });
+    var pts=new THREE.Points(g,m); pts.renderOrder=1; pts.frustumCulled=false;
+    scene.add(pts);
+  })();
+
+  // ---------- goal glow sprite ----------
+  var glowTex=(function(){
+    var c=document.createElement("canvas"); c.width=c.height=256;
+    var x=c.getContext("2d");
+    var g=x.createRadialGradient(128,128,0,128,128,128);
+    g.addColorStop(0,"rgba(175,82,222,0.50)"); g.addColorStop(0.4,"rgba(175,82,222,0.18)");
+    g.addColorStop(1,"rgba(175,82,222,0)");
+    x.fillStyle=g; x.fillRect(0,0,256,256);
+    return new THREE.CanvasTexture(c);
+  })();
+  var glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,transparent:true,depthWrite:false,opacity:0}));
+  glow.position.copy(GOAL).y+=0.3; glow.scale.set(7,7,1); glow.renderOrder=5;
+  scene.add(glow);
+
+  // ---------- camera rails ----------
+  var camRail=new THREE.CatmullRomCurve3([
+    new THREE.Vector3( 0.0, 0.9,   7.0),
+    new THREE.Vector3( 0.8, 2.2,   3.0),
+    new THREE.Vector3(-1.5, 1.8,  -6.0),
+    new THREE.Vector3( 2.2, 1.6, -16.0),
+    new THREE.Vector3( 5.5, 2.4, -22.0),
+    new THREE.Vector3( 0.5,16.0, -30.0),
+    new THREE.Vector3(-2.0, 8.0, -44.0),
+    new THREE.Vector3( 0.0, 3.1, -53.5)
+  ]);
+  var lookRail=new THREE.CatmullRomCurve3([
+    new THREE.Vector3( 0.0, 0.6,  -6.0),
+    new THREE.Vector3( 0.0, 0.8, -10.0),
+    new THREE.Vector3( 0.5, 0.9, -20.0),
+    new THREE.Vector3(-0.5, 1.2, -28.0),
+    new THREE.Vector3(-1.0, 1.3, -30.0),
+    new THREE.Vector3( 0.0, 1.2, -34.0),
+    new THREE.Vector3( 0.0, 2.2, -54.0),
+    new THREE.Vector3( 0.0, 2.4, -58.0)
+  ]);
+
+  // ---------- scroll, beats, envelopes ----------
+  function env(t,a,b,c,d){ // rise a→b, fall c→d
+    function ss(e0,e1,x){ var v=Math.min(1,Math.max(0,(x-e0)/(e1-e0))); return v*v*(3-2*v); }
+    return ss(a,b,t)*(1-ss(c,d,t));
+  }
+  function rise(t,a,b){ var v=Math.min(1,Math.max(0,(t-a)/(b-a))); return v*v*(3-2*v); }
+
+  var BEATS=[
+    [0.00,"01 · Hero — three steps up"],
+    [0.12,"02 · The problem — money leaks"],
+    [0.28,"03 · How it works — milestones ignite"],
+    [0.45,"04 · Employee view — the ¾ swing"],
+    [0.62,"05 · HR view — anonymous currents"],
+    [0.78,"06 · Proof — convergence"],
+    [0.92,"07 · Freedom — arrival"]
+  ];
+  var NODE_TH=[-1,0.31,0.37,0.43,0.90];
+
+  var tTarget=0, tRender=0, px=0, py=0, pxT=0, pyT=0, scrolled=false;
+  addEventListener("scroll",function(){
+    var max=document.documentElement.scrollHeight-innerHeight;
+    tTarget=max>0?Math.min(1,Math.max(0,scrollY/max)):0;
+    if(!scrolled && scrollY>40){scrolled=true;document.getElementById("hint").style.opacity="0";}
+  },{passive:true});
+  var isTouch=matchMedia("(pointer: coarse)").matches;
+  if(!isTouch) addEventListener("pointermove",function(e){
+    pxT=(e.clientX/innerWidth)*2-1; pyT=(e.clientY/innerHeight)*2-1;
+  },{passive:true});
+  addEventListener("resize",function(){
+    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+
+  // ---------- HUD ----------
+  var elBeat=document.getElementById("beatname"), elT=document.getElementById("tval"), elFps=document.getElementById("fps");
+  var elHero=document.getElementById("hero");
+  var frames=0, fpsClock=0;
+
+  // ---------- frame loop ----------
+  var clock=new THREE.Clock();
+  var camPos=new THREE.Vector3(), lookPos=new THREE.Vector3();
+  function frame(){
+    var dt=Math.min(clock.getDelta(),0.05), time=clock.elapsedTime;
+    // Autonomous intro + seamless scroll handoff (ZENDA_DESIGN.md §5.11 mechanic 1):
+    // introFloor eases 0 -> ~0.08 over ~6s and holds forever; scroll takes over the
+    // instant it exceeds the floor. Damping is UNCHANGED, so no code path can jump t.
+    var introFloor = 0.08 * rise(time, 0, 6);
+    var target = Math.max(introFloor, tTarget);
+    tRender += (target - tRender) * Math.min(1, dt*4);
+    px+=(pxT-px)*Math.min(1,dt*3); py+=(pyT-py)*Math.min(1,dt*3);
+    var t=tRender;
+
+    // envelopes
+    shared.uTime.value=time;
+    shared.uProg.value=t;
+    shared.uDesat.value=env(t,0.12,0.18,0.24,0.30);
+    shared.uScatter.value=env(t,0.13,0.20,0.24,0.30);
+    shared.uOrgAlpha.value=env(t,0.60,0.66,0.90,0.96);
+    shared.uConverge.value=rise(t,0.76,0.92);
+    shared.uOrbit.value=rise(t,0.90,0.975);
+    glow.material.opacity=0.12+0.88*rise(t,0.88,0.97);
+    var gs=7+5*rise(t,0.88,1.0); glow.scale.set(gs,gs,1);
+
+    // ribbon draw-on: a luminous reveal front that only ever advances (never re-clips)
+    shared.uReveal.value = Math.max(shared.uReveal.value, rise(time, 0.2, 3.5));
+
+    // atmosphere drift: fog uniform (linearized) + renderer clear colour (sRGB) lerp
+    // cool-navy-white -> violet-white with t (§5.11 mechanic 5, tokens §1 `atmosphere`)
+    atmoColor.copy(ATMO_A).lerp(ATMO_B, t);
+    renderer.setClearColor(atmoColor, 1);
+    shared.uFogCol.value.set(Math.pow(atmoColor.r,2.2), Math.pow(atmoColor.g,2.2), Math.pow(atmoColor.b,2.2));
+
+    // node ignition (damped) — gated by the reveal front (<=, not <, so the goal
+    // node at NODE_T=1.0 can still ignite once uReveal reaches exactly 1.0)
+    for (var i=0;i<5;i++){
+      nodeTarget[i]=(t>NODE_TH[i] && NODE_T[i]<=shared.uReveal.value)?1:0;
+      nodeLit[i]+=(nodeTarget[i]-nodeLit[i])*Math.min(1,dt*5);
+      nodesUniforms.uLit.value[i]=nodeLit[i];
+    }
+
+    // the stairs' dissolve — a pure function of t, not time: scrolling back re-forms them,
+    // since the hero stays a live place the visitor can return to (§5.11, §5.12)
+    shared.uDissolve.value = rise(t, 0.05, 0.13);
+
+    // hero copy hands off — the world persists, nothing reacts to the section cut
+    var heroOp=1-rise(t,0.095,0.14);
+    elHero.style.opacity=String(heroOp);
+    elHero.style.pointerEvents=heroOp<0.05?"none":"auto";
+
+    // camera
+    camRail.getPointAt(t,camPos); lookRail.getPointAt(t,lookPos);
+    var idle=(1-rise(t,0.10,0.18));
+    camPos.y+=Math.sin(time*0.5)*0.06*idle;
+    camera.position.copy(camPos);
+    camera.lookAt(lookPos);
+    // pointer parallax ±~2°, applied after lookAt
+    camera.rotateY(-px*0.035); camera.rotateX(-py*0.02);
+
+    renderer.render(scene,camera);
+
+    // HUD
+    frames++; fpsClock+=dt;
+    if(fpsClock>=0.5){
+      elFps.textContent=Math.round(frames/fpsClock)+" fps";
+      frames=0; fpsClock=0;
+    }
+    elT.textContent="t "+t.toFixed(2);
+    var name=BEATS[0][1];
+    for (var b=0;b<BEATS.length;b++){ if(t>=BEATS[b][0]) name=BEATS[b][1]; }
+    if(elBeat.textContent!==name) elBeat.textContent=name;
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+  } // end startScene
+})();
+</script>
+
+</body>
+</html>

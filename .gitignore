@@ -1,0 +1,28 @@
+node_modules
+.pnpm-store
+.turbo
+.next
+out
+dist
+build
+coverage
+.expo
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.log
+.vercel
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# rendered demo maps
+/*.svg
+
+# playwright
+apps/web/test-results
+apps/web/playwright-report
+apps/web/e2e/screenshots

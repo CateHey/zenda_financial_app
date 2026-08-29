@@ -1,0 +1,23 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "title": "1 · Discover", "x": 0, "y": 0, "w": 390, "h": 844 },
+    { "file": "Achievable.dc.html", "title": "2 · What's achievable", "x": 480, "y": 0, "w": 390, "h": 844 },
+    { "file": "Priorities.dc.html", "title": "3 · Prioritise", "x": 960, "y": 0, "w": 390, "h": 844 },
+    { "file": "Roadmap.dc.html", "title": "4 · Roadmap", "x": 1440, "y": 0, "w": 390, "h": 844 },
+    { "file": "Tradeoff.dc.html", "title": "5 · The trade-off", "x": 0, "y": 1040, "w": 390, "h": 844 },
+    { "file": "Tracking.dc.html", "title": "6 · Progress", "x": 480, "y": 1040, "w": 390, "h": 844 },
+    { "file": "Adapt.dc.html", "title": "7 · Life changed", "x": 960, "y": 1040, "w": 390, "h": 844 },
+    { "file": "Celebration.dc.html", "title": "8 · Goal reached", "x": 1440, "y": 1040, "w": 390, "h": 844 }
+  ],
+  "annotations": [
+    { "id": "note-discover", "x": 0, "y": -150, "w": 390, "text": "You tell us where you are today — income, expenses, debt, savings — and where you want to go: travel, car, home, study, business." },
+    { "id": "note-achievable", "x": 480, "y": -150, "w": 390, "text": "The AI determines what's achievable. Honest distances per goal, each with its lever — never a verdict." },
+    { "id": "note-priorities", "x": 960, "y": -150, "w": 390, "text": "It prioritises competing goals and shows how much to allocate — where the $260 goes, and when." },
+    { "id": "note-roadmap", "x": 1440, "y": -150, "w": 390, "text": "The best path forward. Today at the bottom, the life you want at the top. Allocation and status on every milestone." },
+    { "id": "note-tradeoff", "x": 0, "y": 890, "w": 390, "text": "The trade-offs you may need to make — shown as real options with real dates, and what each does to the other goals." },
+    { "id": "note-tracking", "x": 480, "y": 890, "w": 390, "text": "Following the path: one question per payday. Partly counts. Not a budgeting app — a layer over the roadmap." },
+    { "id": "note-adapt", "x": 960, "y": 890, "w": 390, "text": "As your life changes, the roadmap automatically adapts — before and after, and a choice about what to protect." },
+    { "id": "note-celebration", "x": 1440, "y": 890, "w": 390, "text": "As you achieve goals, resources redirect toward what's next. The one loud moment." }
+  ],
+  "launch": { "view": "canvas" }
+}
