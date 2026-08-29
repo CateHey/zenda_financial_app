@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { isProtectedPath } from "@/lib/auth/protected-routes";
@@ -21,6 +21,16 @@ function LoginForm() {
   const [password, setPassword] = useState(isVinuyDemo ? VINUY_PASSWORD : "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const autoSubmitted = useRef(false);
+  // "See Vinuy's journey": the credentials are prefilled, so sign in without another click.
+  useEffect(() => {
+    if (isVinuyDemo && !autoSubmitted.current) {
+      autoSubmitted.current = true;
+      const t = setTimeout(() => formRef.current?.requestSubmit(), 250);
+      return () => clearTimeout(t);
+    }
+  }, [isVinuyDemo]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -63,7 +73,7 @@ function LoginForm() {
       <div className="authCard">
         <p className="authEyebrow">Zenda</p>
         <h1 className="authTitle">Log in</h1>
-        <form className="authForm" onSubmit={handleSubmit}>
+        <form ref={formRef} className="authForm" onSubmit={handleSubmit}>
           <label className="authLabel" htmlFor="login-email">
             Email
             <input
