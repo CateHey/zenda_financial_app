@@ -297,6 +297,17 @@ export default async function RoadmapPage() {
         todayFraction={todayFraction}
         startedOn={profile.started_on}
         currency={profile.currency}
+        profile={{
+          pay_cycle: profile.pay_cycle,
+          take_home_cents: profile.take_home_cents,
+          essentials_cents: profile.essentials_cents,
+          lifestyle_cents: profile.lifestyle_cents,
+          buffer_cents: profile.buffer_cents,
+          savings_cents: profile.savings_cents,
+          debt_cents: profile.debt_cents,
+          debt_rate_bps: profile.debt_rate_bps,
+          risk_comfort: profile.risk_comfort,
+        }}
       />
       </div>
 

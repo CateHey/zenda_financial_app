@@ -193,7 +193,19 @@
   .lnav-cta{margin-left:auto;display:flex;gap:8px;align-items:center}
   .lnav-demo{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:999px;font-size:14px;font-weight:600;color:#5856D6;text-decoration:none;box-shadow:inset 0 0 0 1.5px rgba(88,86,214,.35)}
   .lnav-start{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:999px;font-size:14px;font-weight:600;color:#fff;background:#5856D6;text-decoration:none}
-  @media (max-width:760px){.lnav-links{display:none}.lnav-start{display:none}}
+  .lnav-burger{display:none;width:40px;height:40px;border:0;border-radius:999px;background:#F2F2F7;color:#111;align-items:center;justify-content:center;cursor:pointer}
+  .lnav-start .short{display:none}
+  @media (max-width:760px){
+    .lnav{gap:10px;padding:0 4vw}
+    .lnav-links{display:none}
+    .lnav.open .lnav-links{display:flex;flex-direction:column;gap:2px;position:absolute;top:60px;left:0;right:0;padding:8px 4vw 12px;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(60,60,67,.14);box-shadow:0 12px 32px rgba(0,0,0,.10)}
+    .lnav.open .lnav-links a{height:46px;font-size:17px}
+    .lnav-burger{display:inline-flex}
+    .lnav-demo{padding:0 12px;font-size:13px}
+    .lnav-start{padding:0 14px}
+    .lnav-start .full{display:none}.lnav-start .short{display:inline}
+  }
+  @media (max-width:380px){.lnav-demo{display:none}}
   #hero{min-height:calc(100vh - 60px)}
 
   /* one soft surface everywhere: the translucent white of the screen captions */
@@ -248,6 +260,43 @@
   .plan-cta{margin-top:12px;display:inline-flex;align-items:center;justify-content:center;height:48px;border-radius:999px;background:#5856D6;color:#fff;font-weight:600;text-decoration:none}
   .plan:not(.featured) .plan-cta{background:rgba(255,255,255,.9);color:#5856D6;box-shadow:inset 0 0 0 1.5px rgba(88,86,214,.35)}
   .pricing .fine{margin:0;font-size:13px;color:rgba(60,60,67,.78)}
+
+  .waitlist{position:relative;z-index:1;padding:6vh 6vw;display:flex;flex-direction:column;gap:22px;align-items:center}
+  .waitlist h2{font-size:clamp(26px,3.4vw,40px);font-weight:700;letter-spacing:-.02em;margin:0;text-align:center}
+  .waitlist .lead{margin:0;max-width:62ch;text-align:center;font-size:17px;line-height:1.5;color:rgba(44,44,50,.9)}
+  .waitlist h2,.waitlist .lead{background:rgba(255,255,255,.58);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);padding:12px 22px;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 28px rgba(0,0,0,.06),inset 0 0 0 1px rgba(255,255,255,.65)}
+  .waitlist [hidden]{display:none !important}
+  .wl-card{width:100%;max-width:560px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:26px 24px;border-radius:20px;
+        background:rgba(255,255,255,.58);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);
+        box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 28px rgba(0,0,0,.06),inset 0 0 0 1px rgba(255,255,255,.65)}
+  .wl-seg{display:flex;gap:6px;margin:0;padding:4px;border:0;border-radius:999px;background:rgba(120,120,128,.14)}
+  .wl-seg legend{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .wl-seg input{position:absolute;opacity:0;pointer-events:none}
+  .wl-seg label{flex:1;display:flex;align-items:center;justify-content:center;height:38px;border-radius:999px;cursor:pointer;
+        font-size:14px;font-weight:600;color:rgba(60,60,67,.8);text-align:center;padding:0 10px}
+  .wl-seg input:checked + label{background:#fff;color:#5856D6;box-shadow:0 1px 2px rgba(0,0,0,.07)}
+  .wl-seg input:focus-visible + label{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
+  .wl-fields{display:flex;flex-direction:column;gap:14px}
+  .wl-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .wl-field label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(60,60,67,.72)}
+  .wl-field label small{font-weight:600;letter-spacing:.04em;text-transform:none;color:rgba(60,60,67,.55)}
+  .wl-field input,.wl-field select,.wl-field textarea{width:100%;box-sizing:border-box;font-family:var(--font);font-size:16px;color:var(--label);
+        background:rgba(255,255,255,.92);border:0;box-shadow:inset 0 0 0 1.5px rgba(60,60,67,.18);border-radius:12px;padding:12px 14px}
+  .wl-field textarea{resize:vertical;line-height:1.4}
+  .wl-field input:focus-visible,.wl-field select:focus-visible,.wl-field textarea:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:1px}
+  .wl-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:520px){ .wl-row{grid-template-columns:1fr} }
+  .wl-trap{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+  .wl-submit{height:48px;border:0;border-radius:999px;background:#5856D6;color:#fff;font-family:var(--font);font-size:16px;font-weight:600;cursor:pointer}
+  .wl-submit:hover{filter:brightness(1.08)}
+  .wl-submit:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
+  .wl-submit[disabled]{opacity:.6;cursor:progress;filter:none}
+  .wl-status{margin:0;font-size:14px;line-height:1.45;color:rgba(60,60,67,.85)}
+  .wl-status.err{color:#B3261E}
+  .wl-fine{margin:0;font-size:13px;line-height:1.45;color:rgba(60,60,67,.78)}
+  .wl-done{gap:10px;text-align:center}
+  .wl-done b{font-size:20px;font-weight:700;letter-spacing:-.01em}
+  .wl-done p{margin:0;font-size:15px;line-height:1.5;color:rgba(44,44,50,.9)}
   .ai-tag{background:linear-gradient(90deg,#007AFF,#AF52DE);-webkit-background-clip:text;background-clip:text;color:transparent}
   .ai-pill{display:inline-flex;align-items:center;gap:8px;margin:0 auto 4px;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.08);color:#10265F;font-size:14px;font-weight:700;max-width:92vw;text-align:center}
   .bench-link{position:relative;z-index:1;margin:6px 0 0;text-align:center;font-size:16px;font-weight:600}
@@ -281,17 +330,19 @@
 
 <header class="lnav">
   <a href="/" class="lnav-brand"><img src="/icon-192.png" alt="" width="30" height="30"><span>Zenda</span></a>
-  <nav class="lnav-links" aria-label="Sections">
+  <nav class="lnav-links" id="lnavLinks" aria-label="Sections">
     <a href="#screens">Modules</a>
     <a href="#coach">Coach</a>
     <a href="#compare">Why Zenda</a>
     <a href="/benchmark">Benchmark</a>
     <a href="#pricing">Pricing</a>
+    <a href="#waitlist">Waitlist</a>
     <a href="#faq">FAQ</a>
   </nav>
   <div class="lnav-cta">
     <a href="/login?demo=vinay" class="lnav-demo">Live demo</a>
-    <a href="/signup" class="lnav-start">Start your journey</a>
+    <a href="/signup" class="lnav-start"><span class="full">Start your journey</span><span class="short">Start</span></a>
+    <button type="button" class="lnav-burger" aria-label="Menu" aria-expanded="false" aria-controls="lnavLinks"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   </div>
 </header>
 
@@ -453,15 +504,70 @@
       <div class="plan featured">
         <span class="k">Company</span><b>$4.50 <small>per seat / month</small></b><span class="who">51 – 500 seats</span>
         <ul><li>Everything in Team</li><li>Single sign-on and team join codes</li><li>Quarterly wellbeing report — aggregate only, never individual</li><li>Priority support and launch kit</li></ul>
-        <a href="mailto:hello@zenda.app?subject=Zenda%20for%20our%20company" class="plan-cta">Talk to us</a>
+        <a href="#waitlist" class="plan-cta" data-wl-source="pricing_company" data-wl-kind="company" data-wl-size="51-200">Talk to us</a>
       </div>
       <div class="plan">
         <span class="k">Enterprise</span><b>Custom</b><span class="who">500+ seats</span>
         <ul><li>Everything in Company</li><li>Dedicated success manager and SLA</li><li>Security review, data residency</li><li>Payroll and bank integrations as they ship</li></ul>
-        <a href="mailto:hello@zenda.app?subject=Zenda%20enterprise" class="plan-cta">Book a demo</a>
+        <a href="#waitlist" class="plan-cta" data-wl-source="pricing_enterprise" data-wl-kind="company" data-wl-size="500+">Book a demo</a>
       </div>
     </div>
     <p class="fine">Introductory pricing during the pilot period. Annual billing available.</p>
+  </section>
+
+  <section class="waitlist" id="waitlist">
+    <h2>Join the waitlist</h2>
+    <p class="lead">We onboard companies in small groups so every launch gets a real hand, and we hold a spot for people whose employer hasn’t brought Zenda in yet. Leave an address and we’ll come back to you with dates.</p>
+
+    <form class="wl-card" id="wlForm" novalidate>
+      <fieldset class="wl-seg">
+        <legend>Who is joining</legend>
+        <input type="radio" name="kind" id="wlKindCompany" value="company" checked>
+        <label for="wlKindCompany">Bringing my company</label>
+        <input type="radio" name="kind" id="wlKindIndividual" value="individual">
+        <label for="wlKindIndividual">Just me</label>
+      </fieldset>
+
+      <div class="wl-fields">
+        <div class="wl-field">
+          <label for="wlEmail">Email</label>
+          <input id="wlEmail" type="email" autocomplete="email" placeholder="you@company.com" required>
+        </div>
+        <div class="wl-row">
+          <div class="wl-field">
+            <label for="wlCompany" id="wlCompanyLabel">Company</label>
+            <input id="wlCompany" type="text" autocomplete="organization" placeholder="Acme Pty Ltd">
+          </div>
+          <div class="wl-field" id="wlTeamField">
+            <label for="wlTeamSize">Team size</label>
+            <select id="wlTeamSize">
+              <option value="1-50">Up to 50 people</option>
+              <option value="51-200" selected>51 &ndash; 200</option>
+              <option value="201-500">201 &ndash; 500</option>
+              <option value="500+">500+</option>
+            </select>
+          </div>
+        </div>
+        <div class="wl-field">
+          <label for="wlNote">Anything we should know <small>(optional)</small></label>
+          <textarea id="wlNote" rows="3" maxlength="300" placeholder="When you’d like to launch, what you’re using today…"></textarea>
+        </div>
+      </div>
+
+      <div class="wl-trap" aria-hidden="true">
+        <label for="wlTrap">Leave this field empty</label>
+        <input id="wlTrap" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button class="wl-submit" id="wlSubmit" type="submit">Join the waitlist</button>
+      <p class="wl-status" id="wlStatus" role="status" aria-live="polite"></p>
+      <p class="wl-fine">We use your address to talk to you about Zenda and nothing else — no newsletter, no sales sequence. Employees never pay; the employer does.</p>
+    </form>
+
+    <div class="wl-card wl-done" id="wlDone" hidden tabindex="-1">
+      <b>You’re on the list.</b>
+      <p>We’ll email you when the next group opens. In the meantime the whole product is walkable — <a href="/login?demo=vinay">open the live demo</a> and follow Vinay’s roadmap end to end.</p>
+    </div>
   </section>
 
   <section class="faq" id="faq">
@@ -542,6 +648,14 @@
     var v = q.value.trim().toLowerCase();
     document.querySelectorAll(".faq-list details").forEach(function(d){ d.style.display = !v || d.textContent.toLowerCase().indexOf(v) >= 0 ? "" : "none"; });
   });
+})();
+</script>
+<script>
+(function(){
+  var nav = document.querySelector(".lnav"), btn = document.querySelector(".lnav-burger");
+  if (!nav || !btn) return;
+  btn.addEventListener("click", function(){ var open = nav.classList.toggle("open"); btn.setAttribute("aria-expanded", open ? "true" : "false"); });
+  nav.querySelectorAll(".lnav-links a").forEach(function(a){ a.addEventListener("click", function(){ nav.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }); });
 })();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1291,6 +1405,115 @@
   }
   frame();
   } // end startScene
+})();
+</script>
+
+
+<script>
+// The waitlist form (#waitlist). Posts to POST /api/waitlist, which writes the one table in the
+// schema an anonymous visitor may insert into (supabase/migrations/0003_waitlist.sql). Plain
+// ES5 + fetch, like the rest of this page: no build step runs over public/.
+(function () {
+  var form = document.getElementById('wlForm');
+  if (!form) return;
+
+  var done = document.getElementById('wlDone');
+  var status = document.getElementById('wlStatus');
+  var submit = document.getElementById('wlSubmit');
+  var email = document.getElementById('wlEmail');
+  var company = document.getElementById('wlCompany');
+  var companyLabel = document.getElementById('wlCompanyLabel');
+  var teamField = document.getElementById('wlTeamField');
+  var teamSize = document.getElementById('wlTeamSize');
+  var note = document.getElementById('wlNote');
+  var trap = document.getElementById('wlTrap');
+  var source = 'waitlist_section';
+
+  function kind() {
+    var picked = form.querySelector('input[name="kind"]:checked');
+    return picked ? picked.value : 'company';
+  }
+
+  // A company names itself and its size (the route stores a team size only for a company entry);
+  // an individual may name where they work, and may leave it blank.
+  function sync() {
+    var isCompany = kind() === 'company';
+    companyLabel.innerHTML = isCompany ? 'Company' : 'Where you work <small>(optional)</small>';
+    company.placeholder = isCompany ? 'Acme Pty Ltd' : 'The company you would like Zenda at';
+    company.required = isCompany;
+    teamField.hidden = !isCompany;
+  }
+  form.addEventListener('change', function (e) {
+    if (e.target && e.target.name === 'kind') sync();
+  });
+  sync();
+
+  function say(message, isError) {
+    status.className = isError ? 'wl-status err' : 'wl-status';
+    status.textContent = message;
+  }
+
+  // The pricing cards jump here with the form already set to what they were asking for.
+  var links = document.querySelectorAll('[data-wl-source]');
+  for (var i = 0; i < links.length; i++) {
+    (function (link) {
+      link.addEventListener('click', function () {
+        source = link.getAttribute('data-wl-source') || source;
+        var wanted = link.getAttribute('data-wl-kind') || 'company';
+        var radio = form.querySelector('input[name="kind"][value="' + wanted + '"]');
+        if (radio) { radio.checked = true; sync(); }
+        var size = link.getAttribute('data-wl-size');
+        if (size) teamSize.value = size;
+        say('', false);
+        setTimeout(function () {
+          try { email.focus({ preventScroll: true }); } catch (err) { email.focus(); }
+        }, 300);
+      });
+    })(links[i]);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var address = email.value.trim();
+    var org = company.value.trim();
+    var at = address.indexOf('@');
+    if (at < 1 || address.indexOf('.', at) < 0) {
+      say('Please enter an email address we can reach you on.', true);
+      email.focus();
+      return;
+    }
+    if (kind() === 'company' && !org) {
+      say('Which company should we hold a spot for?', true);
+      company.focus();
+      return;
+    }
+
+    var body = { kind: kind(), email: address, source: source };
+    if (org) body.company = org;
+    if (kind() === 'company') body.team_size = teamSize.value;
+    if (note.value.trim()) body.note = note.value.trim();
+    if (trap.value) body.trap = trap.value;
+
+    submit.disabled = true;
+    submit.textContent = 'Joining\u2026';
+    say('', false);
+
+    fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (response) {
+      if (!response.ok) throw new Error('http ' + response.status);
+      form.hidden = true;
+      done.hidden = false;
+      try { done.focus(); } catch (err) {}
+    }).catch(function () {
+      submit.disabled = false;
+      submit.textContent = 'Join the waitlist';
+      say('That did not send. Try again in a moment, or email hello@zenda.app.', true);
+    });
+  });
 })();
 </script>
 
