@@ -12,6 +12,7 @@ import { capacityMonthlyCents, cycleDays, monthDate, monthIndex, todayMonth } fr
 import { todayIso } from "@/lib/engine/today";
 import { projectCurve } from "@/lib/engine/solver";
 import { checkedInThisCycle, progress, streak } from "@/lib/engine/progress";
+import { ProgressCharts } from "./charts";
 import type { EngineContribution, EngineProfile } from "@/lib/engine/types";
 import {
   KIND_COLOR,
@@ -222,6 +223,22 @@ export default async function ProgressPage() {
           </svg>
         </Link>
       </div>
+
+      {/* a few charts that mean something */}
+      <ProgressCharts
+        contributions={contributionRows.map((c) => ({ occurredOn: c.occurred_on, amountCents: c.amount_cents }))}
+        perCycleCapacityCents={capacityPerCycle}
+        curve={(currentGoal.projection?.curve ?? []).map((q) => ({ m: q.m, balanceCents: q.balance_cents }))}
+        targetCents={currentGoal.target_cents}
+        savedCents={currentProgress?.savedCents ?? contributionRows.filter((c) => c.goal_id === currentGoal.id).reduce((acc, c) => acc + c.amount_cents, 0)}
+        goalTitle={currentGoal.title}
+        cycleWord={profile.pay_cycle === "fortnightly" ? "fortnight" : profile.pay_cycle === "monthly" ? "month" : "week"}
+        takeHomeCents={profile.take_home_cents}
+        essentialsCents={profile.essentials_cents}
+        lifestyleCents={profile.lifestyle_cents}
+        bufferCents={profile.buffer_cents}
+        currency={profile.currency}
+      />
 
       {dimmedNodes.length > 0 && (
         <div style={{ position: "relative", padding: "18px 20px 0 20px", display: "flex", flexDirection: "column", flexGrow: 1, opacity: 0.55 }}>
