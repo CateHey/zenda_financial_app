@@ -194,6 +194,19 @@
   .lnav-start{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:999px;font-size:14px;font-weight:600;color:#fff;background:#5856D6;text-decoration:none}
   @media (max-width:760px){.lnav-links{display:none}.lnav-start{display:none}}
   #hero{min-height:calc(100vh - 60px)}
+
+  /* one soft surface everywhere: the translucent white of the screen captions */
+  .cmp-card.before,.cmp-card.with,.scen,.chat,.screens h2,.screens .lead,.compare h2,.coach h2,.coach .lead,.faq h2,.faq-list details,#faqSearch,.scard{
+    background:rgba(255,255,255,.8) !important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06) !important;border-radius:16px}
+  .cmp-card.with{color:#1c1c1e;border-top:3px solid #5856D6}
+  .cmp-card.before{border-top:3px solid rgba(60,60,67,.25)}
+  .cmp-card.with .k,.cmp-card.with b{color:#5856D6}
+  .cmp-card.with .chip{background:rgba(88,86,214,.12);color:#5856D6}
+  .cmp-card.before .chip{background:rgba(60,60,67,.1);color:rgba(44,44,50,.85)}
+  .cmp-card p{opacity:1;color:rgba(44,44,50,.9)}
+  .chat{border-radius:20px}
+  .scen-btn{background:rgba(255,255,255,.9)}
 </style>
 </head>
 <body>
