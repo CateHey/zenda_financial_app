@@ -1,7 +1,6 @@
 // lib/ai/run.ts — D7 calls 1 & 2, orchestrated. Trigger points are route handlers' after()
-// callbacks (D5, D10 task 11) — the after() wiring itself is NOT added here (the routes it
-// belongs in are owned by a parallel session); see this task's report for the exact snippets to
-// paste into app/api/discover, app/api/checkin and app/api/goals/[id]/adjust once those exist.
+// callbacks (D5, D10 task 11) — wired in app/api/discover, app/api/checkin and
+// app/api/goals/[id]/adjust (task 11).
 //
 // Both functions take the cookie-bound user Supabase client (never the service role — D5's
 // boundary rule) plus the ids they need, load data via lib/data/queries.ts, call the Anthropic
@@ -124,16 +123,33 @@ export async function runDiscoverReflection(supabase: SupabaseClient, userId: st
 type GoalWithProjectionRow = GoalWithProjection & { projection: GoalProjectionRow };
 
 /**
+ * D7's cache rule: "goals.why is the cache; re-run only when the goal's projection row changes
+ * (computed_at newer than goals.updated_at)." A goal with no `why` yet has nothing cached and
+ * always regenerates; otherwise regenerate only when the projection is strictly newer than the
+ * goal row's last write (parsed to epoch ms — computed_at and updated_at can come back from
+ * PostgREST with different ISO formatting, e.g. "+00:00" vs "Z", so a raw string compare isn't
+ * safe). This is a cost guard, not a clock read (A12): it orders two stored timestamps, it never
+ * asks what time it is now.
+ */
+function needsRegeneration(goal: GoalWithProjectionRow): boolean {
+  if (!goal.why) return true;
+  return new Date(goal.projection.computed_at).getTime() > new Date(goal.updated_at).getTime();
+}
+
+/**
  * Call 2 (D7) — Roadmap copy. Trigger: after POST /api/discover, POST /api/prioritise,
  * POST /api/goals/[id]/adjust, and (pass the new event's id as `eventId`) a `milestone_reached`
  * check-in. Loads every active goal that has a projection (lib/data/recompute.ts has already run
  * by the time after() fires) and, when `eventId` is given, the reached goal + the new current
  * goal (via getCurrentGoal — by the time this runs the reached goal is already marked `reached`,
- * so "current" already means "next"). On success: each returned `why` overwrites its goal's
- * `why`; a `celebration` line overwrites the given event's `message`, but only when `eventId`
- * was passed (a discover/prioritise/adjust call has no event to attach one to, so any
- * `celebration` the model still returned is ignored). A banned-terms hit discards only that one
- * string — the template lib/data/recompute.ts / the checkin route already wrote stands for it.
+ * so "current" already means "next"). The request sent to the model is narrowed to the goals
+ * `needsRegeneration` flags (the D7 cache rule, above) — a goal whose why is already caught up
+ * with its latest projection is never re-sent, which is the actual cost saving (fewer goals in,
+ * fewer whys out). On success: each returned `why` overwrites its goal's `why`; a `celebration`
+ * line overwrites the given event's `message`, but only when `eventId` was passed (a
+ * discover/prioritise/adjust call has no event to attach one to, so any `celebration` the model
+ * still returned is ignored). A banned-terms hit discards only that one string — the template
+ * lib/data/recompute.ts / the checkin route already wrote stands for it.
  */
 export async function runRoadmapCopy(
   supabase: SupabaseClient,
@@ -182,9 +198,17 @@ export async function runRoadmapCopy(
       }
     }
 
+    // D7 cache rule (cost guard): only ask the model to rewrite a `why` whose projection has
+    // moved since it was last written. A milestone still gets its celebration line even when no
+    // goal's why needs a rewrite — those are independent outputs of the one call.
+    const toRegen = active.filter(needsRegeneration);
+    if (toRegen.length === 0 && !milestone) {
+      return { ok: false, reason: "up_to_date" };
+    }
+
     const client = createAnthropicClient();
     const user = JSON.stringify({
-      goals: active.map((g) => ({
+      goals: toRegen.map((g) => ({
         goal_id: g.id,
         title: g.title,
         target_cents: g.target_cents,
@@ -211,7 +235,7 @@ export async function runRoadmapCopy(
       return { ok: false, reason: `no_output (stop_reason=${result.stopReason ?? "unknown"})` };
     }
 
-    const knownIds = new Set(active.map((g) => g.id));
+    const knownIds = new Set(toRegen.map((g) => g.id));
     for (const w of result.output.whys) {
       if (!knownIds.has(w.goal_id)) continue;
       const why = clean(w.why);

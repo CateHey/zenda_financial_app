@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { currentUserId, supabaseServer } from "@/lib/supabase/server";
 import { recompute } from "@/lib/data/recompute";
@@ -10,12 +10,15 @@ import { DISCLAIMER } from "@/lib/engine/types";
 import { CHOOSABLE_GOAL_KINDS } from "@/lib/data/types";
 import type { AssumptionRow, GoalRow, PayCycle, ProfileRow } from "@/lib/data/types";
 import { discoverBody as bodySchema } from "@/lib/api/schemas";
+import { aiEnabled } from "@/lib/ai/enabled";
+import { runDiscoverReflection, runRoadmapCopy } from "@/lib/ai/run";
 
 // D5 POST /api/discover, A5 (foundation goals). Upserts the profile's "where you are today"
 // numbers, replaces the user's chip-selectable active goals with the submitted list, ensures
 // the buffer + emergency foundation goals exist, re-runs the engine, and upserts projections
-// + template `why`s via lib/data/recompute.ts (the only writer of goal_projections).
-// AI (D7 calls 1/2 in after()) is wired in task 11 — not here.
+// + template `why`s via lib/data/recompute.ts (the only writer of goal_projections). D7 calls 1
+// (reflection) and 2 (roadmap copy) run in after() once the response is already on its way —
+// gated by aiEnabled() so a blank key schedules no work and logs nothing (task 11).
 
 const CHOOSABLE_KINDS = CHOOSABLE_GOAL_KINDS;
 
@@ -219,7 +222,13 @@ export async function POST(request: Request) {
 
     await recompute(supabase, userId);
 
-    // AI calls (D7 call 1 reflection, call 2 roadmap copy) run in after() — task 11.
+    // D7 calls 1 (reflection) + 2 (roadmap copy) — after() guarantees these start only once the
+    // response below has been sent; gated by aiEnabled() so a blank ANTHROPIC_API_KEY schedules
+    // no work at all (task 11 acceptance: "nothing breaks").
+    if (aiEnabled()) {
+      after(() => runDiscoverReflection(supabase, userId));
+      after(() => runRoadmapCopy(supabase, userId));
+    }
 
     return NextResponse.json({ ok: true, redirect: "/achievable", disclaimer: DISCLAIMER });
   } catch {

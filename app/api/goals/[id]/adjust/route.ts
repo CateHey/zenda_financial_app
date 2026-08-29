@@ -1,13 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { currentUserId, supabaseServer } from "@/lib/supabase/server";
 import { adjustBody as bodySchema } from "@/lib/api/schemas";
 import { recompute } from "@/lib/data/recompute";
 import { templateTradeOff } from "@/lib/data/templates";
 import { DISCLAIMER } from "@/lib/engine/types";
 import type { GoalRow, ProfileRow } from "@/lib/data/types";
+import { aiEnabled } from "@/lib/ai/enabled";
+import { runRoadmapCopy } from "@/lib/ai/run";
 
 // D5 POST /api/goals/[id]/adjust — S5. Updates the goal's target and/or date, records a
-// `trade_off` event with { before, after }, and re-runs the engine.
+// `trade_off` event with { before, after }, and re-runs the engine. D7 call 2 (roadmap copy)
+// runs in after() once the response is sent, gated by aiEnabled() (task 11).
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -41,29 +44,36 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const profile = profileRow as ProfileRow;
 
     const before = { target_cents: goal.target_cents, target_date: goal.target_date };
-    const after = {
+    // Named afterValues, not `after` — this file also imports `after` from "next/server" (D10
+    // task 11) and a same-named local would shadow it, silently turning the after() call below
+    // into "invoke this plain object", which is not callable.
+    const afterValues = {
       target_cents: body.target_cents ?? goal.target_cents,
       target_date: body.target_date ?? goal.target_date,
     };
 
     const { error: updateError } = await supabase
       .from("goals")
-      .update({ target_cents: after.target_cents, target_date: after.target_date })
+      .update({ target_cents: afterValues.target_cents, target_date: afterValues.target_date })
       .eq("id", id)
       .eq("user_id", userId);
     if (updateError) return NextResponse.json({ error: "internal" }, { status: 500 });
 
-    const message = templateTradeOff(goal.kind, after.target_cents, after.target_date, before.target_cents, before.target_date, profile.currency);
+    const message = templateTradeOff(goal.kind, afterValues.target_cents, afterValues.target_date, before.target_cents, before.target_date, profile.currency);
     const { error: eventError } = await supabase.from("motivational_events").insert({
       user_id: userId,
       goal_id: id,
       kind: "trade_off",
       message,
-      payload: { before, after },
+      payload: { before, after: afterValues },
     });
     if (eventError) return NextResponse.json({ error: "internal" }, { status: 500 });
 
     await recompute(supabase, userId);
+
+    if (aiEnabled()) {
+      after(() => runRoadmapCopy(supabase, userId));
+    }
 
     return NextResponse.json({ ok: true, redirect: "/roadmap", disclaimer: DISCLAIMER });
   } catch {

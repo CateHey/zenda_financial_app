@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { currentUserId, supabaseServer } from "@/lib/supabase/server";
 import { checkinBody as bodySchema } from "@/lib/api/schemas";
 import { recompute } from "@/lib/data/recompute";
@@ -8,12 +8,16 @@ import { capacityMonthlyCents, cycleDays } from "@/lib/engine/rates";
 import { streak } from "@/lib/engine/progress";
 import { perCycleFromMonthlyCents } from "@/lib/format";
 import type { ContributionKind, GoalRow, ProfileRow } from "@/lib/data/types";
+import { aiEnabled } from "@/lib/ai/enabled";
+import { runRoadmapCopy } from "@/lib/ai/run";
 
 // D5 POST /api/checkin — S6. Inserts one contribution row per check-in ("full" = the whole
 // per-cycle capacity, "partial" = a lesser submitted amount, "skip" = amount 0 recorded against
 // checkin_full per A3), then re-derives whether the goal is now reached, re-runs the engine
 // (lib/data/recompute.ts — the only writer of goal_projections, also advances the next goal's
-// start_month per A4 once this goal freezes), and returns the account's current streak.
+// start_month per A4 once this goal freezes), and returns the account's current streak. On the
+// goal-reached branch only, D7 call 2 (the celebration line upgrade) runs in after() once the
+// response is sent, gated by aiEnabled() (task 11).
 
 export async function POST(request: Request) {
   try {
@@ -138,7 +142,10 @@ export async function POST(request: Request) {
         .single();
       if (eventError || !eventRow) return NextResponse.json({ error: "internal" }, { status: 500 });
       eventId = eventRow.id as string;
-      // AI call 2 (the celebration line upgrade) runs in after() — task 11, not built here.
+
+      if (aiEnabled()) {
+        after(() => runRoadmapCopy(supabase, userId, eventId));
+      }
     }
 
     // Streak (A3): the (possibly new) current goal's contributions plus every goal before it in
