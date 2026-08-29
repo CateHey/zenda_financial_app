@@ -5,9 +5,9 @@
 
 ## A1 · Session proxy — specified from scratch (D3 correction)
 
-The sibling repo has no middleware; do not look for one. File: **`proxy.ts` at the project root**
-(Next 16's request boundary; if `next --version` reports < 16, the file is `middleware.ts` with the same
-content — check once, then never revisit). Behaviour, exactly:
+The sibling repo has no middleware; do not look for one. File: **`proxy.ts` at the project root**, and the exported function
+**must be named `proxy`** (Next 16.3 rejects `middleware` as the export name in this file — confirmed in
+task 3). Behaviour, exactly:
 
 1. Create a `NextResponse.next({ request })`.
 2. Create a Supabase server client with the anon key and a cookies adapter whose `getAll` reads
@@ -125,3 +125,22 @@ Add devDependency `tsx ^4`. Scripts: `"seed": "tsx scripts/seed.ts"`.
 3. Creating the Vercel project and entering env vars.
 
 Everything else — including running the seed script locally, which needs only `.env.local` — Sonnet does.
+
+## A12 · The demo clock — `DEMO_TODAY` (found in task 6)
+
+The persona timeline starts 2026-09-01 and the seeded contributions run to 2026-10-12, but the real
+clock at build time is earlier than that, which makes every "today" computation wrong (contributions
+in the future, "already checked in" forever true, `todayMonth` = 0).
+
+**Rule:** every place the app needs today's date calls one helper, `todayIso()` in `lib/engine/today.ts`:
+it returns `process.env.DEMO_TODAY` when that variable is set and a valid `YYYY-MM-DD`, otherwise the real
+UTC date. No other code reads the clock. `Date.now()`/`new Date()` for *dates* is forbidden outside that
+file (timestamps like `created_at` stay database defaults).
+
+- `.env.local`, Vercel, `vitest.config.ts` (`db` project) and `playwright.config.ts` (webServer env) all set
+  **`DEMO_TODAY=2026-10-20`**. With the seed as written: latest contribution 2026-10-12 is 8 days back →
+  not checked in this cycle; streak still 6 (counted from the latest contribution); `todayMonth` ≈ 1.63;
+  Peru 26% / 12 paydays unchanged. Every month name in the demo script and the test spec stays as written.
+- A fresh judge account gets `started_on = todayIso()` = 2026-10-20; its goal defaults are relative to that.
+- Remove the variable after the hackathon and the app runs on the real clock with no code change.
+- `D9` env list gains `DEMO_TODAY` (optional; set for the demo). Seed contributions and dates stay absolute.

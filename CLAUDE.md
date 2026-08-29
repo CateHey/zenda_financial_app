@@ -1,94 +1,88 @@
 # Zenda — project guide for Claude Code
 
 ## What this is
-A B2B financial wellbeing platform (web + iOS/Android). Employees get a personalised roadmap
-from their paycheck to their life goal. Three modules, nothing else: **getting to know you**
-(onboarding) → **your roadmap** (the product) → **progress** (a tracking layer over it).
+A B2B financial wellbeing platform (web first; installable on a phone as a PWA). Employees get a
+personalised roadmap from their paycheck to their life goal. Three modules, nothing else:
+**discover** (where you are, where you want to go) → **roadmap** (the product) → **progress**
+(a tracking layer over it). Hackathon build: real auth, real database, real persistence.
 
-Specs — read the relevant section before starting any task:
-- new_app.md               the brief: scope, the three modules (§1), colour (§4b), landing (§5)
-- ZENDA_CONCEPT.md         product behaviour, personas, screens, copy deck   (pending)
-- ZENDA_DESIGN.md          tokens, components, motion, the landing scene
-- ZENDA_MOTION_DEMO.md     the built landing-scene prototype (demo/zenda-path.html), documented
-- ZENDA_ARCHITECTURE.md    data model, rules engine, AI layer, API, tenancy  (pending)
-- ZENDA_PLAN.md            the phase you are working in                      (pending)
+Specs — read before any task, in this order:
+- ZENDA_BUILD_SPEC.md       D0–D12: stack, schema + RLS, auth, screen map, API, engine, AI, seed, deploy, build order
+- ZENDA_SPEC_ADDENDUM.md    precision items; OVERRIDES the build spec where they differ
+- ZENDA_SCREEN_BINDINGS.md  element-level data bindings for every screen
+- ZENDA_TEST_SPEC.md        five test layers (unit, RLS/db, API, e2e, prod smoke); test:all must be green
+- design/screens/*.dc.html  the eight screens — visual truth, port as-is, never redesign
+- VINUY_JOURNEY.md          the demo persona: every seed number and the engine test vector
+- ZENDA_DESIGN.md §1        token values (app/tokens.css); new_app.md — the product brief
 
 ## Who does what (models)
-- **Fable (`claude-fable-5`)** orchestrates: planning, architecture, decomposition, review.
-- **Sonnet (`claude-sonnet-5`)** executes: implementation tasks, tests, refactors.
-- Sonnet does not redesign. If a task is ambiguous or touches a contract (schema, API route,
-  RLS policy, token file), it comes back to Fable instead of guessing.
-- App runtime model: Claude Opus 5 (`claude-opus-5`) — see Stack.
+- **Fable (`claude-fable-5`)** orchestrates: planning, architecture, decomposition, review, all .md files.
+- **Sonnet (`claude-sonnet-5`)** executes D10 tasks in order, one session per batch, one commit per task.
+- Sonnet does not redesign and does not edit .md files. A genuine contradiction in the spec stops
+  that task and is reported; a trivial silent detail is decided (simplest option) and listed.
+- App runtime model: Claude Opus 5 (`claude-opus-5`), effort low — see Stack.
 
 ## Non-negotiables
-1. ONE canonical `Roadmap` object in packages/core. Web and mobile are renderers of it.
-   Never add platform-specific business logic or platform-only fields.
-2. Numbers come from the rules engine (packages/core/src/rules). The LLM never does
-   arithmetic that reaches a user. The LLM owns language; the engine owns state.
-3. Every milestone carries a plain-language `why`. Enforced by schema.
-4. Education, not advice. Never name products, tickers, funds, brokers, or write
-   "you should buy/sell". The banned-terms gate in packages/ai/src/validate.ts blocks release.
-5. ANTHROPIC_API_KEY and SUPABASE_SERVICE_ROLE_KEY are server-only. Never import
-   @anthropic-ai/sdk or use a service key in apps/web client components or apps/mobile.
-6. Every API input and output is validated with the shared Zod schemas from packages/core.
-7. An org admin can never reach an individual's financial rows — RLS-enforced, proven by a test.
-8. Notification decisions come only from `decideNotifications` in packages/core:
-   max 3 pushes/week, quiet hours 8pm–8am, one nudge per missed check-in. Enforced in code.
-9. No raw hex in components. Colours come from packages/tokens as role tokens (see §4b of
-   the brief); every accent token has a light and a dark value.
+1. ONE engine: `lib/engine` — pure, deterministic, framework-free, imported by server and browser alike.
+   Numbers come from it, never from the LLM. The LLM owns language; the engine owns state.
+2. Money is integer cents everywhere in code; dates are UTC calendar strings (addendum A2).
+3. Every goal carries a plain-language `why` (template first, AI upgrade later). Every projection
+   surface renders `DISCLAIMER` once.
+4. Education, not advice. Never name products, tickers, funds, brokers, coins, or write "you should
+   buy/sell"; never the word "impossible". `lib/ai/banned-terms.ts` gates every AI string; templates
+   obey the same rule by construction.
+5. `ANTHROPIC_API_KEY` is read only in `lib/ai/*` and route handlers. `SUPABASE_SERVICE_ROLE_KEY` is
+   read only by `scripts/seed.ts`. Neither is set on Vercel except the Anthropic key. No client
+   component imports `lib/ai` or `@anthropic-ai/sdk`.
+6. Every route handler validates its body with Zod and operates through the cookie-bound user client
+   so RLS applies. There is no service role at runtime.
+7. Employer-blindness is a database fact: no org-admin policy exists on profiles, goals,
+   contributions, projections or events. The employer's only window is `org_seat_stats()`.
+8. AI is never on a render path: it runs in `after()` and upgrades templates already shown.
 
 ## Stack
-pnpm workspaces + Turborepo · TypeScript strict · Zod · Vitest · Playwright
-apps/web: Next.js App Router, Tailwind v4, Framer Motion, TanStack Query, Zustand,
-          React Three Fiber (landing page only — never in the app bundle)
-apps/mobile: Expo + Expo Router, NativeWind, Reanimated, Expo Notifications
-Backend: Next.js route handlers · Supabase (Postgres + Auth + RLS) — shared project with
-         Free Me; Zenda tables arrive in migration 0002, never touch `sessions`/`plans`
-AI: Claude Opus 5 (`claude-opus-5`) via @anthropic-ai/sdk — streaming for the onboarding
-    conversation; structured outputs with client.messages.parse + zodOutputFormat; effort via
-    output_config.effort; cache_control on system prompts; check stop_reason === "refusal".
-Internal packages are consumed as TypeScript source (no build step); Next transpiles them.
+Next.js 16 App Router, one app at the project root (no monorepo) · React 19 · TypeScript strict · Zod 4
+Styling: `app/tokens.css` + the screens' inline styles ported as-is (no Tailwind)
+Data: Supabase — Postgres + Auth (email/password, confirmation off for the demo) + RLS; `@supabase/ssr`
+Reads: Server Components via `lib/data/queries.ts`. Writes: route handlers under `app/api/**`
+AI: `@anthropic-ai/sdk` — `messages.parse` + `zodOutputFormat`, `output_config.effort: "low"`,
+    `cache_control` on the system block, `stop_reason === "refusal"` treated as failure
+Tests: Vitest on `lib/engine` only. Hosting: Vercel, root `.`
 
 ## Commands
-pnpm install            install everything
-pnpm dev                web app on http://localhost:3000
-pnpm typecheck          tsc across all packages — must pass before you finish
-pnpm test               vitest across all packages — must pass before you finish
-pnpm lint               eslint (web)
-pnpm eval               AI evals against golden JSON — no API calls
-pnpm eval:golden        regenerate golden roadmaps — COSTS MONEY, ask before running
-
-## Conventions
-- Files kebab-case; React components PascalCase, one per file; hooks `use-*.ts`.
-- Tests beside the code as `*.test.ts(x)`. packages/core needs a test for every branch —
-  rules, streaks, notifications. UI gets a smoke test, not snapshot spam.
-- No `any`. Derive types from Zod schemas (`z.infer`). No duplicated type definitions.
-- The share line is rendering: a file with no JSX belongs in packages/*, never in an app.
-- New dependency → say why in the commit body.
-- Conventional commits: feat / fix / chore / docs / test / refactor. Small commits.
-- DEMO_MODE=true while building UI — cached roadmaps, no API spend.
-- Finish every task by running `pnpm typecheck && pnpm test` and reporting the real result.
+npm install             install
+npm run dev             http://localhost:3000 (`/` serves public/landing.html via rewrite)
+npm run build           must pass before a task is called done
+npm test                vitest — the D6 worked example; must stay green
+npm run seed            `tsx scripts/seed.ts` — needs .env.local and applied migrations
 
 ## Where things live
-packages/core/src/schema/   ZendaProfile, Roadmap, Milestone, CheckIn, NotificationDecision (Zod)
-packages/core/src/rules/    computeSurplus, firstMilestone, generateRoadmap, applyCheckIn,
-                            mergeRoadmaps, decideNotifications
-packages/core/src/layout/   layoutRoadmap — deterministic positions for both clients
-packages/ai/src/            prompts/, onboarding, milestone language, celebration, validate
-packages/tokens/            colour roles (light+dark), type, spacing, radius, motion
-packages/api-client/        typed fetch + TanStack Query hooks shared by web and mobile
-apps/web/app/api/           route handlers
-apps/web/app/(landing)/     the marketing page + WebGL scene (lazy-loaded)
-apps/mobile/                Expo app — same three modules, same packages
-evals/                      golden profiles + structural assertions
+proxy.ts                  session refresh + protected routes (export named `proxy`)
+app/tokens.css            design tokens as CSS variables (addendum A9)
+app/{login,signup}/       the two undesigned auth screens (built from tokens)
+app/{discover,achievable,prioritise,roadmap,progress,celebrate,admin}/   the screens
+app/api/**                route handlers (D5)
+lib/engine/               types, rates, solver, waterfall, progress + engine.test.ts
+lib/data/                 types.ts (row types), queries.ts (all reads), recompute.ts (only writer of projections)
+lib/supabase/             browser.ts, server.ts (user client only)
+lib/ai/                   client.ts, banned-terms.ts, prompts.ts, run.ts
+supabase/migrations/      0000_teardown.sql, 0001_zenda.sql (applied by the owner in the SQL editor)
+scripts/seed.ts           demo org, three accounts, Vinuy's data, lessons
+public/landing.html       the landing page (from demo/zenda-path.html; CTAs are links)
+design/, demo/, *.md      design truth and specs — Fable-owned
+
+## Conventions
+- Files kebab-case; React components PascalCase, one per file.
+- Port screen markup verbatim (class→className, style strings→objects, wrappers dropped), then bind.
+- Conventional commits, one per task: feat / fix / chore / test. `.env.local` is never staged.
+- Finish every task by running `npm run build` (and `npm test`) and reporting the real result.
 
 ## Don'ts
-- Don't call the Anthropic API from unit tests. Only evals/ may call it.
-- Don't put notification logic in a client. Both platforms transport `decideNotifications` output.
-- Don't import three.js anywhere except the landing page chunk.
-- Don't build anything from the brief's cut list (e-learning, bank feeds, payments, extra tracks).
-- Don't hand-edit evals/golden/*.json — regenerate with pnpm eval:golden.
-- Don't read or print .env files.
+- Don't read, print or echo `.env.local`; the seed script parses it programmatically only.
+- Don't call the Anthropic API from tests or from the seed.
+- Don't build anything from the brief's cut list (e-learning, bank feeds, payments, push notifications).
+- Don't add a dependency outside the D1 manifest without saying why in the commit body.
+- Don't touch the Supabase dashboard or Vercel from a session — those are owner actions (addendum A11).
 
 <!-- BEGIN:nextjs-agent-rules -->
 

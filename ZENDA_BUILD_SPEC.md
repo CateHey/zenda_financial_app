@@ -11,7 +11,10 @@
 
 **Companion specs (read all three before task 1):** `ZENDA_SPEC_ADDENDUM.md` — precision items found in
 validation; **it overrides this document where they differ** (notably D3's session proxy, which is specified
-there from scratch). `ZENDA_SCREEN_BINDINGS.md` — element-level data bindings for every screen.
+there from scratch). `ZENDA_SCREEN_BINDINGS.md` — element-level data bindings for every screen. `ZENDA_TEST_SPEC.md` — the
+five-layer test plan; its T1/T2/T3 sessions slot into D10 after tasks 7, 10 and 12, and **its definition
+of done supersedes D1's "engine tests only"**: `npm run test:all` green locally and `test:smoke` green
+against the public URL.
 
 **Blocking questions: none.** Three assumptions stated up front instead — correct any of them and the
 affected section changes, nothing else:
@@ -448,7 +451,7 @@ export const DISCLAIMER =
 
 **Functions (signature → behaviour):**
 
-1. `capacityMonthlyCents(profile)` → `max(0, takeHome − essentials − lifestyle) + buffer`, converted per `pay_cycle` to monthly. (Vinuy: (1100 − 590 − 250) + 100 = 260/wk → **112,667 cents/month**.)
+1. `capacityMonthlyCents(profile)` → `max(0, takeHome − essentials − lifestyle)`, converted per `pay_cycle` to monthly. The buffer line is **inside** this number, not added to it — it is savings the person already sets aside, and the design's "$260 = $156 unallocated + $100 buffer" is the same figure decomposed. (Vinuy: 1100 − 590 − 250 = 260/wk → **112,667 cents/month**.) *Corrected after task 4: an earlier draft double-counted the buffer; the implemented engine is right.*
 2. `glideRate(monthsToHorizon, a)` → `a.cashRateAnnual` when `< glideCashBelowMonths`; `a.growthRateAnnual` when `≥ glideGrowthAboveMonths`; linear blend between. A `growth_required` goal never goes below the blend; a goal with `< glideCashBelowMonths` to go is always cash. *Risk reduces as the deadline approaches.*
 3. `requiredMonthlyCents(targetCents, startingBalanceCents, months, rateAnnual)` → PMT: `(FV − PV·g)·r / (g − 1)` with `g = (1+r)^months`; `months ≤ 0` → `FV − PV` (immediate); `r = 0` → `(FV − PV)/months`.
 4. `monthsToReach(targetCents, startingBalanceCents, monthlyCents, rateAnnual)` → smallest integer `n` with `FV(n) ≥ target`: `n = ceil( ln((FV + P/r)/(PV + P/r)) / ln(1+r) )`; `null` when `monthlyCents ≤ 0` and `PV < target`.
@@ -599,8 +602,8 @@ Order is the dependency order. Tasks 7–10 can be split across sessions without
 |---|---|---|---|
 | 0:00 | Open `/` | "Zenda is the path from your paycheck to your goal. Vinuy, 23, wants a house, a car, and Peru." | Landing, the path scene |
 | 0:10 | "See Vinuy's journey" → Log in | "He told us where he is and where he wants to go. One number came out." | Roadmap · **$260 / week** |
-| 0:20 | Scroll the roadmap | "Peru is on track for January. The car needed a trade-off. The house is adjusted, honestly." | Peru **26%** · **12 paydays** · tags |
-| 0:35 | Drag what-if to $300 | "Every date moves live. This is arithmetic, not a model guessing." | "Peru in December, the car in August 2028" |
+| 0:20 | Scroll the roadmap | "Peru is on track for January. The car needed a trade-off — February 2029, no loan. The house is adjusted, honestly." | Peru **26%** · **12 paydays** · tags |
+| 0:35 | Drag what-if to $350 | "Every date moves live. This is arithmetic, not a model guessing." | "Peru in December, the car in June 2028" |
 | 0:45 | `/achievable` | "This is the moment competitors skip: what $260 can actually reach." | **$481** vs $260 · **$474** · 2037 |
 | 0:55 | `/progress` → **Yes** | "One question per payday. Partly counts." | Streak **7** |
 | 1:05 | `/progress/adapt` → rent +$40 → Accept | "Life changes; the roadmap redraws. Nothing saved moves — only the dates." | Engine **$220** · Peru Feb |
