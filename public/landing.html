@@ -261,7 +261,9 @@
   .plan:not(.featured) .plan-cta{background:rgba(255,255,255,.9);color:#5856D6;box-shadow:inset 0 0 0 1.5px rgba(88,86,214,.35)}
   .pricing .fine{margin:0;font-size:13px;color:rgba(60,60,67,.78)}
 
-  .waitlist{position:relative;z-index:1;padding:6vh 6vw;display:flex;flex-direction:column;gap:22px;align-items:center}
+  /* the sticky .lnav (60px) + .ticker (38px) would otherwise cover the heading when the nav
+     link or a pricing CTA jumps here */
+  .waitlist{position:relative;z-index:1;scroll-margin-top:110px;padding:6vh 6vw;display:flex;flex-direction:column;gap:22px;align-items:center}
   .waitlist h2{font-size:clamp(26px,3.4vw,40px);font-weight:700;letter-spacing:-.02em;margin:0;text-align:center}
   .waitlist .lead{margin:0;max-width:62ch;text-align:center;font-size:17px;line-height:1.5;color:rgba(44,44,50,.9)}
   .waitlist h2,.waitlist .lead{background:rgba(255,255,255,.58);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);padding:12px 22px;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 28px rgba(0,0,0,.06),inset 0 0 0 1px rgba(255,255,255,.65)}
@@ -269,7 +271,7 @@
   .wl-card{width:100%;max-width:560px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;padding:26px 24px;border-radius:20px;
         background:rgba(255,255,255,.58);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);
         box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 28px rgba(0,0,0,.06),inset 0 0 0 1px rgba(255,255,255,.65)}
-  .wl-seg{display:flex;gap:6px;margin:0;padding:4px;border:0;border-radius:999px;background:rgba(120,120,128,.14)}
+  .wl-seg{position:relative;display:flex;gap:6px;margin:0;padding:4px;border:0;border-radius:999px;background:rgba(120,120,128,.14)}
   .wl-seg legend{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
   .wl-seg input{position:absolute;opacity:0;pointer-events:none}
   .wl-seg label{flex:1;display:flex;align-items:center;justify-content:center;height:38px;border-radius:999px;cursor:pointer;
@@ -384,7 +386,6 @@
       <div class="connector"></div>
       <a class="step" href="#s-progress"><span class="circle"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5856D6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7.5 15a4.5 4.5 0 0 1 9 0"/><line x1="12" y1="15" x2="14.2" y2="11.8"/><line x1="6" y1="19" x2="6" y2="17"/><line x1="18" y1="19" x2="18" y2="17"/></svg></span><span class="lbl">Progress</span></a>
     </div>
-    <p class="ai-pill">✦ An AI coach that knows your whole path — every number computed by the engine, never by the AI</p>
     <div class="cta">
       <a id="ctaStart" href="/signup">Start your journey 🚀</a>
       <a id="ctaVinay" href="/login?demo=vinay" class="ghost">Live demo</a>
