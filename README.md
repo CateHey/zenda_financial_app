@@ -30,8 +30,10 @@ npm run test:db      # RLS proofs against the live project (needs .env.local)
 npm run test:e2e     # Playwright, starts its own dev server with the AI key blank
 ```
 
-Environment: copy `.env.example` to `.env.local` and fill it in. `DEMO_TODAY=2026-10-20` pins the app's
-"today" to the demo persona's week 7 — remove it and the app runs on the real clock.
+Environment: copy `.env.example` to `.env.local` and fill it in. The app's "today" is pinned to the demo
+persona's week 7 (`DEMO_TODAY=2026-10-20`, defaulted in `next.config.ts`); set `DEMO_TODAY=""` to run on
+the real clock. If the Playwright suite is running it holds port 3000 — start your own server with
+`npm run dev -- -p 3005`.
 
 Database: run `supabase/migrations/0000_teardown.sql` then `0001_zenda.sql` in the Supabase SQL editor;
 turn *Confirm email* off for the demo; then `npm run seed`.
@@ -47,7 +49,10 @@ turn *Confirm email* off for the demo; then `npm run seed`.
   alternatives when a goal is out of reach (later date · smaller amount · extra per month). Tested
   against the persona's worked example.
 - **Claude** (`claude-opus-5`) writes each milestone's *why* and the celebration line, after the response,
-  through a banned-terms gate — never on a render path, never arithmetic.
+  through a banned-terms gate — never on a render path, never arithmetic. **Ask Zenda** (the button on every
+  app screen) answers questions about your own roadmap with the engine's numbers as its only context.
+- **Menu everywhere:** a persistent nav (top bar on web, bottom bar on phones) reaches every screen; *Edit my
+  numbers* reopens Discover prefilled, and *Start over* clears goals and progress while keeping your numbers.
 
 Specs: `ZENDA_BUILD_SPEC.md` (with `ZENDA_SPEC_ADDENDUM.md` and `ZENDA_SCREEN_BINDINGS.md`),
 `ZENDA_TEST_SPEC.md`, and the product brief `new_app.md`. Design sources in `design/screens/`.

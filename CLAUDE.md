@@ -55,13 +55,17 @@ npm run dev             http://localhost:3000 (`/` serves public/landing.html vi
 npm run build           must pass before a task is called done
 npm test                vitest — the D6 worked example; must stay green
 npm run seed            `tsx scripts/seed.ts` — needs .env.local and applied migrations
+npm run reset:e2e       resets e2e@ (Vinuy clone) and judge@ (fresh) test accounts
+DEMO_TODAY              defaults to 2026-10-20 in next.config.ts; set "" for the real clock
 
 ## Where things live
 proxy.ts                  session refresh + protected routes (export named `proxy`)
 app/tokens.css            design tokens as CSS variables (addendum A9)
 app/{login,signup}/       the two undesigned auth screens (built from tokens)
 app/{discover,achievable,prioritise,roadmap,progress,celebrate,admin}/   the screens
-app/api/**                route handlers (D5)
+app/api/**                route handlers (D5) + /api/ask (Ask Zenda) + /api/reset (start over)
+app/components/           nav-bar (persistent menu), ask-zenda, logout-link, route-states
+app/web.css               responsive shell: phone column <900px, two-col / grid web layouts above
 lib/engine/               types, rates, solver, waterfall, progress + engine.test.ts
 lib/data/                 types.ts (row types), queries.ts (all reads), recompute.ts (only writer of projections)
 lib/supabase/             browser.ts, server.ts (user client only)
