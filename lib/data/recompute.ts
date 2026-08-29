@@ -5,16 +5,12 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { capacityMonthlyCents, monthDate, monthIndex, todayMonth } from "@/lib/engine/rates";
+import { todayIso } from "@/lib/engine/today";
 import { waterfall } from "@/lib/engine/waterfall";
 import type { EngineGoal, EngineProfile, GoalProjection } from "@/lib/engine/types";
 import { formatMoney, monthYearLabel, weeklyFromMonthlyCents } from "@/lib/format";
 import { assumptionsToEngine } from "./queries";
 import type { AssumptionRow, ContributionRow, GoalRow, ProfileRow } from "./types";
-
-/** "Today" as a UTC calendar date string (A2: never construct a Date from a local timezone). */
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function templateWhy(
   goal: GoalRow,

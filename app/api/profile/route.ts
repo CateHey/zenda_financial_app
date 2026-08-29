@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { currentUserId, supabaseServer } from "@/lib/supabase/server";
+import { profileBody as bodySchema } from "@/lib/api/schemas";
 
 // D5: POST /api/profile — { display_name, join_code } -> org_id_for_join_code -> upsert profiles.
-const bodySchema = z.object({
-  display_name: z.string().min(1).max(60),
-  join_code: z.string().min(1),
-});
 
 export async function POST(request: Request) {
   try {

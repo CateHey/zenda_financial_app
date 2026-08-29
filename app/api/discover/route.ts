@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { currentUserId, supabaseServer } from "@/lib/supabase/server";
 import { recompute } from "@/lib/data/recompute";
@@ -10,6 +9,7 @@ import type { Assumptions, EngineProfile } from "@/lib/engine/types";
 import { DISCLAIMER } from "@/lib/engine/types";
 import { CHOOSABLE_GOAL_KINDS } from "@/lib/data/types";
 import type { AssumptionRow, GoalRow, PayCycle, ProfileRow } from "@/lib/data/types";
+import { discoverBody as bodySchema } from "@/lib/api/schemas";
 
 // D5 POST /api/discover, A5 (foundation goals). Upserts the profile's "where you are today"
 // numbers, replaces the user's chip-selectable active goals with the submitted list, ensures
@@ -18,40 +18,6 @@ import type { AssumptionRow, GoalRow, PayCycle, ProfileRow } from "@/lib/data/ty
 // AI (D7 calls 1/2 in after()) is wired in task 11 — not here.
 
 const CHOOSABLE_KINDS = CHOOSABLE_GOAL_KINDS;
-const PAY_CYCLES = ["weekly", "fortnightly", "monthly"] as const;
-const RISK_LEVELS = ["low", "medium", "high"] as const;
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-const isoFutureDate = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "must be an ISO date (YYYY-MM-DD)")
-  .refine((d) => d > todayIso(), "must be a future date");
-
-const goalSchema = z.object({
-  id: z.string().uuid().optional(),
-  kind: z.enum(CHOOSABLE_KINDS),
-  title: z.string().min(1).max(80),
-  target_cents: z.number().int().positive(),
-  target_date: isoFutureDate,
-  starting_balance_cents: z.number().int().nonnegative().optional(),
-});
-
-const bodySchema = z.object({
-  freedom_text: z.string().max(600).optional(),
-  pay_cycle: z.enum(PAY_CYCLES),
-  take_home_cents: z.number().int().nonnegative(),
-  essentials_cents: z.number().int().nonnegative(),
-  lifestyle_cents: z.number().int().nonnegative(),
-  buffer_cents: z.number().int().nonnegative(),
-  savings_cents: z.number().int().nonnegative(),
-  debt_cents: z.number().int().nonnegative(),
-  debt_rate_bps: z.number().int().nonnegative(),
-  risk_comfort: z.enum(RISK_LEVELS),
-  goals: z.array(goalSchema).min(1).max(6),
-});
 
 /** A5: ensure the buffer + emergency foundation goals exist, unless one of that kind already does. */
 async function ensureFoundationGoals(

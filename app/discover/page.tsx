@@ -1,5 +1,6 @@
 import { supabaseServer } from "@/lib/supabase/server";
 import { getGoalsWithProjections, getLatestReflectionEvent, getProfile } from "@/lib/data/queries";
+import { todayIso } from "@/lib/engine/today";
 import { DiscoverClient, type DiscoverGoal, type DiscoverProfile } from "./discover-client";
 
 // S1 · Discover — /discover (D4 row 1). Server Component: reads `profiles` (prefill if it
@@ -43,14 +44,12 @@ export default async function DiscoverPage() {
     reflectionMessage = reflectionEvent?.message ?? null;
   }
 
-  const todayIso = new Date().toISOString().slice(0, 10);
-
   return (
     <DiscoverClient
       initialProfile={profile}
       initialGoals={goals}
       reflectionMessage={reflectionMessage}
-      todayIso={todayIso}
+      todayIso={todayIso()}
     />
   );
 }

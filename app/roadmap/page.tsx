@@ -4,6 +4,7 @@ import { supabaseServer } from "@/lib/supabase/server";
 import { assumptionsToEngine, getAssumptions, getContributions, getGoalsWithProjections, getProfile } from "@/lib/data/queries";
 import { CHOOSABLE_GOAL_KINDS } from "@/lib/data/types";
 import { capacityMonthlyCents, monthDate, monthIndex, todayMonth } from "@/lib/engine/rates";
+import { todayIso } from "@/lib/engine/today";
 import { projectCurve } from "@/lib/engine/solver";
 import { progress } from "@/lib/engine/progress";
 import { DISCLAIMER } from "@/lib/engine/types";
@@ -34,10 +35,6 @@ import { WhatIf, type WhatIfEngineGoal } from "./what-if";
 // (not the mockup's placeholder text) is followed, since the bindings doc overrides the raw
 // design copy wherever a rule is stated.
 const CHOOSABLE = new Set<string>(CHOOSABLE_GOAL_KINDS);
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export default async function RoadmapPage() {
   const supabase = await supabaseServer();
