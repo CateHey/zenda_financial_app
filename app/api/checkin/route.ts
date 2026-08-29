@@ -165,21 +165,11 @@ export const POST = withHandler(async (request: Request) => {
     }
   }
 
-  // Streak (A3): the (possibly new) current goal's contributions plus every goal before it in
-  // date order — same combined set the Progress screen's dots use. If every goal is now
-  // reached, fall back to the just-checked-in goal so the streak still reflects real history.
-  const currentForStreak = currentAfter ?? goal;
-  const { data: streakGoalRows, error: streakGoalError } = await supabase
-    .from("goals")
-    .select("id")
-    .eq("user_id", userId)
-    .lte("target_date", currentForStreak.target_date);
-  if (streakGoalError) throw streakGoalError;
-  const streakGoalIds = ((streakGoalRows ?? []) as { id: string }[]).map((g) => g.id);
+  // Streak (A3): every payday on the account in date order; extras in/out excluded.
   const { data: streakContribRows, error: streakContribError } = await supabase
     .from("contributions")
     .select("goal_id, amount_cents, occurred_on, kind")
-    .in("goal_id", streakGoalIds.length > 0 ? streakGoalIds : [currentForStreak.id]);
+    .eq("user_id", userId);
   if (streakContribError) throw streakContribError;
   const streakContribs = (streakContribRows ?? []).filter((c) => c.kind !== "manual").map((c) => ({
     goalId: c.goal_id as string,

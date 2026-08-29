@@ -127,8 +127,9 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
   }));
 
   const paydayContribs: EngineContribution[] = paydayRows.map((c) => ({ goalId: c.goal_id, amountCents: c.amount_cents, occurredOn: c.occurred_on }));
-  const streakCount = streak(paydayContribs, cycleLength);
-  const alreadyCheckedIn = checkedInThisCycle(paydayContribs, cycleLength, today);
+  const allPaydayContribs: EngineContribution[] = allMoves.filter((c) => c.kind !== "manual").map((c) => ({ goalId: c.goal_id, amountCents: c.amount_cents, occurredOn: c.occurred_on }));
+  const streakCount = streak(allPaydayContribs, cycleLength);
+  const alreadyCheckedIn = checkedInThisCycle(allPaydayContribs, cycleLength, today);
   const latestContribution = paydayRows[0] ?? null; // already sorted occurred_on desc
   const nextPaydayLabel = latestContribution ? dayMonthYearLabel(addDaysIso(latestContribution.occurred_on, cycleLength)) : "";
 

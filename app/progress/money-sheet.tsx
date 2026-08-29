@@ -69,6 +69,12 @@ export function MoneySheet({ goals, currency, defaultGoalId }: { goals: MoneyGoa
         router.push(data.redirect);
         return;
       }
+      if (mode === "take" && data.reactivated && typeof data.redirect === "string") {
+        // back on the roadmap with a new date — show it
+        router.push(data.redirect);
+        router.refresh();
+        return;
+      }
       if (mode === "add") {
         setDone(`Done — ${formatMoney(cents, currency)} into ${chosen.title}. ${formatMoney(data.remaining_cents ?? 0, currency)} to go.`);
       } else {
