@@ -227,6 +227,27 @@
   .chat,.faq-list details[open]{background:rgba(255,255,255,.68) !important}
   .chat .m{background:rgba(242,242,247,.9)}
   .chat .m.me{background:#5856D6}
+
+  .ticker{position:sticky;top:60px;z-index:19;height:38px;overflow:hidden;background:linear-gradient(90deg,#5856D6,#8450DA 60%,#AF52DE);color:#fff;display:flex;align-items:center}
+  .ticker-track{display:flex;gap:28px;white-space:nowrap;font-size:13px;font-weight:600;letter-spacing:.04em;animation:ticker 38s linear infinite;will-change:transform;padding-left:28px}
+  @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion:reduce){.ticker-track{animation:none}}
+  .pricing{position:relative;z-index:1;padding:6vh 6vw;display:flex;flex-direction:column;gap:22px;align-items:center}
+  .pricing h2{font-size:clamp(26px,3.4vw,40px);font-weight:700;letter-spacing:-.02em;margin:0;text-align:center}
+  .pricing .lead{margin:0;max-width:62ch;text-align:center;font-size:17px;line-height:1.5;color:rgba(44,44,50,.9)}
+  .pricing h2,.pricing .lead,.pricing .fine{background:rgba(255,255,255,.58);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);padding:12px 22px;border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 28px rgba(0,0,0,.06),inset 0 0 0 1px rgba(255,255,255,.65)}
+  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;width:100%;max-width:1040px;align-items:stretch}
+  .plan{display:flex;flex-direction:column;gap:10px;padding:26px 24px;border-radius:20px;background:rgba(255,255,255,.58);backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 28px rgba(0,0,0,.06),inset 0 0 0 1px rgba(255,255,255,.65)}
+  .plan.featured{border-top:3px solid #5856D6;background:rgba(255,255,255,.7)}
+  .plan .k{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#5856D6}
+  .plan b{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1}
+  .plan b small{font-size:14px;font-weight:500;color:rgba(60,60,67,.78);letter-spacing:0}
+  .plan .who{font-size:14px;color:rgba(60,60,67,.78)}
+  .plan ul{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:1.4;flex:1}
+  .plan li::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#007AFF,#AF52DE);margin-right:10px;vertical-align:middle}
+  .plan-cta{margin-top:12px;display:inline-flex;align-items:center;justify-content:center;height:48px;border-radius:999px;background:#5856D6;color:#fff;font-weight:600;text-decoration:none}
+  .plan:not(.featured) .plan-cta{background:rgba(255,255,255,.9);color:#5856D6;box-shadow:inset 0 0 0 1.5px rgba(88,86,214,.35)}
+  .pricing .fine{margin:0;font-size:13px;color:rgba(60,60,67,.78)}
 </style>
 </head>
 <body>
@@ -245,6 +266,7 @@
     <a href="#screens">Screens</a>
     <a href="#coach">Coach</a>
     <a href="#compare">Why Zenda</a>
+    <a href="#pricing">Pricing</a>
     <a href="#faq">FAQ</a>
   </nav>
   <div class="lnav-cta">
@@ -252,6 +274,11 @@
     <a href="/signup" class="lnav-start">Start your journey</a>
   </div>
 </header>
+
+<div class="ticker" aria-hidden="true"><div class="ticker-track">
+  <span>Goal-based, not budget-based</span><span>·</span><span>Employer-blind by design</span><span>·</span><span>One question per payday</span><span>·</span><span>Honest dates, never "impossible"</span><span>·</span><span>No bank login needed</span><span>·</span><span>A coach that knows your whole path</span><span>·</span><span>Built for teams, owned by the person</span><span>·</span>
+  <span>Goal-based, not budget-based</span><span>·</span><span>Employer-blind by design</span><span>·</span><span>One question per payday</span><span>·</span><span>Honest dates, never "impossible"</span><span>·</span><span>No bank login needed</span><span>·</span><span>A coach that knows your whole path</span><span>·</span><span>Built for teams, owned by the person</span><span>·</span>
+</div></div>
 
 <canvas id="scene"></canvas>
 
@@ -384,6 +411,29 @@
         <div class="chat-input"><span>Ask, or share a plan…</span><b>Send</b></div>
       </div>
     </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <h2>Packages for teams and enterprises</h2>
+    <p class="lead">The employer pays a flat fee per seat. Employees pay nothing, ever — and we never take a percentage of anyone's savings.</p>
+    <div class="plans">
+      <div class="plan">
+        <span class="k">Team</span><b>$6 <small>per seat / month</small></b><span class="who">Up to 50 seats</span>
+        <ul><li>Every Zenda screen and the coach</li><li>Employer view: seats and headcount only</li><li>Company join code, self-serve onboarding</li><li>Email support</li></ul>
+        <a href="/signup" class="plan-cta">Start a pilot</a>
+      </div>
+      <div class="plan featured">
+        <span class="k">Company</span><b>$4.50 <small>per seat / month</small></b><span class="who">51 – 500 seats</span>
+        <ul><li>Everything in Team</li><li>Single sign-on and team join codes</li><li>Quarterly wellbeing report — aggregate only, never individual</li><li>Priority support and launch kit</li></ul>
+        <a href="mailto:hello@zenda.app?subject=Zenda%20for%20our%20company" class="plan-cta">Talk to us</a>
+      </div>
+      <div class="plan">
+        <span class="k">Enterprise</span><b>Custom</b><span class="who">500+ seats</span>
+        <ul><li>Everything in Company</li><li>Dedicated success manager and SLA</li><li>Security review, data residency</li><li>Payroll and bank integrations as they ship</li></ul>
+        <a href="mailto:hello@zenda.app?subject=Zenda%20enterprise" class="plan-cta">Book a demo</a>
+      </div>
+    </div>
+    <p class="fine">Introductory pricing during the pilot period. Annual billing available.</p>
   </section>
 
   <section class="faq" id="faq">
