@@ -293,6 +293,8 @@
   .wl-submit:hover{filter:brightness(1.08)}
   .wl-submit:focus-visible{outline:3px solid rgba(88,86,214,.4);outline-offset:2px}
   .wl-submit[disabled]{opacity:.6;cursor:progress;filter:none}
+  .wl-count{margin:-6px 0 0;display:inline-flex;align-items:baseline;gap:8px;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.06);font-size:15px;color:rgba(44,44,50,.9)}
+  .wl-count b{font-size:22px;font-weight:800;letter-spacing:-.02em;background:linear-gradient(90deg,#007AFF,#AF52DE);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
   .wl-status{margin:0;font-size:14px;line-height:1.45;color:rgba(60,60,67,.85)}
   .wl-status.err{color:#B3261E}
   .wl-fine{margin:0;font-size:13px;line-height:1.45;color:rgba(60,60,67,.78)}
@@ -518,6 +520,7 @@
 
   <section class="waitlist" id="waitlist">
     <h2>Join the waitlist</h2>
+    <p class="wl-count" id="wlCount" hidden><b id="wlCountNum">0</b> <span id="wlCountLabel">already on the list</span></p>
     <p class="lead">We onboard companies in small groups so every launch gets a real hand, and we hold a spot for people whose employer hasn’t brought Zenda in yet. Leave an address and we’ll come back to you with dates.</p>
 
     <form class="wl-card" id="wlForm" novalidate>
@@ -1411,6 +1414,32 @@
 
 
 <script>
+// The waitlist counter (#wlCount): GET /api/waitlist -> { count }. Hidden until a number arrives.
+(function () {
+  var wrap = document.getElementById('wlCount'), num = document.getElementById('wlCountNum'), label = document.getElementById('wlCountLabel');
+  if (!wrap || !num) return;
+  var current = 0;
+  function show(n) {
+    n = Math.max(0, Math.floor(n));
+    label.textContent = n === 1 ? 'person already on the list' : (n === 0 ? 'Be the first on the list' : 'already on the list');
+    if (n === 0) { num.hidden = true; wrap.hidden = false; return; }
+    num.hidden = false; wrap.hidden = false;
+    var from = current, start = null, dur = 900;
+    function step(t) {
+      if (start === null) start = t;
+      var p = Math.min(1, (t - start) / dur), e = 1 - Math.pow(1 - p, 3);
+      num.textContent = Math.round(from + (n - from) * e).toLocaleString('en-AU');
+      if (p < 1) requestAnimationFrame(step); else current = n;
+    }
+    requestAnimationFrame(step);
+  }
+  window.zWaitlistBump = function () { show(current + 1); };
+  fetch('/api/waitlist', { headers: { 'Accept': 'application/json' } })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) { if (d && typeof d.count === 'number') show(d.count); })
+    .catch(function () {});
+})();
+
 // The waitlist form (#waitlist). Posts to POST /api/waitlist, which writes the one table in the
 // schema an anonymous visitor may insert into (supabase/migrations/0003_waitlist.sql). Plain
 // ES5 + fetch, like the rest of this page: no build step runs over public/.
@@ -1508,6 +1537,7 @@
       if (!response.ok) throw new Error('http ' + response.status);
       form.hidden = true;
       done.hidden = false;
+      if (window.zWaitlistBump) window.zWaitlistBump();
       try { done.focus(); } catch (err) {}
     }).catch(function () {
       submit.disabled = false;

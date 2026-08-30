@@ -57,3 +57,17 @@ export const POST = withHandler(async (request: Request) => {
 
   return ok({ joined: true });
 });
+
+// GET /api/waitlist — the counter on the landing page. The table itself stays unreadable from
+// any client role (0003); public.waitlist_count() (0005) runs as its owner and returns one
+// integer. Until that migration exists the call fails and `count` is null, and the landing page
+// simply shows no number. Cached for a minute at the edge — it is a vanity number, not a ledger.
+export const GET = withHandler(async () => {
+  const supabase = await supabaseServer();
+  if (!supabase) throw new HttpError(500, "internal");
+  const { data, error } = await supabase.rpc("waitlist_count");
+  const count = error || typeof data !== "number" ? null : data;
+  const res = ok({ count });
+  res.headers.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=300");
+  return res;
+});
