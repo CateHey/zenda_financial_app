@@ -8,7 +8,8 @@ import { todayIso } from "@/lib/engine/today";
 import { projectCurve } from "@/lib/engine/solver";
 import { progress } from "@/lib/engine/progress";
 import { DISCLAIMER } from "@/lib/engine/types";
-import type { EngineProfile, Progress } from "@/lib/engine/types";
+import type { Progress } from "@/lib/engine/types";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 import {
   CYCLE_WORD,
   KIND_COLOR,
@@ -48,13 +49,7 @@ export default async function RoadmapPage() {
   if (!profile || goals.length === 0) redirect("/discover");
 
   const a = assumptionsToEngine(assumptionRows);
-  const engineProfile: EngineProfile = {
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  };
+  const engineProfile = toEngineProfile(profile);
   const capacityMonthly = capacityMonthlyCents(engineProfile);
   const capacityPerCycle = perCycleFromMonthlyCents(capacityMonthly, profile.pay_cycle);
   const weeklyCapacity = weeklyFromMonthlyCents(capacityMonthly);
@@ -297,6 +292,7 @@ export default async function RoadmapPage() {
         todayFraction={todayFraction}
         startedOn={profile.started_on}
         currency={profile.currency}
+        lockedMonthlyCents={profile.locked_monthly_cents ?? null}
         profile={{
           pay_cycle: profile.pay_cycle,
           take_home_cents: profile.take_home_cents,

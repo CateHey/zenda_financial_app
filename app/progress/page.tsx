@@ -13,7 +13,7 @@ import { todayIso } from "@/lib/engine/today";
 import { projectCurve } from "@/lib/engine/solver";
 import { checkedInThisCycle, progress, streak } from "@/lib/engine/progress";
 import { ProgressCharts } from "./charts";
-import type { EngineContribution, EngineProfile } from "@/lib/engine/types";
+import type { EngineContribution } from "@/lib/engine/types";
 import {
   KIND_COLOR,
   KIND_LABEL,
@@ -23,6 +23,7 @@ import {
   perCycleFromMonthlyCents,
 } from "@/lib/format";
 import { templateNudge } from "@/lib/data/templates";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 import { CheckinSheet } from "./checkin-sheet";
 import { MoneySheet } from "./money-sheet";
 import { MoneyOverview } from "./money-overview";
@@ -94,13 +95,7 @@ export default async function ProgressPage({ searchParams }: { searchParams: Pro
   const isReached = currentGoal.status === "reached";
 
   const a = assumptionsToEngine(assumptionRows);
-  const engineProfile: EngineProfile = {
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  };
+  const engineProfile = toEngineProfile(profile);
   const capacityMonthly = capacityMonthlyCents(engineProfile);
   const capacityPerCycle = perCycleFromMonthlyCents(capacityMonthly, profile.pay_cycle);
   const cycleLength = cycleDays(profile.pay_cycle);

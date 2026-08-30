@@ -146,3 +146,39 @@ describe("waterfall — a reached goal with no reached_at never throws", () => {
     expect(waterfall([], 112_667, assumptions)).toEqual([]);
   });
 });
+
+describe("capacityMonthlyCents — a locked amount (migration 0004)", () => {
+  // take-home 1,100 − essentials 590 − fun 250 − buffer 100, + buffer 100 = $260/wk -> 112,667
+  const derived = {
+    payCycle: "weekly" as const,
+    takeHomeCents: 110_000,
+    essentialsCents: 59_000,
+    lifestyleCents: 25_000,
+    bufferCents: 10_000,
+  };
+
+  it("absent or null lock -> still derives from the profile", () => {
+    expect(capacityMonthlyCents(derived)).toBe(112_667);
+    expect(capacityMonthlyCents({ ...derived, lockedMonthlyCents: null })).toBe(112_667);
+  });
+
+  it("a positive lock replaces the derived capacity outright", () => {
+    expect(capacityMonthlyCents({ ...derived, lockedMonthlyCents: 125_667 })).toBe(125_667);
+  });
+
+  it("the whole point: income and spending changes no longer move a locked capacity", () => {
+    const locked = { ...derived, lockedMonthlyCents: 125_667 };
+    // a pay cut that would have gutted the derived number
+    expect(capacityMonthlyCents({ ...locked, takeHomeCents: 70_000 })).toBe(125_667);
+    // and a fun-money blowout
+    expect(capacityMonthlyCents({ ...locked, lifestyleCents: 90_000 })).toBe(125_667);
+    // while unlocked, both of those do move it
+    expect(capacityMonthlyCents({ ...derived, takeHomeCents: 70_000 })).toBeLessThan(112_667);
+  });
+
+  it("a zero, negative or non-finite lock falls back to deriving rather than poisoning capacity", () => {
+    for (const bad of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(capacityMonthlyCents({ ...derived, lockedMonthlyCents: bad })).toBe(112_667);
+    }
+  });
+});

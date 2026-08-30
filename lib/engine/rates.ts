@@ -31,6 +31,13 @@ export function cycleDays(payCycle: PayCycle): number {
  * "surplus + buffer line, banked" derivation.
  */
 export function capacityMonthlyCents(profile: EngineProfile): number {
+  // A locked amount short-circuits the derivation entirely (see EngineProfile.lockedMonthlyCents):
+  // it is the number the person committed to, so income and spending edits no longer move it. The
+  // same finite/positive guard as everything else below — a corrupt lock falls back to deriving
+  // rather than propagating a bad capacity through every projection.
+  const locked = profile.lockedMonthlyCents;
+  if (typeof locked === "number" && Number.isFinite(locked) && locked > 0) return Math.round(locked);
+
   // NaN/Infinity guard: a corrupted or non-numeric profile field (e.g. a bigint that came back
   // as an unparsable string) clamps to 0 rather than turning the whole result NaN.
   const takeHome = finiteOr(profile.takeHomeCents, 0);

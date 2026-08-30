@@ -8,8 +8,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { capacityMonthlyCents, monthIndex, todayMonth } from "@/lib/engine/rates";
 import { todayIso } from "@/lib/engine/today";
 import { waterfall } from "@/lib/engine/waterfall";
-import type { EngineGoal, EngineProfile, GoalProjection } from "@/lib/engine/types";
+import type { EngineGoal, GoalProjection } from "@/lib/engine/types";
 import { weeklyFromMonthlyCents } from "@/lib/format";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 import { assumptionsToEngine } from "./queries";
 import { templateWhy } from "./templates";
 import type { AssumptionRow, ContributionRow, GoalRow, ProfileRow } from "./types";
@@ -56,13 +57,7 @@ export async function recompute(supabase: SupabaseClient, userId: string): Promi
     contributedByGoal.set(c.goal_id, (contributedByGoal.get(c.goal_id) ?? 0) + c.amount_cents);
   }
 
-  const engineProfile: EngineProfile = {
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  };
+  const engineProfile = toEngineProfile(profile);
   const capacity = capacityMonthlyCents(engineProfile);
   const todayFraction = todayMonth(profile.started_on, today);
 

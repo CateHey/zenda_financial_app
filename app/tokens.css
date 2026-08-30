@@ -20,6 +20,24 @@
   --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, 0.12);
 }
 
+html {
+  /* iOS Safari inflates type on its own ("text autosizing") unless this is set. When it does, the
+     content grows wider than the screen, iOS widens the *layout viewport* to fit it, and every
+     position:fixed element anchored to right:0 — the top bar, the bottom bar, the Coach panel —
+     slides off the right edge with it. That is one root cause behind clipped buttons and
+     half-visible headers on a phone, not a dozen separate layout bugs. Pinch zoom, Safari's page
+     zoom and the OS display zoom all still work; this only turns off the automatic boost. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* A long unbroken string (a pasted link, a goal title typed without spaces) must wrap rather
+     than widen the page — same failure mode as above. Inherited by everything. */
+  overflow-wrap: break-word;
+  /* Backstop for the same failure: if some future block does exceed the viewport, clip it instead
+     of letting the whole layout shift. `clip` rather than `hidden` on purpose — `hidden` makes
+     this a scroll container, which would break the sticky nav and pin position:fixed children. */
+  overflow-x: clip;
+}
+
 body {
   background: var(--surface);
   color: var(--label);

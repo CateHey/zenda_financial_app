@@ -4,8 +4,9 @@ import { assumptionsToEngine, getAssumptions, getContributions, getGoalsWithProj
 import { capacityMonthlyCents, monthIndex, todayMonth } from "@/lib/engine/rates";
 import { todayIso } from "@/lib/engine/today";
 import { progress } from "@/lib/engine/progress";
-import type { EngineGoal, EngineProfile } from "@/lib/engine/types";
+import type { EngineGoal } from "@/lib/engine/types";
 import { perCycleFromMonthlyCents } from "@/lib/format";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 import { AdaptClient, type AdaptBaselineGoal } from "./adapt-client";
 
 // S7 · Life changed — design/screens/Adapt.dc.html ported 1:1, bound per
@@ -27,13 +28,7 @@ export default async function AdaptPage() {
   if (goals.length === 0) redirect("/discover");
 
   const a = assumptionsToEngine(assumptionRows);
-  const engineProfile: EngineProfile = {
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  };
+  const engineProfile = toEngineProfile(profile);
   const capacityMonthly = capacityMonthlyCents(engineProfile);
   const capacityPerCycle = perCycleFromMonthlyCents(capacityMonthly, profile.pay_cycle);
   const todayFraction = todayMonth(profile.started_on, todayIso());

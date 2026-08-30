@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
 import { getEventById, getGoalById, getGoalsWithProjections, getProfile } from "@/lib/data/queries";
 import { capacityMonthlyCents, monthDate } from "@/lib/engine/rates";
-import type { EngineProfile } from "@/lib/engine/types";
 import { formatMoney, monthYearLabel, perCycleFromMonthlyCents } from "@/lib/format";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 import { CelebrateActions } from "./celebrate-actions";
 
 // S8 · Goal reached — design/screens/Celebration.dc.html ported 1:1, bound per
@@ -53,13 +53,7 @@ export default async function CelebratePage({
   ]);
   if (!goal || !profile) redirect("/roadmap");
 
-  const engineProfile: EngineProfile = {
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  };
+  const engineProfile = toEngineProfile(profile);
   const capacityPerCycle = perCycleFromMonthlyCents(capacityMonthlyCents(engineProfile), profile.pay_cycle);
 
   const activeGoals = goals.filter((g) => g.status === "active");

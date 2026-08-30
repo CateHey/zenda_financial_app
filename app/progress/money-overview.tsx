@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatMoney } from "@/lib/format";
+import { RecentMoves } from "./recent-moves";
 
 // Progress — "where your money is": every goal on the path with what it holds, one stacked bar
 // of everything set aside, where this payday's engine goes next, and the recent moves (paydays,
@@ -102,28 +103,8 @@ export function MoneyOverview({
         )}
       </div>
 
-      {/* recent moves */}
-      <div style={card}>
-        <span style={k}>Recent moves</span>
-        {recent.length === 0 && <span style={sub}>No money has moved yet — your first check-in will show here.</span>}
-        {recent.map((m) => {
-          const out = m.amountCents < 0;
-          const manual = m.kind === "manual";
-          const skipped = !manual && m.amountCents === 0;
-          const label = manual ? (out ? `Taken out of ${m.goalTitle}` : `Extra into ${m.goalTitle}`) : skipped ? `Skipped payday · ${m.goalTitle}` : m.kind === "checkin_partial" ? `Part payday → ${m.goalTitle}` : `Payday → ${m.goalTitle}`;
-          const color = out ? "#FF3B30" : skipped ? "rgba(60,60,67,0.55)" : manual ? "#0057D9" : "#1C1C1E";
-          return (
-            <div key={m.id} style={{ display: "flex", alignItems: "baseline", gap: 10, fontSize: 14 }}>
-              <span style={{ ...sub, width: 52, flexShrink: 0 }}>{dayMonth(m.occurredOn)}</span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                {label}
-                {m.note ? <span style={sub}> · {m.note}</span> : null}
-              </span>
-              <span style={{ fontWeight: 700, color, whiteSpace: "nowrap" }}>{out ? "−" : skipped ? "" : "+"}{formatMoney(Math.abs(m.amountCents), currency)}</span>
-            </div>
-          );
-        })}
-      </div>
+      {/* recent moves — editable in place (PATCH/DELETE /api/contributions/[id]) */}
+      <RecentMoves moves={moves} currency={currency} />
     </div>
   );
 }

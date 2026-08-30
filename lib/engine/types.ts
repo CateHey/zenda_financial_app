@@ -36,6 +36,14 @@ export type EngineProfile = {
   essentialsCents: number;
   lifestyleCents: number;
   bufferCents: number;
+  /**
+   * A standing "keep sending exactly this much" decision (profiles.locked_monthly_cents, set from
+   * the what-if card). When present and positive it IS the monthly capacity: the derived surplus
+   * is ignored, so a pay rise or an edit to the fun line moves what is left over rather than what
+   * reaches the goals. Optional and nullable — absent/null means derive, which is every profile
+   * that has never locked.
+   */
+  lockedMonthlyCents?: number | null;
 };
 
 // ---- Additive: one row of `contributions`, as `progress()` (D6 §6) needs it. ----

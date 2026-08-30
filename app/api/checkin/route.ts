@@ -10,6 +10,7 @@ import type { ContributionKind, GoalRow, ProfileRow } from "@/lib/data/types";
 import { aiEnabled } from "@/lib/ai/enabled";
 import { runRoadmapCopy } from "@/lib/ai/run";
 import { HttpError, ok, orNotFound, requireUser, withHandler } from "@/lib/api/respond";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 
 // D5 POST /api/checkin — S6. Inserts one contribution row per check-in ("full" = the whole
 // per-cycle capacity, "partial" = a lesser submitted amount, "skip" = amount 0 recorded against
@@ -81,13 +82,7 @@ export const POST = withHandler(async (request: Request) => {
     throw new HttpError(409, "already_checked_in");
   }
 
-  const capacityMonthly = capacityMonthlyCents({
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  });
+  const capacityMonthly = capacityMonthlyCents(toEngineProfile(profile));
   const capacityPerCycle = perCycleFromMonthlyCents(capacityMonthly, profile.pay_cycle);
 
   let amountCents: number;

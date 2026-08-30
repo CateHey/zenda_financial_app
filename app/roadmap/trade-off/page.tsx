@@ -4,8 +4,9 @@ import { assumptionsToEngine, getAssumptions, getGoalsWithProjections, getProfil
 import { capacityMonthlyCents, monthDate, monthIndex, todayMonth } from "@/lib/engine/rates";
 import { todayIso } from "@/lib/engine/today";
 import { DISCLAIMER } from "@/lib/engine/types";
-import type { EngineGoal, EngineProfile } from "@/lib/engine/types";
+import type { EngineGoal } from "@/lib/engine/types";
 import { KIND_LABEL, formatMoney, joinTitles, monthYearLabel, weeklyFromMonthlyCents } from "@/lib/format";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 import { TradeoffClient } from "./trade-off-client";
 
 // S5 · The trade-off — design/screens/Tradeoff.dc.html ported 1:1, bound per
@@ -41,13 +42,7 @@ export default async function TradeoffPage({
   if (!projection || projection.achievable) redirect("/roadmap");
 
   const a = assumptionsToEngine(assumptionRows);
-  const engineProfile: EngineProfile = {
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  };
+  const engineProfile = toEngineProfile(profile);
   const capacityMonthly = capacityMonthlyCents(engineProfile);
   const capacityWeekly = weeklyFromMonthlyCents(capacityMonthly);
   const requiredWeekly = weeklyFromMonthlyCents(projection.required_monthly_cents);

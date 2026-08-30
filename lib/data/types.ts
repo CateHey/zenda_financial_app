@@ -36,6 +36,7 @@ export type ProfileRow = {
   debt_cents: number;
   debt_rate_bps: number;
   risk_comfort: RiskComfort;
+  locked_monthly_cents: number | null;   // 0004: set = "keep sending exactly this much"
   freedom_text: string | null;
   started_on: string;
   last_seen_at: string;

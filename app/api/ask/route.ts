@@ -11,6 +11,7 @@ import { assumptionsToEngine } from "@/lib/data/queries";
 import type { AssumptionRow } from "@/lib/data/types";
 import type { EngineGoal } from "@/lib/engine/types";
 import { HttpError, ok, requireUser, withHandler } from "@/lib/api/respond";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 
 const body = z.object({
   question: z.string().trim().min(1).max(600),
@@ -56,7 +57,7 @@ export const POST = withHandler(async (request: Request) => {
   const { question, history = [] } = parsed.data;
 
   const [{ data: profile }, { data: goals }, { data: projections }, { data: contributions }, { data: assumptionRows }] = await Promise.all([
-    supabase.from("profiles").select("display_name, pay_cycle, take_home_cents, essentials_cents, lifestyle_cents, buffer_cents, savings_cents, debt_cents, debt_rate_bps, started_on").eq("user_id", userId).maybeSingle(),
+    supabase.from("profiles").select("display_name, pay_cycle, take_home_cents, essentials_cents, lifestyle_cents, buffer_cents, savings_cents, debt_cents, debt_rate_bps, started_on, locked_monthly_cents").eq("user_id", userId).maybeSingle(),
     supabase.from("goals").select("id, kind, title, target_cents, target_date, priority, goal_type, status, why, starting_balance_cents").eq("user_id", userId).order("target_date"),
     supabase.from("goal_projections").select("goal_id, completion_month, required_monthly_cents, capacity_monthly_cents, achievable, alt_later_months, alt_smaller_target_cents, alt_extra_monthly_cents").eq("user_id", userId),
     supabase.from("contributions").select("goal_id, amount_cents, occurred_on").eq("user_id", userId).order("occurred_on", { ascending: false }).limit(60),
@@ -136,7 +137,7 @@ export const POST = withHandler(async (request: Request) => {
       .map((m) => m.g);
     if (mentioned.length >= 2 && /\b(after|before|first|behind|ahead|later than|earlier than|instead|priorit)/.test(q)) {
       const a = assumptionsToEngine((assumptionRows ?? []) as AssumptionRow[]);
-      const capacity = capacityMonthlyCents({ payCycle: profile.pay_cycle, takeHomeCents: profile.take_home_cents, essentialsCents: profile.essentials_cents, lifestyleCents: profile.lifestyle_cents, bufferCents: profile.buffer_cents });
+      const capacity = capacityMonthlyCents(toEngineProfile(profile));
       const todayFraction = todayMonth(profile.started_on, today);
       const engineGoals: EngineGoal[] = (goals ?? []).map((g) => ({
         id: g.id,

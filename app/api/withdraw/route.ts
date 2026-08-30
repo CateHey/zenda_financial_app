@@ -5,6 +5,7 @@ import { capacityMonthlyCents, cycleDays } from "@/lib/engine/rates";
 import { perCycleFromMonthlyCents } from "@/lib/format";
 import type { GoalRow, ProfileRow } from "@/lib/data/types";
 import { HttpError, ok, orNotFound, requireUser, withHandler } from "@/lib/api/respond";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 
 // POST /api/withdraw — "I need some of that money": takes an amount out of a goal (an emergency,
 // a change of plan) as a negative `manual` contribution with a note, then re-runs the engine so
@@ -66,13 +67,7 @@ export const POST = withHandler(async (request: Request) => {
   let reactivated = false;
   if (goal.status === "reached" && savedCents < goal.target_cents) {
     // Back on the path: refill it at capacity from today, so its date is honest again.
-    const capacityMonthly = capacityMonthlyCents({
-      payCycle: profile.pay_cycle,
-      takeHomeCents: profile.take_home_cents,
-      essentialsCents: profile.essentials_cents,
-      lifestyleCents: profile.lifestyle_cents,
-      bufferCents: profile.buffer_cents,
-    });
+    const capacityMonthly = capacityMonthlyCents(toEngineProfile(profile));
     const perCycle = perCycleFromMonthlyCents(capacityMonthly, profile.pay_cycle);
     const cycles = perCycle > 0 ? Math.max(1, Math.ceil((goal.target_cents - savedCents) / perCycle)) : 4;
     const targetDate = isoPlusDays(today, cycles * cycleDays(profile.pay_cycle));

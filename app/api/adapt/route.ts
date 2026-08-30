@@ -5,6 +5,7 @@ import { formatMoney, perCycleFromMonthlyCents, weeklyFromMonthlyCents } from "@
 import type { EngineProfile } from "@/lib/engine/types";
 import type { GoalRow, GoalProjectionRow, ProfileRow } from "@/lib/data/types";
 import { HttpError, ok, orNotFound, requireUser, withHandler } from "@/lib/api/respond";
+import { toEngineProfile } from "@/lib/data/engine-profile";
 
 // D5 POST /api/adapt — S7. Updates the profile's "where you are today" numbers, re-runs the
 // engine, and records an `adapted` event with { before, after } capacities and every goal's
@@ -30,13 +31,7 @@ export const POST = withHandler(async (request: Request) => {
   const profile = orNotFound(profileRow) as ProfileRow;
   if (goalsError) throw goalsError;
 
-  const beforeEngineProfile: EngineProfile = {
-    payCycle: profile.pay_cycle,
-    takeHomeCents: profile.take_home_cents,
-    essentialsCents: profile.essentials_cents,
-    lifestyleCents: profile.lifestyle_cents,
-    bufferCents: profile.buffer_cents,
-  };
+  const beforeEngineProfile = toEngineProfile(profile);
   const beforeCapacityMonthly = capacityMonthlyCents(beforeEngineProfile);
   const beforeCapacityPerCycle = perCycleFromMonthlyCents(beforeCapacityMonthly, profile.pay_cycle);
 
@@ -47,12 +42,16 @@ export const POST = withHandler(async (request: Request) => {
 
   let finalLifestyleCents = body.lifestyle_cents;
   if (body.strategy === "protect_dates") {
+    // The lock (if any) rides along: adapt never changes it, so both sides of the comparison
+    // below use the same capacity and the trim correctly becomes a no-op — a locked amount is
+    // already "protect the dates", by construction.
     const submittedCapacityMonthly = capacityMonthlyCents({
       payCycle: body.pay_cycle,
       takeHomeCents: body.take_home_cents,
       essentialsCents: body.essentials_cents,
       lifestyleCents: body.lifestyle_cents,
       bufferCents: body.buffer_cents,
+      lockedMonthlyCents: profile.locked_monthly_cents,
     });
     const submittedCapacityPerCycle = perCycleFromMonthlyCents(submittedCapacityMonthly, body.pay_cycle);
     const deltaPerCycle = beforeCapacityPerCycle - submittedCapacityPerCycle; // > 0 when capacity dropped
@@ -85,6 +84,7 @@ export const POST = withHandler(async (request: Request) => {
     essentialsCents: body.essentials_cents,
     lifestyleCents: finalLifestyleCents,
     bufferCents: body.buffer_cents,
+    lockedMonthlyCents: profile.locked_monthly_cents,
   };
   const afterCapacityMonthly = capacityMonthlyCents(afterEngineProfile);
 

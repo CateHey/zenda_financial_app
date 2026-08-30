@@ -86,3 +86,47 @@ export const adaptBody = z.object({
   risk_comfort: z.enum(RISK_LEVELS),
   strategy: z.enum(["accept", "protect_dates"]),
 });
+
+// ---------- POST /api/waitlist ----------
+// Public route (no session): the landing page's "join the waitlist" form. One table, two shapes —
+// a company naming itself and a team size, or an individual whose employer hasn't bought Zenda yet
+// and who may name the company they'd like it at. `trap` is a honeypot the form hides from people.
+export const WAITLIST_KINDS = ["company", "individual"] as const;
+export const WAITLIST_TEAM_SIZES = ["1-50", "51-200", "201-500", "500+"] as const;
+export const WAITLIST_SOURCES = [
+  "pricing_team",
+  "pricing_company",
+  "pricing_enterprise",
+  "waitlist_section",
+] as const;
+
+export const waitlistBody = z
+  .object({
+    kind: z.enum(WAITLIST_KINDS),
+    email: z.string().trim().toLowerCase().pipe(z.email().max(160)),
+    company: z.string().trim().min(1).max(80).optional(),
+    team_size: z.enum(WAITLIST_TEAM_SIZES).optional(),
+    note: z.string().trim().max(300).optional(),
+    source: z.enum(WAITLIST_SOURCES).optional(),
+    trap: z.string().max(200).optional(),
+  })
+  .refine((b) => b.kind !== "company" || b.company !== undefined, {
+    message: "a company entry must name the company",
+    path: ["company"],
+  });
+
+// ---------- POST /api/lock ----------
+// The what-if card's "Lock this amount". `monthly_cents: null` clears the lock and hands capacity
+// back to the derivation. The upper bound matches migration 0004's check constraint.
+export const lockBody = z.object({
+  monthly_cents: z.number().int().positive().lt(100_000_000).nullable(),
+});
+
+// ---------- PATCH /api/contributions/[id] ----------
+// Correcting a move already recorded, from Progress → Recent moves. The sign rules live in the
+// route (they depend on the row's own `kind`, per migration 0002's check constraint): a manual
+// move may be negative but never zero; a payday check-in is always >= 0. `note: null` clears it.
+export const contributionEditBody = z.object({
+  amount_cents: z.number().int().gt(-100_000_000).lt(100_000_000),
+  note: z.string().trim().max(120).nullable().optional(),
+});
