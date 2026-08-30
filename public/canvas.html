@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="/icon-192.png">
+<title>Zenda Business Model Canvas</title>
+<style>
+  :root{
+    --bg:#FFFFFF;--ink:#1C1C1E;--muted:rgba(60,60,67,.72);--line:rgba(60,60,67,.14);
+    --accent:#5856D6;--blue:#007AFF;--navy:#10265F;--purple:#AF52DE;--sunken:#F5F5FA;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI Variable","Segoe UI",system-ui,sans-serif;
+  }
+  html,body{background:var(--bg);color:var(--ink);font-family:var(--font);margin:0}
+  .page{max-width:1400px;margin:0 auto;padding:28px 28px 40px;display:flex;flex-direction:column;gap:14px}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:0 4px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;color:#fff;font-weight:800;font-size:20px}
+  h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.02em}
+  h1 span{color:var(--muted);font-weight:600}
+  .tag{margin:0;font-size:15px;color:var(--muted)}
+  .tag b{background:linear-gradient(90deg,var(--blue),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:auto auto;gap:10px}
+  .box{background:var(--sunken);border-radius:16px;padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;min-height:150px;position:relative}
+  .box.vp{background:linear-gradient(160deg,rgba(0,122,255,.10),rgba(175,82,222,.14));box-shadow:inset 0 0 0 1.5px rgba(88,86,214,.35)}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .stack .box{min-height:0;flex:1}
+  .k{margin:0;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+  .vp .k{color:var(--navy)}
+  ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+  li{font-size:15px;line-height:1.3;font-weight:600;display:flex;gap:8px;align-items:baseline}
+  li::before{content:"";flex:0 0 7px;width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));transform:translateY(-2px)}
+  li small{font-weight:500;color:var(--muted);font-size:13px}
+  .vp li{font-size:17px;font-weight:700}
+  .who{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0 -2px}
+  .bottom{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .bottom .box{min-height:0}
+  .rev li b{font-variant-numeric:tabular-nums}
+  footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:0 4px;font-size:12px;color:var(--muted)}
+  @media (max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vp{grid-column:1 / -1;order:-1}}
+  @media (max-width:560px){.grid,.bottom{grid-template-columns:1fr}}
+  @media print{.page{padding:0}.box{break-inside:avoid}@page{size:landscape;margin:10mm}}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header>
+    <div class="brand">
+      <div class="mark">Z</div>
+      <div>
+        <h1>Zenda <span>· Business Model Canvas</span></h1>
+        <p class="tag">We are your path to <b>financial freedom</b>.</p>
+      </div>
+    </div>
+    <p class="tag">Employer pays · Employee owns the path · AI-coached, engine-exact</p>
+  </header>
+
+  <section class="grid" aria-label="Business model canvas">
+    <div class="box">
+      <p class="k">Key partners</p>
+      <ul>
+        <li>Employers · HR &amp; benefits</li>
+        <li>Payroll &amp; HR platforms</li>
+        <li>Claude (Anthropic) <small>AI coach</small></li>
+        <li>Universities, NGOs <small>next</small></li>
+      </ul>
+    </div>
+
+    <div class="stack">
+      <div class="box">
+        <p class="k">Key activities</p>
+        <ul>
+          <li>Roadmap engine <small>deterministic</small></li>
+          <li>AI coach that acts</li>
+          <li>Employer onboarding</li>
+        </ul>
+      </div>
+      <div class="box">
+        <p class="k">Key resources</p>
+        <ul>
+          <li>Engine + private data model</li>
+          <li>Claude API</li>
+          <li>Team · pilots</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box vp">
+      <p class="k">Value proposition</p>
+      <p class="who">Employees</p>
+      <ul>
+        <li>Paycheck → goal, with dates</li>
+        <li>A coach that changes the plan</li>
+        <li>Your numbers stay yours</li>
+      </ul>
+      <p class="who">Employers</p>
+      <ul>
+        <li>A benefit people actually use</li>
+        <li>Less money stress at work</li>
+      </ul>
+    </div>
+
+    <div class="stack">
+      <div class="box">
+        <p class="k">Customer relationships</p>
+        <ul>
+          <li>Self-serve · 2-minute setup</li>
+          <li>AI coach · one-tap changes</li>
+          <li>Employer-blind by design</li>
+        </ul>
+      </div>
+      <div class="box">
+        <p class="k">Channels</p>
+        <ul>
+          <li>Employer benefit rollout</li>
+          <li>Payroll / HR partners</li>
+          <li>Web + phone (PWA)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box">
+      <p class="k">Customer segments</p>
+      <ul>
+        <li>Employers <small>SME → enterprise, AU first</small></li>
+        <li>Employees on a paycheck</li>
+        <li>Next: universities, NGOs, schools</li>
+      </ul>
+    </div>
+
+    <div class="bottom">
+      <div class="box">
+        <p class="k">Cost structure</p>
+        <ul>
+          <li>Team</li>
+          <li>AI inference</li>
+          <li>Hosting <small>Vercel · Supabase</small></li>
+          <li>Sales &amp; onboarding</li>
+        </ul>
+      </div>
+      <div class="box rev">
+        <p class="k">Revenue streams</p>
+        <ul>
+          <li>Per seat, per month <small>employer pays</small></li>
+          <li><b>Team $6</b> · <b>Company $4.50</b> · Enterprise custom</li>
+          <li>Employees pay <b>$0</b> · no % of savings, ever</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Zenda · Weekend of Startups · August 2026</span>
+    <span>General information, not financial advice.</span>
+  </footer>
+</div>
+
+</body>
+</html>
